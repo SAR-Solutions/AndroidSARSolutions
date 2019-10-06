@@ -8,4 +8,7 @@
     <string name="permission_rationale" />
     <string name="permission_denied_explanation" />
     <string name="settings" />
+    <string name="location_updated" />
+    <string name="launch_activity" />
+    <string name="stop" />
 </resources>

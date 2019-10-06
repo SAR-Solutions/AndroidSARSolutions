@@ -83,7 +83,9 @@ class MainActivity : AppCompatActivity() {
                 for (location in locationResult.locations){
                     // Update UI with location data
                     // ...
-                    location_id.text = location.longitude.toString()
+                    val locString = location_id.text.toString() + "\n" + location.longitude.toString()
+
+                    location_id.text = locString
                 }
             }
         }
