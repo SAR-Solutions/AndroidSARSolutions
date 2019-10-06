@@ -36,7 +36,14 @@ import com.karumi.dexter.Dexter
 import androidx.core.app.ComponentActivity.ExtraData
 import androidx.core.content.ContextCompat.getSystemService
 import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import android.util.Log
+import android.widget.Toast
+import com.google.firebase.firestore.FirebaseFirestore
 import com.karumi.dexter.listener.PermissionRequest
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.util.*
 
 @Suppress("LABEL_NAME_CLASH")
 class MainActivity : AppCompatActivity() {
@@ -44,11 +51,39 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
     private lateinit var locationCallback: LocationCallback
+    private val fireBaseService = RetrofitFactory.makeFirebaseRetrofitService()
+    private var isSearching = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val db = FirebaseFirestore.getInstance()
+
+       db.collection("Shift")
+           .get()
+           .addOnSuccessListener { result ->
+               for (document in result) {
+                   Toast.makeText(this, "${document.id} ==> ${document.data}", Toast.LENGTH_LONG).show()
+               }
+           }
+
+        start_button.setOnClickListener {
+            if(!isSearching) {
+                isSearching = true
+                start_button.text = "Stop"
+            } else {
+                isSearching = false
+                start_button.text = "Start"
+            }
+            val geoLocations = listOf(GeoLocation("123", "321"), GeoLocation("12", "420"))
+            val shift = Shift("YlNtlx3VTh6rAv6KC9dU", "oKrbMcbPVJ6yiErezkX3", Calendar.getInstance().time.toString(), geoLocations)
+            db.collection("Shift")
+                .add(shift)
+                .addOnSuccessListener { docRef ->
+                    Log.d("SAR", "Added document with id ${docRef.id}")
+                }
+        }
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
@@ -98,5 +133,10 @@ class MainActivity : AppCompatActivity() {
             interval = 5000
             fastestInterval = 5000
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        fusedLocationClient.removeLocationUpdates(locationCallback)
     }
 }

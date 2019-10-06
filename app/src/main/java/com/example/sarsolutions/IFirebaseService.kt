@@ -9,4 +9,7 @@ interface IFirebaseService {
 
     @POST("postShift")
     fun createShift(@Body shift: Shift) : Call<String>
+
+//    @POST("putLocations")
+//    fun createLocations() : Call<>
 }

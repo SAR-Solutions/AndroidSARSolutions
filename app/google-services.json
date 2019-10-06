@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "615606149986",
+    "firebase_url": "https://sar-solutions.firebaseio.com",
+    "project_id": "sar-solutions",
+    "storage_bucket": "sar-solutions.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:615606149986:android:8e131aee3f2c6e45cec23b",
+        "android_client_info": {
+          "package_name": "com.example.sarsolutions"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "615606149986-8ijidnspc3ufi3aisa34rub8jv90ooji.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAe3hO9SuybJ6m4RVWhpn8fnGcusrr8bOw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "615606149986-8ijidnspc3ufi3aisa34rub8jv90ooji.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
