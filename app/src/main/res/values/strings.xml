@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">SAR Solutions</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="dashboard">Dashboard</string>
+    <string name="home">Home</string>
+    <string name="permission_rationale" />
+    <string name="permission_denied_explanation" />
+    <string name="settings" />
+</resources>
