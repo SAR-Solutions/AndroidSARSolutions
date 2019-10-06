@@ -39,6 +39,7 @@ import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 import android.os.Handler
 import android.util.Log
 import android.widget.Toast
+import androidx.lifecycle.ViewModelProviders
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.SetOptions
@@ -55,9 +56,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
     private lateinit var locationCallback: LocationCallback
-    private val locationList : ArrayList<GeoPoint> = ArrayList<GeoPoint>()
     private var isSearching = false
     private var currentShiftId: String? = null
+    private val viewModel: MainActivityViewModel by lazy { ViewModelProviders.of(this).get(MainActivityViewModel::class.java)}
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,7 +83,7 @@ class MainActivity : AppCompatActivity() {
                         } else { // Stop searching and update Loc
                             fusedLocationClient.removeLocationUpdates(locationCallback)
                             // TODO: Stop handler from updating
-                            val shift = Shift("YlNtlx3VTh6rAv6KC9dU", "oKrbMcbPVJ6yiErezkX3", Calendar.getInstance().time.toString(), locationList)
+                            val shift = Shift("YlNtlx3VTh6rAv6KC9dU", "oKrbMcbPVJ6yiErezkX3", Calendar.getInstance().time.toString(), viewModel.getLocationList())
 
                             /** NOTE: currentShiftId in this context is always going to be null for the demo. This code is here for the future **/
 
@@ -98,6 +99,7 @@ class MainActivity : AppCompatActivity() {
                                     .document(currentShiftId!!)
                                     .set(shift, SetOptions.merge())
                             }
+                            viewModel.clearList()
                             isSearching = false
                             start_button.text = "Start"
                             currentShiftId = null
@@ -129,7 +131,7 @@ class MainActivity : AppCompatActivity() {
                 for (location in locationResult.locations){
 
                     // Update UI with location data
-                    locationList.add(GeoPoint(location.latitude, location.longitude))
+                    viewModel.addToList((GeoPoint(location.latitude, location.longitude)))
                     location_id.text = "Last updated at \n" + Calendar.getInstance().time.toString()
                 }
             }
@@ -147,16 +149,12 @@ class MainActivity : AppCompatActivity() {
         } // update every 5 seconds
     }
 
-    override fun onStop() {
-        super.onStop()
-        if(isSearching) {
-            // TODO: Update fields
-            fusedLocationClient.removeLocationUpdates(locationCallback)
-        }
-    }
-
     override fun onDestroy() {
         super.onDestroy()
+        if(isSearching) {
+            // TODO: Update fields
+        }
+        fusedLocationClient.removeLocationUpdates(locationCallback)
     }
 
     // Runs every 10 minutes to sync locations with the database
