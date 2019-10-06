@@ -5,6 +5,8 @@ import com.google.firebase.firestore.GeoPoint
 
 class MainActivityViewModel : ViewModel(){
     private val locationList : ArrayList<GeoPoint> = ArrayList<GeoPoint>()
+    public var isSearching = false
+    private var lastUpdated: String? = null
 
     fun getLocationList(): ArrayList<GeoPoint> {
         return locationList
@@ -14,8 +16,19 @@ class MainActivityViewModel : ViewModel(){
         locationList.add(geoPoint)
     }
 
-    fun clearList() {
+    // Resets instance variables to default values
+    fun endShift() {
+        isSearching = false
+        lastUpdated = null
         locationList.clear()
+    }
+
+    fun getLastUpdated(): String? {
+        return lastUpdated
+    }
+
+    fun setLastUpdated(time: String) {
+        lastUpdated = time
     }
 
 }

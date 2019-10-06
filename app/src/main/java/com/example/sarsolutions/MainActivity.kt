@@ -56,7 +56,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
     private lateinit var locationCallback: LocationCallback
-    private var isSearching = false
     private var currentShiftId: String? = null
     private val viewModel: MainActivityViewModel by lazy { ViewModelProviders.of(this).get(MainActivityViewModel::class.java)}
 
@@ -64,11 +63,20 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+
         val db = FirebaseFirestore.getInstance()
 
+        // Setup location services
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
         createLocationRequest()
+
+        // Restore state depending on view model
+        if(viewModel.isSearching) {
+            location_id.text = viewModel.getLastUpdated()
+            start_button.text = "Stop"
+            locStuff()
+        }
+
         Dexter.withActivity(this)
             .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
             .withListener(object : PermissionListener {
@@ -76,8 +84,8 @@ class MainActivity : AppCompatActivity() {
 
                     start_button.setOnClickListener {
                         // Change button state/functionality
-                        if(!isSearching) { // Start searching
-                            isSearching = true
+                        if(!viewModel.isSearching) { // Start searching
+                            viewModel.isSearching = true
                             start_button.text = "Stop"
                             locStuff()
                         } else { // Stop searching and update Loc
@@ -99,8 +107,8 @@ class MainActivity : AppCompatActivity() {
                                     .document(currentShiftId!!)
                                     .set(shift, SetOptions.merge())
                             }
-                            viewModel.clearList()
-                            isSearching = false
+                            viewModel.endShift()
+                            viewModel.isSearching = false
                             start_button.text = "Start"
                             currentShiftId = null
                         }
@@ -132,7 +140,8 @@ class MainActivity : AppCompatActivity() {
 
                     // Update UI with location data
                     viewModel.addToList((GeoPoint(location.latitude, location.longitude)))
-                    location_id.text = "Last updated at \n" + Calendar.getInstance().time.toString()
+                    viewModel.setLastUpdated("Last updated at \n" + Calendar.getInstance().time.toString())
+                    location_id.text = viewModel.getLastUpdated()
                 }
             }
         }
@@ -151,10 +160,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        if(isSearching) {
-            // TODO: Update fields
-        }
-        fusedLocationClient.removeLocationUpdates(locationCallback)
+        if(::locationCallback.isInitialized)
+            fusedLocationClient.removeLocationUpdates(locationCallback)
     }
 
     // Runs every 10 minutes to sync locations with the database
