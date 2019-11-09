@@ -22,7 +22,6 @@ import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 import kotlin.system.exitProcess
 
-@Suppress("LABEL_NAME_CLASH")
 class MainActivity : AppCompatActivity() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -42,13 +41,37 @@ class MainActivity : AppCompatActivity() {
         createLocationRequest()
 
         // Restore state depending on view model
-        if(viewModel.isSearching) {
+        restoreState()
+
+        handlePermissions()
+
+        test_button.setOnClickListener {
+            if (viewModel.isTestingEnabled) { // Disable Testing
+                viewModel.isTestingEnabled = false
+                test_button.text = "Enable Test Mode"
+                test_button.setBackgroundColor(resources.getColor(R.color.warning))
+            } else { // Enable Testing
+                viewModel.isTestingEnabled = true
+                test_button.text = "Disable Test Mode"
+                test_button.setBackgroundColor(resources.getColor(R.color.error))
+            }
+        }
+
+    }
+
+    // Restore view state on configuration changes
+    private fun restoreState() {
+        if (viewModel.isSearching) {
             location_id.text = viewModel.getLastUpdated()
             start_button.text = "Stop"
+            start_button.setBackgroundColor(resources.getColor(R.color.error))
             locStuff()
         }
 
-        handlePermissions()
+        if (viewModel.isTestingEnabled) {
+            test_button.text = "Disable Test Mode"
+            test_button.setBackgroundColor(resources.getColor(R.color.error))
+        }
 
     }
 
@@ -56,7 +79,6 @@ class MainActivity : AppCompatActivity() {
         Dexter.withActivity(this)
             .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
             .withListener(object : PermissionListener {
-
                 override fun onPermissionGranted(response: PermissionGrantedResponse) {
 
                     start_button.setOnClickListener {
@@ -64,6 +86,7 @@ class MainActivity : AppCompatActivity() {
                         if (!viewModel.isSearching) { // Start searching
                             viewModel.isSearching = true
                             start_button.text = "Stop"
+                            start_button.setBackgroundColor(resources.getColor(R.color.error))
                             locStuff()
                         } else { // Stop searching and update Loc
                             fusedLocationClient.removeLocationUpdates(locationCallback)
@@ -72,25 +95,27 @@ class MainActivity : AppCompatActivity() {
                                 "YlNtlx3VTh6rAv6KC9dU",
                                 "oKrbMcbPVJ6yiErezkX3",
                                 Calendar.getInstance().time.toString(),
+                                BuildConfig.VERSION_NAME,
                                 viewModel.getLocationList()
                             )
 
                             /** NOTE: currentShiftId in this context is always going to be null for the demo. This code is here for the future **/
 
                             if (currentShiftId == null) { // Add if no current shift id exists
-                                db.collection("Shift")
+                                db.collection(if (viewModel.isTestingEnabled) "TestShift" else "Shift")
                                     .add(shift)
                                     .addOnSuccessListener { docRef ->
                                         Log.d("SAR", "Added document with id ${docRef.id}")
                                     }
                             } else { // Update and merge if current shift id exists
-                                db.collection("Shift")
+                                db.collection(if (viewModel.isTestingEnabled) "TestShift" else "Shift")
                                     .document(currentShiftId!!)
                                     .set(shift, SetOptions.merge())
                             }
                             viewModel.endShift()
                             viewModel.isSearching = false
                             start_button.text = "Start"
+                            start_button.setBackgroundColor(resources.getColor(R.color.success))
                             currentShiftId = null
                         }
                     }
@@ -118,6 +143,7 @@ class MainActivity : AppCompatActivity() {
             }).check()
     }
 
+    // Close app on permission denied
     private fun closeNow() {
         finishAffinity()
         exitProcess(0)
@@ -131,7 +157,10 @@ class MainActivity : AppCompatActivity() {
                 locationResult ?: return
                 for (location in locationResult.locations){
 
-                    // Update UI with location data
+                    // Don't record if already exists
+                    if (viewModel.existsInList(GeoPoint(location.latitude, location.longitude)))
+                        continue
+                    (GeoPoint(location.latitude, location.longitude))
                     viewModel.addToList((GeoPoint(location.latitude, location.longitude)))
                     viewModel.setLastUpdated("Last updated at \n" + Calendar.getInstance().time.toString())
                     location_id.text = viewModel.getLastUpdated()
@@ -148,6 +177,7 @@ class MainActivity : AppCompatActivity() {
         locationRequest = LocationRequest.create().apply {
             interval = 5000
             fastestInterval = 5000
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         } // update every 5 seconds
     }
 

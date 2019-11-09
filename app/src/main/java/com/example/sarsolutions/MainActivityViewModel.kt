@@ -4,12 +4,22 @@ import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.GeoPoint
 
 class MainActivityViewModel : ViewModel(){
-    private val locationList : ArrayList<GeoPoint> = ArrayList<GeoPoint>()
-    public var isSearching = false
+    private val locationList: ArrayList<GeoPoint> = ArrayList()
+    var isSearching = false
+    var isTestingEnabled = false
     private var lastUpdated: String? = null
 
     fun getLocationList(): ArrayList<GeoPoint> {
         return locationList
+    }
+
+    // Return true if newPoint exists in list, else false
+    fun existsInList(newPoint: GeoPoint): Boolean {
+        locationList.forEach { point ->
+            if (point.compareTo(newPoint) == 0)
+                return true
+        }
+        return false
     }
 
     fun addToList(geoPoint: GeoPoint) {
