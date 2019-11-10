@@ -12,4 +12,5 @@
     <string name="launch_activity" />
     <string name="stop" />
     <string name="enter_password">Enter Password</string>
+    <string name="reset_password">Reset Password</string>
 </resources>

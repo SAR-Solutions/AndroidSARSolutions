@@ -9,12 +9,12 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import com.google.firebase.auth.FirebaseAuth
-import kotlinx.android.synthetic.main.fragment_login.*
+import kotlinx.android.synthetic.main.fragment_reset_password.*
 
 /**
  * A simple [Fragment] subclass.
  */
-class LoginFragment : Fragment() {
+class ResetPasswordFragment : Fragment() {
 
     private val auth = FirebaseAuth.getInstance()
 
@@ -23,47 +23,30 @@ class LoginFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_login, container, false)
+        return inflater.inflate(R.layout.fragment_reset_password, container, false)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        if (auth.currentUser != null) {
-            Toast.makeText(context, "${auth.currentUser!!.email} is logged in", Toast.LENGTH_LONG)
-                .show()
-            view!!.findNavController().navigate(R.id.action_loginFragment_to_mainFragment)
-        }
-
-        signin_button.setOnClickListener {
+        forgot_password_button.setOnClickListener {
             if (!Patterns.EMAIL_ADDRESS.matcher(email_input_text.text.toString()).matches()) { // Validate input is email
                 Toast.makeText(context, "Enter valid email", Toast.LENGTH_LONG).show()
                 return@setOnClickListener
             }
-            auth.signInWithEmailAndPassword(
-                email_input_text.text.toString(),
-                password_input_text.text.toString()
-            )
+            auth.sendPasswordResetEmail(email_input_text.text.toString())
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        Toast.makeText(
-                            context,
-                            "${auth.currentUser!!.email} has signed in!",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        Toast.makeText(context, "Email Sent.", Toast.LENGTH_LONG).show()
+                        view!!.findNavController().popBackStack()
                     } else {
                         Toast.makeText(
                             context,
-                            "Invalid credentials. Try again.",
+                            "No account found associated with the entered email",
                             Toast.LENGTH_LONG
                         ).show()
                     }
                 }
         }
-
-        forgot_password_button.setOnClickListener {
-            view!!.findNavController().navigate(R.id.action_loginFragment_to_resetPasswordFragment)
-        }
     }
-
 }
