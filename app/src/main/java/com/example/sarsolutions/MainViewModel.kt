@@ -3,7 +3,7 @@ package com.example.sarsolutions
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.GeoPoint
 
-class MainActivityViewModel : ViewModel(){
+class MainViewModel : ViewModel() {
     private val locationList: ArrayList<GeoPoint> = ArrayList()
     var isSearching = false
     var isTestingEnabled = false
@@ -40,5 +40,4 @@ class MainActivityViewModel : ViewModel(){
     fun setLastUpdated(time: String) {
         lastUpdated = time
     }
-
 }
