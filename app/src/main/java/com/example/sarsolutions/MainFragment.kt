@@ -9,7 +9,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.findNavController
 import com.google.android.gms.location.*
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.SetOptions
@@ -32,6 +34,8 @@ class MainFragment : Fragment() {
     private lateinit var locationCallback: LocationCallback
     private var currentShiftId: String? = null
     private val db = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
+
 
     val viewModel: MainViewModel by viewModel()
 
@@ -49,6 +53,11 @@ class MainFragment : Fragment() {
 
         // Restore state depending on view model
         restoreState()
+
+        sign_out_button.setOnClickListener {
+            auth.signOut()
+            view!!.findNavController().navigate(R.id.action_mainFragment_to_loginFragment)
+        }
 
         handlePermissions()
 

@@ -51,6 +51,8 @@ class LoginFragment : Fragment() {
                             "${auth.currentUser!!.email} has signed in!",
                             Toast.LENGTH_LONG
                         ).show()
+                        view!!.findNavController()
+                            .navigate(R.id.action_loginFragment_to_mainFragment)
                     } else {
                         Toast.makeText(
                             context,
