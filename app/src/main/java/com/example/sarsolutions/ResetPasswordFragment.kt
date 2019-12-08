@@ -1,5 +1,6 @@
 package com.example.sarsolutions
 
+import android.os.Build
 import android.os.Bundle
 import android.util.Patterns
 import android.view.LayoutInflater
@@ -28,6 +29,11 @@ class ResetPasswordFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+
+        // Set autofill hint
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            email_input_text.setAutofillHints(View.AUTOFILL_HINT_EMAIL_ADDRESS)
+        }
 
         forgot_password_button.setOnClickListener {
             if (!Patterns.EMAIL_ADDRESS.matcher(email_input_text.text.toString()).matches()) { // Validate input is email

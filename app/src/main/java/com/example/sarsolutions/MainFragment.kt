@@ -3,13 +3,13 @@ package com.example.sarsolutions
 import android.Manifest
 import android.os.Bundle
 import android.os.Looper
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
+import com.example.sarsolutions.models.Shift
 import com.google.android.gms.location.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -23,6 +23,7 @@ import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
 import kotlinx.android.synthetic.main.main_fragment.*
 import org.koin.android.viewmodel.ext.android.viewModel
+import timber.log.Timber
 import java.util.*
 import kotlin.system.exitProcess
 
@@ -133,7 +134,7 @@ class MainFragment : Fragment() {
                     db.collection(if (viewModel.isTestingEnabled) "TestShift" else "Shift")
                         .add(shift)
                         .addOnSuccessListener { docRef ->
-                            Log.d("SAR", "Added document with id ${docRef.id}")
+                            Timber.i("Added document with id ${docRef.id}")
                         }
                 } else { // Update and merge if current shift id exists
                     db.collection(if (viewModel.isTestingEnabled) "TestShift" else "Shift")

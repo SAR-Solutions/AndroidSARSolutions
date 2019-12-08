@@ -21,6 +21,9 @@
             app:destination="@id/resetPasswordFragment"
             app:enterAnim="@android:anim/fade_in"
             app:popEnterAnim="@android:anim/fade_in" />
+        <action
+            android:id="@+id/action_loginFragment_to_casesFragment"
+            app:destination="@id/casesFragment" />
     </fragment>
     <fragment
         android:id="@+id/mainFragment"
@@ -40,4 +43,9 @@
         android:name="com.example.sarsolutions.ResetPasswordFragment"
         android:label="fragment_reset_password"
         tools:layout="@layout/fragment_reset_password" />
+    <fragment
+        android:id="@+id/casesFragment"
+        android:name="com.example.sarsolutions.CasesFragment"
+        android:label="fragment_cases"
+        tools:layout="@layout/fragment_cases" />
 </navigation>
