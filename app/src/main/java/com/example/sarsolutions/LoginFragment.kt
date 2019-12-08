@@ -50,37 +50,55 @@ class LoginFragment : Fragment() {
         }
 
         signin_button.setOnClickListener {
+            it.isEnabled = false
+
             if (!Patterns.EMAIL_ADDRESS.matcher(email_input_text.text.toString()).matches()) { // Validate input is email
                 Toast.makeText(context, "Enter valid email", Toast.LENGTH_LONG).show()
+                it.isEnabled = true
                 return@setOnClickListener
             }
-            auth.signInWithEmailAndPassword(
-                email_input_text.text.toString(),
-                password_input_text.text.toString()
-            )
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        Toast.makeText(
-                            context,
-                            "${auth.currentUser!!.email} signed in",
-                            Toast.LENGTH_LONG
-                        ).show()
 
-                        // Prompt auto fill service to save password
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                            afm?.commit()
+            if (password_input_text.text.isNullOrEmpty()) {
+                Toast.makeText(context, "Password can't be empty", Toast.LENGTH_LONG).show()
+                it.isEnabled = true
+                return@setOnClickListener
+            }
+
+            try {
+                auth.signInWithEmailAndPassword(
+                    email_input_text.text.toString(),
+                    password_input_text.text.toString()
+                )
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            Toast.makeText(
+                                context,
+                                "${auth.currentUser!!.email} signed in",
+                                Toast.LENGTH_LONG
+                            ).show()
+
+                            // Prompt auto fill service to save password
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                                afm?.commit()
+                            }
+
+                            view!!.findNavController()
+                                .navigate(R.id.action_loginFragment_to_mainFragment)
+                        } else {
+                            it.isEnabled = true
+                            Toast.makeText(
+                                context,
+                                "Invalid credentials. Try again.",
+                                Toast.LENGTH_LONG
+                            ).show()
                         }
-
-                        view!!.findNavController()
-                            .navigate(R.id.action_loginFragment_to_mainFragment)
-                    } else {
-                        Toast.makeText(
-                            context,
-                            "Invalid credentials. Try again.",
-                            Toast.LENGTH_LONG
-                        ).show()
                     }
-                }
+            } catch (e: Exception) {
+                it.isEnabled = true
+                Toast.makeText(context, "Unknown error occurred. Try again", Toast.LENGTH_LONG)
+                    .show()
+            }
+
         }
 
         forgot_password_button.setOnClickListener {
