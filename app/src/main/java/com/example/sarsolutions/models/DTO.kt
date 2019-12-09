@@ -18,7 +18,7 @@ data class Case(
     val missingPersonName: List<String>,
     val reporterName: String,
     val volunteers: List<Volunteer>,
-    val date: Int
+    val date: Long
 )
 
 data class Volunteer(

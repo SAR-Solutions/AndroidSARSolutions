@@ -1,5 +1,6 @@
 package com.example.sarsolutions
 
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.util.Patterns
@@ -7,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.autofill.AutofillManager
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
@@ -33,13 +35,6 @@ class LoginFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        if (auth.currentUser != null) {
-            Toast.makeText(context, "${auth.currentUser!!.email} is logged in", Toast.LENGTH_LONG)
-                .show()
-            view?.findNavController()?.navigate(R.id.action_loginFragment_to_mainFragment)
-            //     view?.findNavController()?.navigate(R.id.action_loginFragment_to_casesFragment)
-        }
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             afm = requireContext().getSystemService(AutofillManager::class.java)
         }
@@ -50,7 +45,14 @@ class LoginFragment : Fragment() {
         }
 
         signin_button.setOnClickListener {
-            it.isEnabled = false
+            it.isEnabled = false // Disable button
+
+            // Hide keyboard
+            activity?.window?.decorView?.rootView?.let {
+                val imm =
+                    activity!!.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(it.windowToken, 0)
+            }
 
             if (!Patterns.EMAIL_ADDRESS.matcher(email_input_text.text.toString()).matches()) { // Validate input is email
                 Toast.makeText(context, "Enter valid email", Toast.LENGTH_LONG).show()
@@ -82,8 +84,8 @@ class LoginFragment : Fragment() {
                                 afm?.commit()
                             }
 
-                            view!!.findNavController()
-                                .navigate(R.id.action_loginFragment_to_mainFragment)
+                            view?.findNavController()
+                                ?.navigate(R.id.action_loginFragment_to_casesFragment)
                         } else {
                             it.isEnabled = true
                             Toast.makeText(
