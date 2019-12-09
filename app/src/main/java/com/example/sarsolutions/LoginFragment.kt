@@ -85,7 +85,7 @@ class LoginFragment : Fragment() {
                             }
 
                             view?.findNavController()
-                                ?.navigate(R.id.action_loginFragment_to_casesFragment)
+                                ?.navigate(LoginFragmentDirections.actionLoginFragmentToCasesFragment())
                         } else {
                             it.isEnabled = true
                             Toast.makeText(
@@ -104,7 +104,8 @@ class LoginFragment : Fragment() {
         }
 
         forgot_password_button.setOnClickListener {
-            view!!.findNavController().navigate(R.id.action_loginFragment_to_resetPasswordFragment)
+            view?.findNavController()
+                ?.navigate(LoginFragmentDirections.actionLoginFragmentToResetPasswordFragment())
         }
     }
 

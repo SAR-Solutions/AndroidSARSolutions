@@ -51,7 +51,6 @@ class CasesFragment : Fragment() {
         })
     }
 
-
     class Adapter : RecyclerView.Adapter<Adapter.ViewHolder>() {
         private var data = ArrayList<Case>()
 
@@ -62,7 +61,8 @@ class CasesFragment : Fragment() {
                 itemView.date.text = SimpleDateFormat("MMMM d, yyyy", Locale.getDefault())
                     .format(Date(Timestamp(case.date * 1000).time))
                 itemView.setOnClickListener {
-                    itemView.findNavController().navigate(R.id.action_casesFragment_to_mainFragment)
+                    itemView.findNavController()
+                        .navigate(CasesFragmentDirections.actionCasesFragmentToMainFragment())
                 }
             }
         }

@@ -16,26 +16,28 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setSupportActionBar(appbar)
 
-        // Starting off in login fragment where appbar needs to be hidden
-        appbar.visibility = View.INVISIBLE
+        if (savedInstanceState == null) {
+            // Starting off in login fragment where appbar needs to be hidden
+            appbar.visibility = View.INVISIBLE
 
-        val auth = FirebaseAuth.getInstance()
-        val navController = findNavController(R.id.nav_host_fragment)
-        val graph = navController.graph
+            val auth = FirebaseAuth.getInstance()
+            val navController = findNavController(R.id.nav_host_fragment)
+            val graph = navController.graph
 
-        // If user is logged in, navigate to case list fragment
-        if (auth.currentUser != null) {
-            graph.startDestination = R.id.casesFragment
-            navController.graph = graph
-        }
+            // If user is logged in, navigate to case list fragment
+            if (auth.currentUser != null) {
+                graph.startDestination = R.id.casesFragment
+                navController.graph = graph
+            }
+            appbar.setupWithNavController(navController, AppBarConfiguration(navController.graph))
 
-        appbar.setupWithNavController(navController, AppBarConfiguration(navController.graph))
 
-        findNavController(R.id.nav_host_fragment).addOnDestinationChangedListener { controller, destination, arguments ->
-            if (destination.id == R.id.casesFragment)
-                appbar.visibility = View.VISIBLE
-            else if (destination.id == R.id.loginFragment)
-                appbar.visibility = View.INVISIBLE
+            findNavController(R.id.nav_host_fragment).addOnDestinationChangedListener { controller, destination, arguments ->
+                if (destination.id == R.id.casesFragment)
+                    appbar.visibility = View.VISIBLE
+                else if (destination.id == R.id.loginFragment)
+                    appbar.visibility = View.INVISIBLE
+            }
         }
     }
 }

@@ -5,14 +5,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
 import com.example.sarsolutions.api.Repository
 import com.example.sarsolutions.models.Case
+import kotlinx.coroutines.Dispatchers
 
 class CasesViewModel : ViewModel() {
 
-    val cases: LiveData<ArrayList<Case>> = liveData {
-        val cases = ArrayList<Case>()
+    val cases: LiveData<ArrayList<Case>> = liveData(Dispatchers.IO) {
+        val result = ArrayList<Case>()
         Repository.getCases().caseIds.forEach { id ->
-            cases.add(Repository.getCaseDetail(id))
+            result.add(Repository.getCaseDetail(id))
         }
-        emit(cases)
+        emit(result)
     }
 }
