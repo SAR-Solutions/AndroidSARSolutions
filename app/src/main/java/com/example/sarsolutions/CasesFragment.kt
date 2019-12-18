@@ -6,13 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.sarsolutions.models.Case
 import kotlinx.android.synthetic.main.fragment_cases.*
 import kotlinx.android.synthetic.main.list_view_item.view.*
-import org.koin.android.viewmodel.ext.android.viewModel
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.*
@@ -23,7 +23,7 @@ import kotlin.collections.ArrayList
  */
 class CasesFragment : Fragment() {
 
-    private val viewModel: CasesViewModel by viewModel()
+    private lateinit var viewModel: CasesViewModel
     private lateinit var viewManager: RecyclerView.LayoutManager
     private lateinit var viewAdapter: Adapter
 
@@ -33,6 +33,13 @@ class CasesFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(R.layout.fragment_cases, container, false)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        viewModel = activity?.run {
+            ViewModelProviders.of(this)[CasesViewModel::class.java]
+        } ?: throw Exception("Invalid Activity")
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {

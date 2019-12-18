@@ -9,6 +9,9 @@ import kotlinx.coroutines.Dispatchers
 
 class CasesViewModel : ViewModel() {
 
+    var isTestingEnabled = false
+    lateinit var lastUpdatedText: String
+
     val cases: LiveData<ArrayList<Case>> = liveData(Dispatchers.IO) {
         val result = ArrayList<Case>()
         Repository.getCases().caseIds.forEach { id ->

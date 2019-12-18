@@ -1,11 +1,8 @@
 package com.example.sarsolutions
 
 import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
-import android.net.http.SslCertificate.restoreState
-import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.view.LayoutInflater
@@ -14,14 +11,12 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
 import com.example.sarsolutions.services.LocationService
-import com.google.android.gms.location.*
+import com.google.android.gms.location.LocationCallback
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.main_fragment.*
-import org.koin.android.viewmodel.ext.android.viewModel
-import timber.log.Timber
 
 class MainFragment : Fragment() {
 
@@ -43,13 +38,20 @@ class MainFragment : Fragment() {
         }
     }
 
-    private val viewModel: MainViewModel by viewModel()
+    private lateinit var viewModel: CasesViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(R.layout.main_fragment, container, false)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        viewModel = activity?.run {
+            ViewModelProviders.of(this)[CasesViewModel::class.java]
+        } ?: throw Exception("Invalid Activity")
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -113,10 +115,12 @@ class MainFragment : Fragment() {
     // Restore view state on configuration changes
     private fun restoreState() {
         if (LocationService.Status.isRunning) {
-            location_id.text = viewModel.lastUpdatedText
             disableButtons()
+            // Find and rebind service
             val serviceIntent = Intent(context, LocationService::class.java)
             activity?.bindService(serviceIntent, connection, 0)
+
+            location_id.text = viewModel.lastUpdatedText
         }
 
         if (viewModel.isTestingEnabled) {

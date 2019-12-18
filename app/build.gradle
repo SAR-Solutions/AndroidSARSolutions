@@ -60,11 +60,6 @@ dependencies {
     // Lifecycle
     implementation 'androidx.lifecycle:lifecycle-extensions:2.1.0'
 
-    // Koin
-    implementation 'org.koin:koin-core:2.0.1'
-    implementation 'org.koin:koin-android-viewmodel:2.0.1'
-    implementation 'org.koin:koin-android-scope:2.0.1'
-
     // Navigation components
     implementation "androidx.navigation:navigation-fragment-ktx:2.1.0"
     implementation "androidx.navigation:navigation-ui-ktx:2.1.0"

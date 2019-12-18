@@ -4,16 +4,12 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
-import org.koin.android.ext.koin.androidContext
-import org.koin.android.viewmodel.dsl.viewModel
-import org.koin.core.context.startKoin
-import org.koin.dsl.module
 import timber.log.Timber
 
 class MyApplication : Application() {
 
     companion object {
-        public final val CHANNEL_ID = "SARLocationServiceChannel"
+        val CHANNEL_ID = "SARLocationServiceChannel"
     }
 
     override fun onCreate() {
@@ -24,17 +20,6 @@ class MyApplication : Application() {
             Timber.plant(Timber.DebugTree())
 
         createNotificationChannel()
-
-        // Koin Dependency Injection
-        val appModule = module {
-            viewModel { MainViewModel() }
-            viewModel { CasesViewModel() }
-        }
-
-        startKoin {
-            androidContext(this@MyApplication)
-            modules(appModule)
-        }
     }
 
     private fun createNotificationChannel() {
