@@ -1,4 +1,4 @@
-package com.example.sarsolutions
+package com.sarcoordinator.sarsolutions
 
 import android.content.Context
 import android.content.Intent
@@ -11,9 +11,9 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
-import com.example.sarsolutions.services.LocationService
 import com.google.android.gms.location.LocationCallback
 import com.google.firebase.auth.FirebaseAuth
+import com.sarcoordinator.sarsolutions.services.LocationService
 import kotlinx.android.synthetic.main.main_fragment.*
 
 class MainFragment : Fragment() {

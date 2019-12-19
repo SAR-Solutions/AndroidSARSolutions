@@ -8,11 +8,11 @@ android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
     defaultConfig {
-        applicationId "com.example.sarsolutions"
+        applicationId "com.sarcoordinator.sarsolutions"
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 7
-        versionName "1.0-alpha6"
+        versionCode 8
+        versionName "1.0-alpha7"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -53,9 +53,9 @@ dependencies {
     implementation 'com.squareup.okhttp3:logging-interceptor:3.4.1'
 
     // Firebase
+    implementation 'com.google.firebase:firebase-analytics:17.2.1'
     implementation 'com.google.firebase:firebase-auth:19.2.0'
     implementation 'com.google.firebase:firebase-firestore:21.3.1'
-    implementation 'com.google.firebase:firebase-analytics:17.2.1'
 
     // Lifecycle
     implementation 'androidx.lifecycle:lifecycle-extensions:2.1.0'

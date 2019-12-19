@@ -6,7 +6,7 @@
     app:startDestination="@id/loginFragment">
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.example.sarsolutions.LoginFragment"
+        android:name="com.sarcoordinator.sarsolutions.LoginFragment"
         android:label="Login"
         tools:layout="@layout/fragment_login">
         <action
@@ -22,7 +22,7 @@
     </fragment>
     <fragment
         android:id="@+id/mainFragment"
-        android:name="com.example.sarsolutions.MainFragment"
+        android:name="com.sarcoordinator.sarsolutions.MainFragment"
         android:label="Case"
         tools:layout="@layout/main_fragment">
         <action
@@ -33,12 +33,12 @@
     </fragment>
     <fragment
         android:id="@+id/resetPasswordFragment"
-        android:name="com.example.sarsolutions.ResetPasswordFragment"
+        android:name="com.sarcoordinator.sarsolutions.ResetPasswordFragment"
         android:label="Reset Password"
         tools:layout="@layout/fragment_reset_password" />
     <fragment
         android:id="@+id/casesFragment"
-        android:name="com.example.sarsolutions.CasesFragment"
+        android:name="com.sarcoordinator.sarsolutions.CasesFragment"
         android:label="@string/app_name"
         tools:layout="@layout/fragment_cases">
         <action

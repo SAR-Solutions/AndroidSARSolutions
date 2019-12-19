@@ -1,4 +1,4 @@
-package com.example.sarsolutions
+package com.sarcoordinator.sarsolutions
 
 import android.app.Application
 import android.app.NotificationChannel

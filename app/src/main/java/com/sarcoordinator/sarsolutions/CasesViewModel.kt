@@ -1,4 +1,4 @@
-package com.example.sarsolutions
+package com.sarcoordinator.sarsolutions
 
 import android.content.ComponentName
 import android.content.ServiceConnection
@@ -7,9 +7,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
-import com.example.sarsolutions.api.Repository
-import com.example.sarsolutions.models.Case
-import com.example.sarsolutions.services.LocationService
+import com.sarcoordinator.sarsolutions.api.Repository
+import com.sarcoordinator.sarsolutions.models.Case
+import com.sarcoordinator.sarsolutions.services.LocationService
 import kotlinx.coroutines.Dispatchers
 import timber.log.Timber
 

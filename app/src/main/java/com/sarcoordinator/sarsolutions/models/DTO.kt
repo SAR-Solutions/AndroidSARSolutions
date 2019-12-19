@@ -1,4 +1,4 @@
-package com.example.sarsolutions.models
+package com.sarcoordinator.sarsolutions.models
 
 import com.google.firebase.firestore.GeoPoint
 

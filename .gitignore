@@ -16,3 +16,7 @@
 # Project exclude paths
 /app/build/
 /app/build/intermediates/javac/debug/classes/
+
+# Firebase config file
+/app/google-services.json
+

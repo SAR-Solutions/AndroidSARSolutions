@@ -1,7 +1,7 @@
-package com.example.sarsolutions.api
+package com.sarcoordinator.sarsolutions.api
 
-import com.example.sarsolutions.models.Case
-import com.example.sarsolutions.models.Cases
+import com.sarcoordinator.sarsolutions.models.Case
+import com.sarcoordinator.sarsolutions.models.Cases
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory

@@ -1,4 +1,4 @@
-package com.example.sarsolutions.services
+package com.sarcoordinator.sarsolutions.services
 
 import android.Manifest
 import android.app.Notification
@@ -13,14 +13,14 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.example.sarsolutions.BuildConfig
-import com.example.sarsolutions.MainActivity
-import com.example.sarsolutions.MyApplication.Companion.CHANNEL_ID
-import com.example.sarsolutions.R
-import com.example.sarsolutions.models.Shift
 import com.google.android.gms.location.*
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
+import com.sarcoordinator.sarsolutions.BuildConfig
+import com.sarcoordinator.sarsolutions.MainActivity
+import com.sarcoordinator.sarsolutions.MyApplication.Companion.CHANNEL_ID
+import com.sarcoordinator.sarsolutions.R
+import com.sarcoordinator.sarsolutions.models.Shift
 import timber.log.Timber
 import java.util.*
 

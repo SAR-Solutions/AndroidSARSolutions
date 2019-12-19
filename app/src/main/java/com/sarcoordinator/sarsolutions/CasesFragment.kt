@@ -1,4 +1,4 @@
-package com.example.sarsolutions
+package com.sarcoordinator.sarsolutions
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,7 +10,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.sarsolutions.models.Case
+import com.sarcoordinator.sarsolutions.models.Case
 import kotlinx.android.synthetic.main.fragment_cases.*
 import kotlinx.android.synthetic.main.list_view_item.view.*
 import java.sql.Timestamp
