@@ -1,18 +1,20 @@
 package com.example.sarsolutions.services
 
 import android.Manifest
-import android.annotation.SuppressLint
-import android.app.*
-import android.content.Context
+import android.app.Notification
+import android.app.PendingIntent
+import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.*
+import android.os.Binder
+import android.os.IBinder
+import android.os.Looper
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.sarsolutions.BuildConfig
 import com.example.sarsolutions.MainActivity
-import com.example.sarsolutions.MainFragment
 import com.example.sarsolutions.MyApplication.Companion.CHANNEL_ID
 import com.example.sarsolutions.R
 import com.example.sarsolutions.models.Shift
@@ -26,22 +28,18 @@ import java.util.*
 class LocationService : Service() {
 
     companion object {
-        val isTestMode = "TEST_MODE"
+        const val isTestMode = "TEST_MODE"
     }
 
     private var testMode: Boolean = false
 
-    object Status {
-        var isRunning: Boolean = false
-    }
-
-    var lastUpdated = MutableLiveData<String>()
+    private val lastUpdated = MutableLiveData<String>()
+    fun getLastUpdated(): LiveData<String> = lastUpdated
 
     private val db = FirebaseFirestore.getInstance()
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val UPDATE_INTERVAL = 4000L
     private val FASTEST_INTERVAL = 2000L
-    private val binder = LocalBinder()
 
     private val locationList: ArrayList<GeoPoint> = ArrayList()
     private var locationCallback: LocationCallback =  object : LocationCallback() {
@@ -51,7 +49,7 @@ class LocationService : Service() {
             locationResult ?: return
             for (location in locationResult.locations) {
 
-                if(location.accuracy > 15) // Remove outliers for bad data points
+                if (location.accuracy > 20) // Remove outliers for bad data points
                     continue
                 // Don't record if already exists
                 if (existsInList(GeoPoint(location.latitude, location.longitude)))
@@ -61,6 +59,12 @@ class LocationService : Service() {
                 Timber.d(lastUpdated.value)
             }
         }
+    }
+
+    private val binder = LocalBinder()
+
+    inner class LocalBinder : Binder() {
+        fun getService(): LocationService = this@LocationService
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -73,11 +77,23 @@ class LocationService : Service() {
         testMode = intent.getBooleanExtra(isTestMode, false)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle(getString(R.string.loc_notification_title))
-                .setContentText("CaseId YlNtlx3VTh6rAv6KC9dU")
-                .setSmallIcon(R.drawable.ic_location)
-                .build()
+        val resultIntent = Intent(this, MainActivity::class.java).apply {
+            putExtra("test", 1)
+            setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        }
+
+        val resultPendingIntent = PendingIntent.getActivity(
+            this, 0, resultIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        // Notification is needed for >= API 26 for foreground services
+        val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID).apply {
+            setContentTitle(getString(R.string.loc_notification_title))
+            setContentText("CaseId YlNtlx3VTh6rAv6KC9dU")
+            setSmallIcon(R.drawable.ic_location)
+//            setContentIntent(resultPendingIntent)
+        }.build()
 
         // Id must not be 0
         // Ref: https://developer.android.com/guide/components/services.html#kotlin
@@ -85,7 +101,7 @@ class LocationService : Service() {
 
         Timber.d("Location service started")
         getLocation()
-        return START_REDELIVER_INTENT
+        return START_NOT_STICKY
     }
 
     override fun onDestroy() {
@@ -138,10 +154,5 @@ class LocationService : Service() {
                 return true
         }
         return false
-    }
-
-
-    inner class LocalBinder : Binder() {
-        fun getService(): LocationService = this@LocationService
     }
 }

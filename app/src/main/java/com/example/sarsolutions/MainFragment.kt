@@ -1,10 +1,8 @@
 package com.example.sarsolutions
 
-import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
-import android.content.ServiceConnection
 import android.os.Bundle
-import android.os.IBinder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,19 +22,7 @@ class MainFragment : Fragment() {
     private var currentShiftId: String? = null
     private val auth = FirebaseAuth.getInstance()
     private lateinit var locationService: LocationService
-
-    private val connection = object: ServiceConnection {
-        override fun onServiceConnected(className: ComponentName, service: IBinder) {
-            val binder = service as LocationService.LocalBinder
-            locationService = binder.getService()
-            // Observe and update location string in view
-            locationService.lastUpdated.observe(viewLifecycleOwner,
-                Observer<String> { t -> location_id.text = t })
-        }
-
-        override fun onServiceDisconnected(arg0: ComponentName) {
-        }
-    }
+    private var service: LocationService? = null
 
     private lateinit var viewModel: CasesViewModel
 
@@ -79,7 +65,7 @@ class MainFragment : Fragment() {
         }
 
         start_button.setOnClickListener {
-            if(!LocationService.Status.isRunning) {
+            if (viewModel.getBinder().value == null) {
                 disableButtons()
                 startLocationService()
             }
@@ -88,38 +74,71 @@ class MainFragment : Fragment() {
                 enableButtons()
             }
         }
+
+        // Rough flow: startButton --> startLocationServices() --> viewModel binder
+        viewModel.getBinder().observe(viewLifecycleOwner, Observer { binder ->
+            // Either service was bound or unbound
+            service = binder?.getService()
+            observeService()
+        })
+    }
+
+    private fun observeService() {
+        service?.getLastUpdated()?.observe(viewLifecycleOwner, Observer { lastUpdated ->
+            location_id.text = lastUpdated
+        })
     }
 
     private fun startLocationService() {
         val serviceIntent = Intent(context, LocationService::class.java)
         serviceIntent.putExtra(LocationService.isTestMode, viewModel.isTestingEnabled)
-        LocationService.Status.isRunning = true
         ContextCompat.startForegroundService(context!!, serviceIntent)
-        activity?.bindService(serviceIntent, connection, 0)
+        bindService()
+    }
+
+    private fun bindService() {
+        val serviceIntent = Intent(context, LocationService::class.java)
+        activity?.bindService(
+            serviceIntent,
+            viewModel.getServiceConnection(),
+            Context.BIND_AUTO_CREATE
+        )
     }
 
     private fun stopLocationService() {
         val serviceIntent = Intent(context, LocationService::class.java)
-        LocationService.Status.isRunning = false
-        activity?.let {
-            it.unbindService(connection)
-            it.stopService(serviceIntent)
-        }
+        unbindService()
+        activity?.stopService(serviceIntent)
+        // Deletes reference to binder in viewmodel
+        // Will not be re-bind on configuration change
+        // NOTE: Must call unbindService() before removeService()
+        viewModel.removeService()
     }
 
-    override fun onStop() {
-        super.onStop()
+    private fun unbindService() {
+        if (viewModel.getBinder().value != null)
+            activity?.unbindService(viewModel.getServiceConnection())
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Rebind service if an instance of a service exists
+        if (viewModel.getBinder().value != null)
+            bindService()
+    }
+
+    override fun onPause() {
+        super.onPause()
         viewModel.lastUpdatedText = location_id.text.toString()
+        unbindService()
     }
 
-    // Restore view state on configuration changes
+    // Restore view state on configuration change
     private fun restoreState() {
-        if (LocationService.Status.isRunning) {
+        if (viewModel.getBinder().value != null) {
             disableButtons()
-            // Find and rebind service
-            val serviceIntent = Intent(context, LocationService::class.java)
-            activity?.bindService(serviceIntent, connection, 0)
-
+            // Service is alive and running but needs to be bound back to activity
+            bindService()
             location_id.text = viewModel.lastUpdatedText
         }
 
