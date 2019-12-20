@@ -45,6 +45,8 @@ class CasesFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
+//        (activity as MainActivity).supportActionBar?.title = "Tis work liek magik"
+
         viewManager = LinearLayoutManager(context)
         viewAdapter = Adapter()
         cases_recycler_view.apply {

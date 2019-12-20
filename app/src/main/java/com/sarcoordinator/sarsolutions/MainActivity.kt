@@ -32,7 +32,6 @@ class MainActivity : AppCompatActivity() {
             window.statusBarColor = Color.BLACK
 
         setContentView(R.layout.activity_main)
-        setSupportActionBar(appbar)
 
         // Ask for locational permission and handle response
         Dexter.withActivity(this)
@@ -64,22 +63,23 @@ class MainActivity : AppCompatActivity() {
             }).check()
 
         val navController = findNavController(R.id.nav_host_fragment)
+
+        if (savedInstanceState == null) {
+            // If user is logged in, navigate to case list fragment
+            if (FirebaseAuth.getInstance().currentUser != null) {
+                navController.navigate(LoginFragmentDirections.actionLoginFragmentToCasesFragment())
+            }
+        }
+
+        setSupportActionBar(appbar)
+
         // Set loginFragment and caseFragment as top-level destinations to prevent showing back
         //  on these screens
         val appBarConfiguration = AppBarConfiguration(setOf(R.id.loginFragment, R.id.casesFragment))
-
         appbar.setupWithNavController(navController, appBarConfiguration)
 
-        if (savedInstanceState == null) {
-            val auth = FirebaseAuth.getInstance()
-            val graph = navController.graph
-
-            // If user is logged in, navigate to case list fragment
-            if (auth.currentUser != null) {
-                graph.startDestination = R.id.casesFragment
-                navController.graph = graph
-            }
-        }
+        // Set toolbar title depending on current destination
+        supportActionBar?.title = navController.currentDestination?.label
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -90,8 +90,8 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.toggle_theme -> {
-                val mode = resources.configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK)
-                when (mode) {
+                // Get current theme
+                when (resources.configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK)) {
                     Configuration.UI_MODE_NIGHT_YES -> {
                         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
                     }
