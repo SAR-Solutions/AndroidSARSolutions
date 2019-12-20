@@ -92,7 +92,7 @@ class LocationService : Service() {
             setContentTitle(getString(R.string.loc_notification_title))
             setContentText("CaseId YlNtlx3VTh6rAv6KC9dU")
             setSmallIcon(R.drawable.ic_location)
-//            setContentIntent(resultPendingIntent)
+            setContentIntent(resultPendingIntent)
         }.build()
 
         // Id must not be 0

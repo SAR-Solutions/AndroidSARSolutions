@@ -50,6 +50,7 @@
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/password_input_text"
+            android:background="@null"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:autofillHints="password"

@@ -1,9 +1,15 @@
 package com.sarcoordinator.sarsolutions
 
 import android.Manifest
+import android.content.res.Configuration
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
@@ -20,6 +26,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Black status bar for old android version
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
+            window.statusBarColor = Color.BLACK
+
         setContentView(R.layout.activity_main)
         setSupportActionBar(appbar)
 
@@ -69,6 +80,28 @@ class MainActivity : AppCompatActivity() {
                 navController.graph = graph
             }
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.toggle_theme -> {
+                val mode = resources.configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK)
+                when (mode) {
+                    Configuration.UI_MODE_NIGHT_YES -> {
+                        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+                    }
+                    Configuration.UI_MODE_NIGHT_NO -> {
+                        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                    }
+                }
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 }
 
