@@ -2,14 +2,18 @@ package com.sarcoordinator.sarsolutions
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.models.Case
 import kotlinx.android.synthetic.main.fragment_cases.*
 import kotlinx.android.synthetic.main.list_view_item.view.*
@@ -23,22 +27,24 @@ import kotlin.collections.ArrayList
  */
 class CasesFragment : Fragment() {
 
-    private lateinit var viewModel: CasesViewModel
+    private lateinit var viewModel: SharedViewModel
     private lateinit var viewManager: RecyclerView.LayoutManager
     private lateinit var viewAdapter: Adapter
+    private val auth = FirebaseAuth.getInstance()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        setHasOptionsMenu(true)
         return inflater.inflate(R.layout.fragment_cases, container, false)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = activity?.run {
-            ViewModelProviders.of(this)[CasesViewModel::class.java]
+            ViewModelProviders.of(this)[SharedViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
     }
 
@@ -71,7 +77,7 @@ class CasesFragment : Fragment() {
                     .format(Date(Timestamp(case.date * 1000).time))
                 itemView.setOnClickListener {
                     itemView.findNavController()
-                        .navigate(CasesFragmentDirections.actionCasesFragmentToMainFragment())
+                        .navigate(CasesFragmentDirections.actionCasesFragmentToTrackFragment())
                 }
             }
         }
@@ -94,4 +100,17 @@ class CasesFragment : Fragment() {
         }
     }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.sign_out -> {
+                if (viewModel.getBinder().value == null) {
+                    auth.signOut()
+                    findNavController().navigate(CasesFragmentDirections.actionCasesFragmentToLoginFragment())
+                } else {
+                    Snackbar.make(view!!, "Stop tracking to sign out", Snackbar.LENGTH_LONG).show()
+                }
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
 }

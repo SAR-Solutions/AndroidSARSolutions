@@ -14,12 +14,5 @@
         <item name="colorError">@color/error</item>
         <item name="colorPrimaryDark">@android:color/white</item>
         <item name="android:windowLightStatusBar" tools:targetApi="23">true</item>
-        <item name="materialButtonStyle">@style/Widget.SARSolutions.Button</item>
     </style>
-
-    <style name="Widget.SARSolutions.Button" parent="Widget.MaterialComponents.Button.TextButton">
-        <item name="android:textColor">@android:color/white</item>
-        <item name="backgroundTint">@color/orange</item>
-    </style>
-
 </resources>

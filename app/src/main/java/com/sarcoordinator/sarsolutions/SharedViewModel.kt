@@ -13,7 +13,8 @@ import com.sarcoordinator.sarsolutions.services.LocationService
 import kotlinx.coroutines.Dispatchers
 import timber.log.Timber
 
-class CasesViewModel : ViewModel() {
+// Viewmodel is shared between all fragments and parent activity
+class SharedViewModel : ViewModel() {
 
     var isTestingEnabled = false
     lateinit var lastUpdatedText: String

@@ -1,23 +1,17 @@
 <resources>
     <string name="app_name">SAR Solutions</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="dashboard">Dashboard</string>
     <string name="home">Home</string>
-    <string name="permission_rationale" />
-    <string name="permission_denied_explanation" />
-    <string name="settings" />
-    <string name="location_updated" />
-    <string name="launch_activity" />
+    <string name="settings">Settings</string>
     <string name="enter_password">Enter Password</string>
     <string name="reset_password">Reset Password</string>
-    <string name="sign_out">sign out</string>
+    <string name="sign_out">Sign Out</string>
     <string name="Stop">Stop</string>
     <string name="stop" >Stop</string>
     <string name="start">Start</string>
     <string name="loc_notification_title">Tracking location</string>
-    <string name="ok">Ok</string>
+    <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
-    <string name="go_to_settings">Go to settings</string>
+    <string name="go_to_settings">Go To Settings</string>
+    <string name="toggle_theme">Toggle Theme</string>
 </resources>

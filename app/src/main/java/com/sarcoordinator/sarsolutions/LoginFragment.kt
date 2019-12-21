@@ -4,9 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.util.Patterns
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.view.autofill.AutofillManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
@@ -28,6 +26,7 @@ class LoginFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        setHasOptionsMenu(true)
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_login, container, false)
     }
@@ -107,6 +106,10 @@ class LoginFragment : Fragment() {
             view?.findNavController()
                 ?.navigate(LoginFragmentDirections.actionLoginFragmentToResetPasswordFragment())
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        menu.clear()
     }
 
 }

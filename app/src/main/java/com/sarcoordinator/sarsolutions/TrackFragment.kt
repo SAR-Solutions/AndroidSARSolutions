@@ -2,12 +2,12 @@ package com.sarcoordinator.sarsolutions
 
 import android.Manifest
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
@@ -15,9 +15,10 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import com.google.android.gms.location.LocationCallback
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.PermissionToken
@@ -26,10 +27,10 @@ import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
 import com.sarcoordinator.sarsolutions.services.LocationService
-import kotlinx.android.synthetic.main.main_fragment.*
+import kotlinx.android.synthetic.main.fragment_track.*
 import timber.log.Timber
 
-class MainFragment : Fragment() {
+class TrackFragment : Fragment() {
 
     private lateinit var locationCallback: LocationCallback
     private var currentShiftId: String? = null
@@ -37,19 +38,20 @@ class MainFragment : Fragment() {
     private lateinit var locationService: LocationService
     private var service: LocationService? = null
 
-    private lateinit var viewModel: CasesViewModel
+    private lateinit var viewModel: SharedViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.main_fragment, container, false)
+        setHasOptionsMenu(true)
+        return inflater.inflate(R.layout.fragment_track, container, false)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = activity?.run {
-            ViewModelProviders.of(this)[CasesViewModel::class.java]
+            ViewModelProviders.of(this)[SharedViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
     }
 
@@ -58,11 +60,6 @@ class MainFragment : Fragment() {
 
         // Restore state depending on view model
         restoreState()
-
-        sign_out_button.setOnClickListener {
-            auth.signOut()
-            view?.findNavController()?.navigate(R.id.action_mainFragment_to_loginFragment)
-        }
 
         // Toggle test mode
         test_button.setOnClickListener {
@@ -209,15 +206,27 @@ class MainFragment : Fragment() {
     private fun disableButtons() {
         start_button.text = getString(R.string.stop)
         test_button.isEnabled = false
-        sign_out_button.isEnabled = false
         start_button.setBackgroundColor(resources.getColor(R.color.error))
     }
 
     private fun enableButtons() {
         start_button.text = getString(R.string.start)
         test_button.isEnabled = true
-        sign_out_button.isEnabled = true
         start_button.setBackgroundColor(resources.getColor(R.color.success))
     }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.sign_out -> {
+                if (viewModel.getBinder().value == null) {
+                    auth.signOut()
+                    findNavController().navigate(TrackFragmentDirections.actionTrackFragmentToLoginFragment())
+                } else {
+                    Snackbar.make(view!!, "Stop tracking to sign out", Snackbar.LENGTH_LONG).show()
+                }
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
 }
+
