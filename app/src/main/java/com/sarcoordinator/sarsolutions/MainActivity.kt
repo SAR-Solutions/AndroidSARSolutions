@@ -1,25 +1,17 @@
 package com.sarcoordinator.sarsolutions
 
-import android.Manifest
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
 import com.google.firebase.auth.FirebaseAuth
-import com.karumi.dexter.Dexter
-import com.karumi.dexter.PermissionToken
-import com.karumi.dexter.listener.PermissionDeniedResponse
-import com.karumi.dexter.listener.PermissionGrantedResponse
-import com.karumi.dexter.listener.PermissionRequest
-import com.karumi.dexter.listener.single.PermissionListener
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -32,35 +24,6 @@ class MainActivity : AppCompatActivity() {
             window.statusBarColor = Color.BLACK
 
         setContentView(R.layout.activity_main)
-
-        // Ask for locational permission and handle response
-        Dexter.withActivity(this)
-            .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-            .withListener(object : PermissionListener {
-                override fun onPermissionGranted(response: PermissionGrantedResponse) {
-                    return
-                }
-
-                override fun onPermissionDenied(response: PermissionDeniedResponse) {
-                    if (response.isPermanentlyDenied)
-                    finish()
-                    else {
-                        Toast.makeText(
-                            applicationContext,
-                            "Permission not granted",
-                            Toast.LENGTH_LONG
-                        ).show()
-                        finish()
-                    }
-                }
-
-                override fun onPermissionRationaleShouldBeShown(
-                    permission: PermissionRequest,
-                    token: PermissionToken
-                ) {
-                    token.continuePermissionRequest()
-                }
-            }).check()
 
         val navController = findNavController(R.id.nav_host_fragment)
 

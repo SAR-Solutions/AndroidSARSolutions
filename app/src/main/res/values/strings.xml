@@ -17,4 +17,7 @@
     <string name="stop" >Stop</string>
     <string name="start">Start</string>
     <string name="loc_notification_title">Tracking location</string>
+    <string name="ok">Ok</string>
+    <string name="cancel">Cancel</string>
+    <string name="go_to_settings">Go to settings</string>
 </resources>
