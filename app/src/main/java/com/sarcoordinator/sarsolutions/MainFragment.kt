@@ -1,20 +1,33 @@
 package com.sarcoordinator.sarsolutions
 
+import android.Manifest
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
 import com.google.android.gms.location.LocationCallback
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
+import com.karumi.dexter.Dexter
+import com.karumi.dexter.PermissionToken
+import com.karumi.dexter.listener.PermissionDeniedResponse
+import com.karumi.dexter.listener.PermissionGrantedResponse
+import com.karumi.dexter.listener.PermissionRequest
+import com.karumi.dexter.listener.single.PermissionListener
 import com.sarcoordinator.sarsolutions.services.LocationService
 import kotlinx.android.synthetic.main.main_fragment.*
+import timber.log.Timber
 
 class MainFragment : Fragment() {
 
@@ -65,11 +78,10 @@ class MainFragment : Fragment() {
         }
 
         start_button.setOnClickListener {
-            if (viewModel.getBinder().value == null) {
-                disableButtons()
-                startLocationService()
+            if (viewModel.getBinder().value == null) { // Start new service
+                requestLocPermission()
             }
-            else {
+            else { // Stop ongoing service
                 stopLocationService()
                 enableButtons()
             }
@@ -81,6 +93,52 @@ class MainFragment : Fragment() {
             service = binder?.getService()
             observeService()
         })
+    }
+
+    private fun requestLocPermission() {
+        // Ask for locational permission and handle response
+        Dexter.withActivity(activity)
+            .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+            .withListener(object : PermissionListener {
+                override fun onPermissionGranted(response: PermissionGrantedResponse) {
+                    disableButtons()
+                    startLocationService()
+                }
+
+                override fun onPermissionDenied(response: PermissionDeniedResponse) {
+                    if (response.isPermanentlyDenied)
+                        MaterialAlertDialogBuilder(context)
+                            .setTitle("Permission Denied")
+                            .setMessage("Location permission is needed to use this feature")
+                            .setNegativeButton(getString(R.string.cancel), null)
+                            .setPositiveButton(getString(R.string.go_to_settings)) { _, _ ->
+                                // Open settings
+                                val settingsIntent = Intent(
+                                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                    Uri.parse("package:" + BuildConfig.APPLICATION_ID))
+                                startActivity(settingsIntent)
+                            }
+                            .show()
+                }
+
+                override fun onPermissionRationaleShouldBeShown(
+                    permission: PermissionRequest,
+                    token: PermissionToken
+                ) {
+                    MaterialAlertDialogBuilder(context)
+                        .setTitle("Location Permission Required")
+                        .setMessage("Location permission is needed to use this feature")
+                        .setPositiveButton(getString(R.string.ok)) {_, _ -> token.continuePermissionRequest()}
+                        .setOnCancelListener { token.cancelPermissionRequest() }
+                        .show()
+                }
+
+            })
+            .withErrorListener {
+                Timber.e("Unexpected error requesting permission")
+                Toast.makeText(context, "Unexpected error, try again", Toast.LENGTH_LONG).show()
+            }
+            .check()
     }
 
     private fun observeService() {
