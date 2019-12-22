@@ -22,7 +22,6 @@ class ResetPasswordFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         setHasOptionsMenu(true)
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_reset_password, container, false)
     }
 

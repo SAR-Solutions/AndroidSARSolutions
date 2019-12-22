@@ -10,7 +10,8 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.setupWithNavController
+import androidx.navigation.ui.NavigationUI
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -36,17 +37,21 @@ class MainActivity : AppCompatActivity() {
 
         if (savedInstanceState == null) {
             // If user is logged in, navigate to case list fragment
-            if (FirebaseAuth.getInstance().currentUser != null) {
+            if (auth.currentUser != null) {
                 navController.navigate(LoginFragmentDirections.actionLoginFragmentToCasesFragment())
             }
         }
 
-        setSupportActionBar(appbar)
+        setSupportActionBar(toolbar)
 
         // Set loginFragment and caseFragment as top-level destinations to prevent showing back
         //  on these screens
         val appBarConfiguration = AppBarConfiguration(setOf(R.id.loginFragment, R.id.casesFragment))
-        appbar.setupWithNavController(navController, appBarConfiguration)
+
+        // Don't use the following:
+        // toolbar.setupWithNavController(navController, appBarConfiguration)
+        // Reason : https://stackoverflow.com/questions/55904485/custom-navigate-up-behavior-for-certain-fragment-using-navigation-component
+        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration)
 
         // Set toolbar title depending on current destination
         supportActionBar?.title = navController.currentDestination?.label
@@ -66,7 +71,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
+        return when (item.itemId) {
 //            R.id.toggle_theme -> {
 //                // Get current theme
 //                when (resources.configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK)) {
@@ -80,10 +85,20 @@ class MainActivity : AppCompatActivity() {
 //            }
             R.id.sign_out -> {
                 // Navigation is handled within fragments by overriding onOptionsItemSelected
-                return false
+                false
             }
+            else -> super.onOptionsItemSelected(item)
         }
-        return super.onOptionsItemSelected(item)
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        // Don't allow navigating back if LocationService is running
+        return if (viewModel.getBinder().value != null) {
+            Snackbar.make(parent_layout, "Click the 'stop' button to go back", Snackbar.LENGTH_LONG)
+                .show()
+            true
+        } else
+            navController.navigateUp()
     }
 }
 

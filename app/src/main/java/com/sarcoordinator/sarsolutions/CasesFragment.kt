@@ -101,16 +101,18 @@ class CasesFragment : Fragment() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
+        return when (item.itemId) {
             R.id.sign_out -> {
                 if (viewModel.getBinder().value == null) {
                     auth.signOut()
                     findNavController().navigate(CasesFragmentDirections.actionCasesFragmentToLoginFragment())
+                    true
                 } else {
                     Snackbar.make(view!!, "Stop tracking to sign out", Snackbar.LENGTH_LONG).show()
+                    true
                 }
             }
+            else -> super.onOptionsItemSelected(item)
         }
-        return super.onOptionsItemSelected(item)
     }
 }
