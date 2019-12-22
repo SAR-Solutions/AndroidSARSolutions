@@ -7,11 +7,20 @@
     <string name="reset_password">Reset Password</string>
     <string name="sign_out">Sign Out</string>
     <string name="Stop">Stop</string>
-    <string name="stop" >Stop</string>
+    <string name="stop">Stop</string>
     <string name="start">Start</string>
     <string name="loc_notification_title">Tracking location</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="go_to_settings">Go To Settings</string>
     <string name="toggle_theme">Toggle Theme</string>
+    <string name="general">General</string>
+    <string name="theme">Theme</string>
+    <string name="select_theme">Select Theme</string>
+    <string name="testing_mode">Testing Mode</string>
+    <string-array name="theme_array">
+        <item>Light</item>
+        <item>Dark</item>
+        <item>System Default</item>
+    </string-array>
 </resources>

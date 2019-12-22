@@ -1,11 +1,14 @@
 package com.sarcoordinator.sarsolutions
 
+import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
@@ -32,6 +35,9 @@ class MainActivity : AppCompatActivity() {
             window.statusBarColor = Color.BLACK
 
         setContentView(R.layout.activity_main)
+        setSupportActionBar(toolbar)
+
+        loadUserPreferences()
 
         navController = findNavController(R.id.nav_host_fragment)
 
@@ -41,8 +47,6 @@ class MainActivity : AppCompatActivity() {
                 navController.navigate(LoginFragmentDirections.actionLoginFragmentToCasesFragment())
             }
         }
-
-        setSupportActionBar(toolbar)
 
         // Set loginFragment and caseFragment as top-level destinations to prevent showing back
         //  on these screens
@@ -87,6 +91,10 @@ class MainActivity : AppCompatActivity() {
                 // Navigation is handled within fragments by overriding onOptionsItemSelected
                 false
             }
+            R.id.settings -> {
+                navController.navigate(R.id.settingFragment)
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -99,6 +107,28 @@ class MainActivity : AppCompatActivity() {
             true
         } else
             navController.navigateUp()
+    }
+
+    // Load user preferences using shared preferences
+    private fun loadUserPreferences() {
+        val sharedPrefs = getPreferences(Context.MODE_PRIVATE)
+
+        // System default theme
+        val defaultTheme: String =
+            this.resources.configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK).let {
+                when (it) {
+                    Configuration.UI_MODE_NIGHT_YES -> SettingsFragment.THEME_DARK
+                    Configuration.UI_MODE_NIGHT_NO -> SettingsFragment.THEME_LIGHT
+                    else -> SettingsFragment.THEME_DEFAULT
+                }
+            }
+
+        // Set theme
+        when (sharedPrefs.getString(SettingsFragment.THEME_PREFS, defaultTheme)) {
+            SettingsFragment.THEME_DARK -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            SettingsFragment.THEME_LIGHT -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            else -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        }
     }
 }
 
