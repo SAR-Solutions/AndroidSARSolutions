@@ -3,6 +3,7 @@ package com.sarcoordinator.sarsolutions
 import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
@@ -37,6 +38,7 @@ class TrackFragment : Fragment() {
     private val auth = FirebaseAuth.getInstance()
     private lateinit var locationService: LocationService
     private var service: LocationService? = null
+    private lateinit var sharedPrefs: SharedPreferences
 
     private lateinit var viewModel: SharedViewModel
 
@@ -57,22 +59,10 @@ class TrackFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+        sharedPrefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
 
         // Restore state depending on view model
         restoreState()
-
-        // Toggle test mode
-        test_button.setOnClickListener {
-            if (viewModel.isTestingEnabled) { // Disable Testing
-                viewModel.isTestingEnabled = false
-                test_button.text = "Enable Test Mode"
-                test_button.setBackgroundColor(resources.getColor(R.color.warning))
-            } else { // Enable Testing
-                viewModel.isTestingEnabled = true
-                test_button.text = "Disable Test Mode"
-                test_button.setBackgroundColor(resources.getColor(R.color.error))
-            }
-        }
 
         start_button.setOnClickListener {
             if (viewModel.getBinder().value == null) { // Start new service
@@ -146,7 +136,10 @@ class TrackFragment : Fragment() {
 
     private fun startLocationService() {
         val serviceIntent = Intent(context, LocationService::class.java)
-        serviceIntent.putExtra(LocationService.isTestMode, viewModel.isTestingEnabled)
+        serviceIntent.putExtra(
+            LocationService.isTestMode,
+            sharedPrefs.getBoolean(SettingsFragment.TESTING_MODE_PREFS, false)
+        )
         ContextCompat.startForegroundService(context!!, serviceIntent)
         bindService()
     }
@@ -196,22 +189,15 @@ class TrackFragment : Fragment() {
             bindService()
             location_id.text = viewModel.lastUpdatedText
         }
-
-        if (viewModel.isTestingEnabled) {
-            test_button.text = "Disable Test Mode"
-            test_button.setBackgroundColor(resources.getColor(R.color.error))
-        }
     }
 
     private fun disableButtons() {
         start_button.text = getString(R.string.stop)
-        test_button.isEnabled = false
         start_button.setBackgroundColor(resources.getColor(R.color.error))
     }
 
     private fun enableButtons() {
         start_button.text = getString(R.string.start)
-        test_button.isEnabled = true
         start_button.setBackgroundColor(resources.getColor(R.color.success))
     }
 

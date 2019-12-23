@@ -6,6 +6,7 @@ data class Shift(
     val caseId: String,
     val userId: String,
     val startTime: String,
+    val endTime: String,
     val app_version: String,
     val path: List<GeoPoint>
 )

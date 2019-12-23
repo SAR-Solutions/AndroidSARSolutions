@@ -32,6 +32,7 @@ class LocationService : Service() {
     }
 
     private var testMode: Boolean = false
+    private lateinit var startTime: String
 
     private val lastUpdated = MutableLiveData<String>()
     fun getLastUpdated(): LiveData<String> = lastUpdated
@@ -98,6 +99,7 @@ class LocationService : Service() {
         // Id must not be 0
         // Ref: https://developer.android.com/guide/components/services.html#kotlin
         startForeground(1, notification)
+        startTime = Calendar.getInstance().time.toString()
 
         Timber.d("Location service started")
         getLocation()
@@ -116,6 +118,7 @@ class LocationService : Service() {
         val shift = Shift(
                 "YlNtlx3VTh6rAv6KC9dU",
                 "oKrbMcbPVJ6yiErezkX3",
+            startTime,
                 Calendar.getInstance().time.toString(),
                 BuildConfig.VERSION_NAME,
                 locationList
@@ -123,7 +126,12 @@ class LocationService : Service() {
 
         db.collection(if (testMode) "TestShift" else "Shift")
                 .add(shift)
-                .addOnSuccessListener { docRef -> Timber.i("Added document with id ${docRef.id}") }
+            .addOnSuccessListener { docRef ->
+                Timber.i(
+                    "Added to ${if (testMode) "TestShift" else "Shift"}" +
+                            " with id ${docRef.id}"
+                )
+            }
     }
 
     private fun getLocation() {

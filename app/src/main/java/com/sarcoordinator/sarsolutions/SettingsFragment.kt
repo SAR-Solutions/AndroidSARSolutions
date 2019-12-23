@@ -8,6 +8,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
+import com.google.android.material.switchmaterial.SwitchMaterial
 import kotlinx.android.synthetic.main.fragment_settings.*
 import timber.log.Timber
 
@@ -35,6 +36,7 @@ class SettingsFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
         sharedPrefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
 
+        // Init and set adapter for theme spinner
         ArrayAdapter.createFromResource(
             requireContext(),
             R.array.theme_array,
@@ -42,6 +44,13 @@ class SettingsFragment : Fragment() {
         ).also {
             it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             theme_spinner.adapter = it
+        }
+
+        testing_mode_switch.setOnClickListener {
+            with(sharedPrefs.edit()) {
+                putBoolean(TESTING_MODE_PREFS, (it as SwitchMaterial).isChecked)
+                commit()
+            }
         }
 
         loadPreferences()
@@ -65,6 +74,7 @@ class SettingsFragment : Fragment() {
 
     // Set ui elements based on user preferences
     private fun loadPreferences() {
+        // Theme
         sharedPrefs.getString(THEME_PREFS, THEME_DEFAULT).let {
             when (it) {
                 THEME_LIGHT -> theme_spinner.setSelection(0)
@@ -73,6 +83,9 @@ class SettingsFragment : Fragment() {
                 else -> throw Exception("SharedPreferences returned unexpected value for current theme")
             }
         }
+
+        // Testing mode
+        testing_mode_switch.isChecked = sharedPrefs.getBoolean(TESTING_MODE_PREFS, false)
     }
 
     // Sets theme preference to parameter and changes theme

@@ -16,7 +16,6 @@ import timber.log.Timber
 // Viewmodel is shared between all fragments and parent activity
 class SharedViewModel : ViewModel() {
 
-    var isTestingEnabled = false
     lateinit var lastUpdatedText: String
     private val binder = MutableLiveData<LocationService.LocalBinder>()
     private val serviceConnection = object : ServiceConnection {
