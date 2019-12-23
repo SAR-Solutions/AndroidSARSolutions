@@ -92,8 +92,17 @@ class MainActivity : AppCompatActivity() {
                 false
             }
             R.id.settings -> {
-                navController.navigate(R.id.settingFragment)
-                true
+                if (viewModel.getBinder().value == null) {
+                    navController.navigate(R.id.settingFragment)
+                } else {
+                    Snackbar.make(
+                        parent_layout,
+                        "Click the 'stop' button to go to settings",
+                        Snackbar.LENGTH_LONG
+                    )
+                        .show()
+                }
+                return true
             }
             else -> super.onOptionsItemSelected(item)
         }
@@ -101,12 +110,19 @@ class MainActivity : AppCompatActivity() {
 
     override fun onSupportNavigateUp(): Boolean {
         // Don't allow navigating back if LocationService is running
-        return if (viewModel.getBinder().value != null) {
+        if (viewModel.getBinder().value != null) {
             Snackbar.make(parent_layout, "Click the 'stop' button to go back", Snackbar.LENGTH_LONG)
                 .show()
-            true
-        } else
-            navController.navigateUp()
+            return true
+        } else if (!navController.popBackStack()) {
+            return navController.navigateUp()
+        }
+        return true
+    }
+
+    override fun onBackPressed() {
+        if (!onSupportNavigateUp())
+            super.onBackPressed()
     }
 
     // Load user preferences using shared preferences
