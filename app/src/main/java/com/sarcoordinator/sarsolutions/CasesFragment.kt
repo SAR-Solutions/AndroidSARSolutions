@@ -48,11 +48,8 @@ class CasesFragment : Fragment() {
         } ?: throw Exception("Invalid Activity")
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-
-//        (activity as MainActivity).supportActionBar?.title = "Tis work liek magik"
-
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         viewManager = LinearLayoutManager(context)
         viewAdapter = Adapter()
         cases_recycler_view.apply {
@@ -61,9 +58,14 @@ class CasesFragment : Fragment() {
             adapter = viewAdapter
         }
 
-        viewModel.cases.observe(this, Observer {
+        viewModel.cases.observe(viewLifecycleOwner, Observer<ArrayList<Case>> {
             viewAdapter.addCaseList(it)
         })
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        cases_recycler_view.adapter = null
     }
 
     class Adapter : RecyclerView.Adapter<Adapter.ViewHolder>() {

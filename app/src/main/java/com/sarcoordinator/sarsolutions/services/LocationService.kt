@@ -96,7 +96,7 @@ class LocationService : Service() {
             setContentIntent(resultPendingIntent)
         }.build()
 
-        // Id must not be 0
+        // Id must NOT be 0
         // Ref: https://developer.android.com/guide/components/services.html#kotlin
         startForeground(1, notification)
         startTime = Calendar.getInstance().time.toString()
@@ -162,5 +162,24 @@ class LocationService : Service() {
                 return true
         }
         return false
+    }
+
+    private fun activityRecognition() {
+        val transitions = mutableListOf<ActivityTransition>()
+
+        transitions += ActivityTransition.Builder()
+            .setActivityType(DetectedActivity.ON_FOOT)
+            .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
+            .build()
+
+        transitions += ActivityTransition.Builder()
+            .setActivityType(DetectedActivity.IN_VEHICLE)
+            .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
+            .build()
+
+        val request = ActivityTransitionRequest(transitions)
+//        val pendingIntent = PendingIntent.
+//        val task = ActivityRecognition.getClient(baseContext)
+//            .requestActivityTransitionUpdates(request, PendingIntent())
     }
 }

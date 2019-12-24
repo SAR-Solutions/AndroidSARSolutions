@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.LayoutInflater
@@ -12,6 +13,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -57,8 +59,8 @@ class TrackFragment : Fragment() {
         } ?: throw Exception("Invalid Activity")
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         sharedPrefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
 
         // Restore state depending on view model
@@ -74,7 +76,6 @@ class TrackFragment : Fragment() {
             }
         }
 
-        // Rough flow: startButton --> startLocationServices() --> viewModel binder
         viewModel.getBinder().observe(viewLifecycleOwner, Observer { binder ->
             // Either service was bound or unbound
             service = binder?.getService()
@@ -122,12 +123,37 @@ class TrackFragment : Fragment() {
 
             })
             .withErrorListener {
-                Timber.e("Unexpected error requesting permission")
+                Timber.e("Unexpected error requesting location permission")
                 Toast.makeText(context, "Unexpected error, try again", Toast.LENGTH_LONG).show()
             }
             .check()
     }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun requestActivityPermission() {
+        // Ask for locational permission and handle response
+        Dexter.withActivity(activity)
+            .withPermission(Manifest.permission.ACTIVITY_RECOGNITION)
+            .withListener(object : PermissionListener {
+                override fun onPermissionGranted(response: PermissionGrantedResponse?) {
+                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                }
+
+                override fun onPermissionRationaleShouldBeShown(
+                    permission: PermissionRequest?,
+                    token: PermissionToken?
+                ) {
+                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                }
+
+                override fun onPermissionDenied(response: PermissionDeniedResponse?) {
+                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                }
+            })
+            .check()
+    }
+
+    // Update UI by observing viewModel data
     private fun observeService() {
         service?.getLastUpdated()?.observe(viewLifecycleOwner, Observer { lastUpdated ->
             location_id.text = lastUpdated
