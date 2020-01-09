@@ -14,13 +14,18 @@ import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.location.*
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.GeoPoint
 import com.sarcoordinator.sarsolutions.BuildConfig
 import com.sarcoordinator.sarsolutions.MainActivity
 import com.sarcoordinator.sarsolutions.MyApplication.Companion.CHANNEL_ID
 import com.sarcoordinator.sarsolutions.R
+import com.sarcoordinator.sarsolutions.api.Repository
+import com.sarcoordinator.sarsolutions.models.LocationPoint
 import com.sarcoordinator.sarsolutions.models.Shift
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.*
 
@@ -31,33 +36,46 @@ class LocationService : Service() {
         const val isTestMode = "TEST_MODE"
     }
 
-    private var testMode: Boolean = false
-    private lateinit var startTime: String
+    private var mTestMode: Boolean = false
+    private lateinit var mShiftId: String
+    private lateinit var mIdToken: String
 
     private val lastUpdated = MutableLiveData<String>()
     fun getLastUpdated(): LiveData<String> = lastUpdated
 
+    private val user = FirebaseAuth.getInstance().currentUser
     private val db = FirebaseFirestore.getInstance()
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val UPDATE_INTERVAL = 4000L
     private val FASTEST_INTERVAL = 2000L
 
-    private val locationList: ArrayList<GeoPoint> = ArrayList()
-    private var locationCallback: LocationCallback =  object : LocationCallback() {
+    private val locationList: ArrayList<LocationPoint> = ArrayList()
+    private var locationCallback: LocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult?) {
             super.onLocationResult(locationResult)
             super.onLocationResult(locationResult)
+
             locationResult ?: return
+            if (!::mIdToken.isInitialized || !::mShiftId.isInitialized)
+                return
+
             for (location in locationResult.locations) {
 
                 if (location.accuracy > 20) // Remove outliers for bad data points
                     continue
                 // Don't record if already exists
-                if (existsInList(GeoPoint(location.latitude, location.longitude)))
+                if (locationList.contains(LocationPoint(location.latitude, location.longitude)))
                     continue
-                locationList.add(GeoPoint(location.latitude, location.longitude))
-                lastUpdated.postValue( "Last updated at \n" + Calendar.getInstance().time)
+                locationList.add(LocationPoint(location.latitude, location.longitude))
+                lastUpdated.postValue("Last updated at \n" + Calendar.getInstance().time)
                 Timber.d(lastUpdated.value)
+
+                // If list has 10 items, sync to backend
+                if (locationList.size >= 10)
+                    CoroutineScope(IO).launch {
+                        Repository.putLocations(mIdToken, mShiftId, mTestMode, locationList)
+                        locationList.clear()
+                    }
             }
         }
     }
@@ -73,10 +91,25 @@ class LocationService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if(intent == null)
+        if (intent == null)
             throw Exception("Service needs to be called with specified intent fields")
-        testMode = intent.getBooleanExtra(isTestMode, false)
+        mTestMode = intent.extras!!.getBoolean(isTestMode, false)
+        intent.getBooleanExtra(isTestMode, false)
+
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        // Create shift; get and set mShiftId, mIdToken
+        user?.getIdToken(true)?.addOnSuccessListener {
+            mIdToken = it.token!!
+            val shift = Shift(
+                Calendar.getInstance().time.toString(),
+                BuildConfig.VERSION_NAME
+            )
+            CoroutineScope(IO).launch {
+                mShiftId = Repository
+                    .postStartShift(mIdToken, shift, "YlNtlx3VTh6rAv6KC9dU", true).shiftId
+            }
+        }
 
         val resultIntent = Intent(this, MainActivity::class.java).apply {
             putExtra("test", 1)
@@ -99,7 +132,6 @@ class LocationService : Service() {
         // Id must NOT be 0
         // Ref: https://developer.android.com/guide/components/services.html#kotlin
         startForeground(1, notification)
-        startTime = Calendar.getInstance().time.toString()
 
         Timber.d("Location service started")
         getLocation()
@@ -108,31 +140,44 @@ class LocationService : Service() {
 
     override fun onDestroy() {
         fusedLocationClient.removeLocationUpdates(locationCallback)
-        syncUserShift()
+//        syncUserShift()
         stopForeground(true)
         stopSelf()
     }
 
     // Add user shift to database
-    private fun syncUserShift() {
-        val shift = Shift(
-                "YlNtlx3VTh6rAv6KC9dU",
-                "oKrbMcbPVJ6yiErezkX3",
-            startTime,
-                Calendar.getInstance().time.toString(),
-                BuildConfig.VERSION_NAME,
-                locationList
-        )
-
-        db.collection(if (testMode) "TestShift" else "Shift")
-                .add(shift)
-            .addOnSuccessListener { docRef ->
-                Timber.i(
-                    "Added to ${if (testMode) "TestShift" else "Shift"}" +
-                            " with id ${docRef.id}"
-                )
-            }
-    }
+//    private fun syncUserShift() {
+//        if(!locationList.isNullOrEmpty()) {
+//            val shift = Shift(
+//                startTime,
+//                Calendar.getInstance().time.toString(),
+//                BuildConfig.VERSION_NAME,
+//                locationList
+//            )
+//
+//            CoroutineScope(IO).launch {
+//                Repository.postShift(shift)
+//            }
+//
+//            user?.getIdToken(true)?.addOnCompleteListener { task ->
+//                if(task.isSuccessful) {
+//                    val idToken = task.result?.token
+//                    Timber.d("User token is: $idToken")
+//                }
+//            }
+//
+//            return
+//            //TODO: Replace with api call
+//            db.collection(if (testMode) "TestShift" else "Shift")
+//                .add(shift)
+//                .addOnSuccessListener { docRef ->
+//                    Timber.i(
+//                        "Added to ${if (testMode) "TestShift" else "Shift"}" +
+//                                " with id ${docRef.id}"
+//                    )
+//                }
+//        }
+//    }
 
     private fun getLocation() {
         val locationRequest = LocationRequest.create().apply {
@@ -142,26 +187,21 @@ class LocationService : Service() {
         }
 
         // Stop if permissions aren't granted
-        if(ActivityCompat.checkSelfPermission(this,
-                        Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             Timber.d("Location permissions not granted, stopping service.")
             stopSelf()
             return
         }
 
         fusedLocationClient.requestLocationUpdates(
-                locationRequest,
-                locationCallback,
-                Looper.myLooper())
-    }
-
-    // Checks for given point in locationList
-    private fun existsInList(newPoint: GeoPoint) : Boolean {
-        locationList.forEach { point ->
-            if (point.compareTo(newPoint) == 0)
-                return true
-        }
-        return false
+            locationRequest,
+            locationCallback,
+            Looper.myLooper()
+        )
     }
 
     private fun activityRecognition() {

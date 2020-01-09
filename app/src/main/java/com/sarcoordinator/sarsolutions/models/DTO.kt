@@ -1,17 +1,17 @@
 package com.sarcoordinator.sarsolutions.models
 
-import com.google.firebase.firestore.GeoPoint
+data class ShiftId(val shiftId: String)
 
 data class Shift(
-    val caseId: String,
-    val userId: String,
     val startTime: String,
-    val endTime: String,
-    val app_version: String,
-    val path: List<GeoPoint>
+    val appVersion: String
 )
 
 data class Cases(val caseIds: List<String>)
+
+data class LocationPoint(val latitude: Double, val longitude: Double)
+
+data class LocationBody(val paths: List<LocationPoint>)
 
 data class Case(
     val description: String,

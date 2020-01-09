@@ -69,6 +69,8 @@ class TrackFragment : Fragment() {
         start_button.setOnClickListener {
             if (viewModel.getBinder().value == null) { // Start new service
                 requestLocPermission()
+                disableButtons()
+                startLocationService()
             }
             else { // Stop ongoing service
                 stopLocationService()
@@ -89,8 +91,6 @@ class TrackFragment : Fragment() {
             .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
             .withListener(object : PermissionListener {
                 override fun onPermissionGranted(response: PermissionGrantedResponse) {
-                    disableButtons()
-                    startLocationService()
                 }
 
                 override fun onPermissionDenied(response: PermissionDeniedResponse) {
@@ -116,7 +116,7 @@ class TrackFragment : Fragment() {
                     MaterialAlertDialogBuilder(context)
                         .setTitle("Location Permission Required")
                         .setMessage("Location permission is needed to use this feature")
-                        .setPositiveButton(getString(R.string.ok)) {_, _ -> token.continuePermissionRequest()}
+                        .setPositiveButton(getString(R.string.ok)) { _, _ -> token.continuePermissionRequest() }
                         .setOnCancelListener { token.cancelPermissionRequest() }
                         .show()
                 }
@@ -126,6 +126,7 @@ class TrackFragment : Fragment() {
                 Timber.e("Unexpected error requesting location permission")
                 Toast.makeText(context, "Unexpected error, try again", Toast.LENGTH_LONG).show()
             }
+            .onSameThread()
             .check()
     }
 
@@ -161,6 +162,7 @@ class TrackFragment : Fragment() {
     }
 
     private fun startLocationService() {
+        // Pass required extras and start location service
         val serviceIntent = Intent(context, LocationService::class.java)
         serviceIntent.putExtra(
             LocationService.isTestMode,

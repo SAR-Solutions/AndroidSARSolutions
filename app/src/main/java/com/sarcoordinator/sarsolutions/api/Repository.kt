@@ -1,8 +1,8 @@
 package com.sarcoordinator.sarsolutions.api
 
-import com.sarcoordinator.sarsolutions.models.Case
-import com.sarcoordinator.sarsolutions.models.Cases
+import com.sarcoordinator.sarsolutions.models.*
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit
@@ -10,11 +10,15 @@ import java.util.concurrent.TimeUnit
 object Repository {
     private const val SAR_FUNCTIONS_URL = "https://us-central1-sar-solutions.cloudfunctions.net/"
 
+    private val interceptor: HttpLoggingInterceptor = HttpLoggingInterceptor().apply {
+        level = HttpLoggingInterceptor.Level.BODY
+    }
     private val client: OkHttpClient by lazy {
         OkHttpClient.Builder()
             .callTimeout(45, TimeUnit.SECONDS)
             .connectTimeout(45, TimeUnit.SECONDS)
             .writeTimeout(45, TimeUnit.SECONDS)
+            .addInterceptor(interceptor)
             .build()
     }
 
@@ -32,4 +36,20 @@ object Repository {
     suspend fun getCaseDetail(id: String): Case {
         return service.getCaseData(id)
     }
+
+    suspend fun postStartShift(
+        tokenId: String,
+        shift: Shift,
+        caseId: String,
+        isTest: Boolean
+    ) =
+        service.postStartShift(tokenId, shift, caseId, isTest)
+
+    suspend fun putLocations(
+        tokenId: String,
+        shiftId: String,
+        isTest: Boolean,
+        paths: List<LocationPoint>
+    ) =
+        service.putLocationsAuth(tokenId, shiftId, isTest, LocationBody(paths))
 }
