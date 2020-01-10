@@ -26,10 +26,9 @@
         android:label="Case"
         tools:layout="@layout/fragment_track">
         <action
-            android:id="@+id/action_trackFragment_to_loginFragment"
-            app:destination="@id/loginFragment"
-            app:popUpTo="@id/nav_graph"
-            app:popUpToInclusive="true" />
+            android:id="@+id/action_trackFragment_to_shiftReportFragment"
+            app:destination="@id/shiftReportFragment"
+            app:popUpTo="@id/trackFragment" />
     </fragment>
     <fragment
         android:id="@+id/resetPasswordFragment"
@@ -44,15 +43,22 @@
         <action
             android:id="@+id/action_casesFragment_to_trackFragment"
             app:destination="@id/trackFragment" />
-        <action
-            android:id="@+id/action_casesFragment_to_loginFragment"
-            app:destination="@id/loginFragment"
-            app:popUpTo="@id/nav_graph"
-            app:popUpToInclusive="true" />
     </fragment>
     <fragment
         android:id="@+id/settingFragment"
         android:name="com.sarcoordinator.sarsolutions.SettingsFragment"
         android:label="@string/settings"
         tools:layout="@layout/fragment_settings" />
+    <fragment
+        android:id="@+id/shiftReportFragment"
+        android:name="com.sarcoordinator.sarsolutions.ShiftReportFragment"
+        android:label="ShiftReport"
+        tools:layout="@layout/fragment_shift_report"
+        >
+        <action
+            android:id="@+id/action_shiftReportFragment_to_casesFragment"
+            app:destination="@id/casesFragment"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
+    </fragment>
 </navigation>

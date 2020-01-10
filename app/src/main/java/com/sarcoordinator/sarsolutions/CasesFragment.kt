@@ -2,17 +2,14 @@ package com.sarcoordinator.sarsolutions
 
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.models.Case
 import kotlinx.android.synthetic.main.fragment_cases.*
@@ -37,7 +34,6 @@ class CasesFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        setHasOptionsMenu(true)
         return inflater.inflate(R.layout.fragment_cases, container, false)
     }
 
@@ -99,22 +95,6 @@ class CasesFragment : Fragment() {
         fun addCaseList(list: ArrayList<Case>) {
             data.addAll(list)
             notifyDataSetChanged()
-        }
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.sign_out -> {
-                if (viewModel.getBinder().value == null) {
-                    auth.signOut()
-                    findNavController().navigate(CasesFragmentDirections.actionCasesFragmentToLoginFragment())
-                    true
-                } else {
-                    Snackbar.make(view!!, "Stop tracking to sign out", Snackbar.LENGTH_LONG).show()
-                    true
-                }
-            }
-            else -> super.onOptionsItemSelected(item)
         }
     }
 }
