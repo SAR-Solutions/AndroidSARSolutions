@@ -1,12 +1,12 @@
 package com.sarcoordinator.sarsolutions
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.fragment_shift_report.*
 
@@ -17,10 +17,6 @@ class ShiftReportFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
     //todo: Remove dummy data
     val vehicleTypes = arrayOf("Ford Explorer", "Snowmobile", "ATV")
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -56,24 +52,24 @@ class ShiftReportFragment : Fragment(), AdapterView.OnItemSelectedListener {
         }
     }
 
-    fun initViewListeners(){
+    private fun initViewListeners() {
         countyVehicleCheckBox.setOnCheckedChangeListener { buttonView, isChecked ->
-            if(isChecked){
+            if (isChecked) {
                 spinner.visibility = View.VISIBLE
-                personalVehicleCheckBox.isEnabled = false;
+                personalVehicleCheckBox.isEnabled = false
             } else {
                 spinner.visibility = View.GONE
-                personalVehicleCheckBox.isEnabled = true;
+                personalVehicleCheckBox.isEnabled = true
             }
         }
 
         personalVehicleCheckBox.setOnCheckedChangeListener { buttonView, isChecked ->
             if(isChecked){
                 spinner.visibility = View.VISIBLE
-                countyVehicleCheckBox.isEnabled = false;
+                countyVehicleCheckBox.isEnabled = false
             } else {
                 spinner.visibility = View.GONE
-                countyVehicleCheckBox.isEnabled = true;
+                countyVehicleCheckBox.isEnabled = true
             }
         }
 

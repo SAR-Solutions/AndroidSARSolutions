@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.NavController
+import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
@@ -76,21 +77,21 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-//            R.id.toggle_theme -> {
-//                // Get current theme
-//                when (resources.configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK)) {
-//                    Configuration.UI_MODE_NIGHT_YES -> {
-//                        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-//                    }
-//                    Configuration.UI_MODE_NIGHT_NO -> {
-//                        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-//                    }
-//                }
-//            }
             R.id.sign_out -> {
-                // Navigation is handled within fragments by overriding onOptionsItemSelected
-                false
+                if (viewModel.getBinder().value == null) {
+                    auth.signOut()
+                    navController.navigate(
+                        R.id.loginFragment,
+                        null,
+                        NavOptions.Builder().setPopUpTo(R.id.nav_graph, true).build()
+                    )
+                } else {
+                    Snackbar.make(parent_layout, "Stop tracking to sign out", Snackbar.LENGTH_LONG)
+                        .show()
+                }
+                true
             }
+
             R.id.settings -> {
                 if (viewModel.getBinder().value == null) {
                     navController.navigate(R.id.settingFragment)
