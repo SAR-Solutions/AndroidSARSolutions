@@ -18,9 +18,33 @@
     <string name="theme">Theme</string>
     <string name="select_theme">Select Theme</string>
     <string name="testing_mode">Testing Mode</string>
+    <string name="county_vehicle">County Vehicle</string>
+    <string name="personal_vehicle">Personal Vehicle</string>
+    <string name="miles_traveled">Miles Traveled</string>
+    <string name="hours_on_search">Hours on Search</string>
+    <string name="vehicle">Vehicle</string>
+    <string name="personal">Personal</string>
+    <string name="end_shift">End Shift</string>
     <string-array name="theme_array">
         <item>Light</item>
         <item>Dark</item>
         <item>System Default</item>
     </string-array>
+    <string-array name="vehicle_array">
+        <item>4WD</item>
+        <item>Auto</item>
+        <item>Trailer</item>
+        <item>ATV</item>
+        <item>Motorcycle</item>
+        <item>Boat</item>
+        <item>PWC</item>
+        <item>Snowmobile</item>
+        <item>Horses</item>
+        <item>Dogs</item>
+        <item>Helicopter</item>
+        <item>Fixed Wing</item>
+
+    </string-array>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
