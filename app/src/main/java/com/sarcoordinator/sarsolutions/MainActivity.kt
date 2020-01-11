@@ -1,5 +1,6 @@
 package com.sarcoordinator.sarsolutions
 
+import android.app.ProgressDialog
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
@@ -45,7 +46,12 @@ class MainActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             // If user is logged in, navigate to case list fragment
             if (auth.currentUser != null) {
-                navController.navigate(LoginFragmentDirections.actionLoginFragmentToCasesFragment())
+                val progressDialog = ProgressDialog.show(this, "Loading", "Please wait...")
+                auth.currentUser!!.getIdToken(true).addOnSuccessListener {
+                    viewModel.mAuthToken = it.token!!
+                    progressDialog.dismiss()
+                    navController.navigate(LoginFragmentDirections.actionLoginFragmentToCasesFragment())
+                }
             }
         }
 

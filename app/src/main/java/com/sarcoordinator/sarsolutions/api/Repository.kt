@@ -33,8 +33,8 @@ object Repository {
         return service.getCases()
     }
 
-    suspend fun getCaseDetail(id: String): Case {
-        return service.getCaseData(id)
+    suspend fun getCaseDetail(caseId: String, idToken: String): Case {
+        return service.getCaseData(caseId, idToken)
     }
 
     suspend fun postStartShift(

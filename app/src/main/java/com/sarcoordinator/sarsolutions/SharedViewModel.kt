@@ -10,7 +10,7 @@ import androidx.lifecycle.liveData
 import com.sarcoordinator.sarsolutions.api.Repository
 import com.sarcoordinator.sarsolutions.models.Case
 import com.sarcoordinator.sarsolutions.services.LocationService
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Dispatchers.IO
 import timber.log.Timber
 
 // Viewmodel is shared between all fragments and parent activity
@@ -18,6 +18,7 @@ class SharedViewModel : ViewModel() {
 
     lateinit var lastUpdatedText: String
     private val binder = MutableLiveData<LocationService.LocalBinder>()
+    lateinit var mAuthToken: String
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(p0: ComponentName?, iBinder: IBinder?) {
             Timber.d("Connected to service")
@@ -30,10 +31,10 @@ class SharedViewModel : ViewModel() {
         }
     }
 
-    val cases: LiveData<ArrayList<Case>> = liveData(Dispatchers.IO) {
+    val cases: LiveData<ArrayList<Case>> = liveData(IO) {
         val result = ArrayList<Case>()
         Repository.getCases().caseIds.forEach { id ->
-            result.add(Repository.getCaseDetail(id))
+            result.add(Repository.getCaseDetail(id, mAuthToken))
         }
         emit(result)
     }

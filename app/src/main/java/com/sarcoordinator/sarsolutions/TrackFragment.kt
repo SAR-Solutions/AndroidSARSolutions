@@ -18,9 +18,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
-import com.google.android.gms.location.LocationCallback
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.firebase.auth.FirebaseAuth
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionDeniedResponse
@@ -33,10 +31,6 @@ import timber.log.Timber
 
 class TrackFragment : Fragment() {
 
-    private lateinit var locationCallback: LocationCallback
-    private var currentShiftId: String? = null
-    private val auth = FirebaseAuth.getInstance()
-    private lateinit var locationService: LocationService
     private var service: LocationService? = null
     private lateinit var sharedPrefs: SharedPreferences
 

@@ -10,11 +10,14 @@ interface API {
     suspend fun getCases(): Cases
 
     @GET("getCaseData")
-    suspend fun getCaseData(@Query("caseId") caseId: String): Case
+    suspend fun getCaseData(
+        @Query("caseId") caseId: String,
+        @Header("authorization") tokenId: String
+    ): Case
 
     @POST("postStartShiftAuth")
     suspend fun postStartShift(
-        @Header("token-id") tokenId: String,
+        @Header("authorization") tokenId: String,
         @Body shift: Shift,
         @Query("caseId") caseId: String,
         @Query("isTest") isTest: Boolean
@@ -24,7 +27,7 @@ interface API {
     // Kotlin throws a null pointer exception (as of Retrofit 2.7.0)
     @PUT("putLocationsAuth")
     suspend fun putLocations(
-        @Header("token-id") tokenId: String,
+        @Header("authorization") tokenId: String,
         @Query("shiftId") shiftId: String,
         @Query("isTest") isTest: Boolean,
         @Body paths: LocationBody
@@ -32,7 +35,7 @@ interface API {
 
     @PUT("putEndTimeAuth")
     suspend fun putEndTime(
-        @Header("token-id") tokenId: String,
+        @Header("authorization") tokenId: String,
         @Query("shiftId") shiftId: String,
         @Query("isTest") isTest: Boolean,
         @Body endTime: EndTimeBody
