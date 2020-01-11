@@ -51,5 +51,13 @@ object Repository {
         isTest: Boolean,
         paths: List<LocationPoint>
     ) =
-        service.putLocationsAuth(tokenId, shiftId, isTest, LocationBody(paths))
+        service.putLocations(tokenId, shiftId, isTest, LocationBody(paths))
+
+    suspend fun putEndTime(
+        tokenId: String,
+        shiftId: String,
+        isTest: Boolean,
+        endTime: String
+    ) =
+        service.putEndTime(tokenId, shiftId, isTest, EndTimeBody(endTime))
 }

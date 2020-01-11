@@ -15,7 +15,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.location.*
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import com.sarcoordinator.sarsolutions.BuildConfig
 import com.sarcoordinator.sarsolutions.MainActivity
 import com.sarcoordinator.sarsolutions.MyApplication.Companion.CHANNEL_ID
@@ -23,11 +22,14 @@ import com.sarcoordinator.sarsolutions.R
 import com.sarcoordinator.sarsolutions.api.Repository
 import com.sarcoordinator.sarsolutions.models.LocationPoint
 import com.sarcoordinator.sarsolutions.models.Shift
+import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class LocationService : Service() {
@@ -44,10 +46,12 @@ class LocationService : Service() {
     fun getLastUpdated(): LiveData<String> = lastUpdated
 
     private val user = FirebaseAuth.getInstance().currentUser
-    private val db = FirebaseFirestore.getInstance()
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val UPDATE_INTERVAL = 4000L
     private val FASTEST_INTERVAL = 2000L
+
+    private lateinit var addPathsJob: CompletableJob
+    private var addPathsJobIsSyncing = false
 
     private val locationList: ArrayList<LocationPoint> = ArrayList()
     private var locationCallback: LocationCallback = object : LocationCallback() {
@@ -70,12 +74,18 @@ class LocationService : Service() {
                 lastUpdated.postValue("Last updated at \n" + Calendar.getInstance().time)
                 Timber.d(lastUpdated.value)
 
-                // If list has 10 items, sync to backend
-                if (locationList.size >= 10)
-                    CoroutineScope(IO).launch {
-                        Repository.putLocations(mIdToken, mShiftId, mTestMode, locationList)
-                        locationList.clear()
+                // Start addPathsjob if 10 or more locations exist and job isn't running
+                if (locationList.size >= 10 && !addPathsJobIsSyncing) {
+                    addPathsJobIsSyncing = true
+                    val tempList = ArrayList<LocationPoint>()
+                    tempList.addAll(locationList)
+                    locationList.clear()
+                    CoroutineScope(IO + addPathsJob).launch {
+                        Repository.putLocations(mIdToken, mShiftId, mTestMode, tempList)
+                    }.invokeOnCompletion {
+                        addPathsJobIsSyncing = false
                     }
+                }
             }
         }
     }
@@ -107,9 +117,16 @@ class LocationService : Service() {
             )
             CoroutineScope(IO).launch {
                 mShiftId = Repository
-                    .postStartShift(mIdToken, shift, "YlNtlx3VTh6rAv6KC9dU", true).shiftId
+                    .postStartShift(mIdToken, shift, "YlNtlx3VTh6rAv6KC9dU", mTestMode).shiftId
+                lastUpdated.postValue(getString(R.string.started_shift))
             }
         }
+
+        if (!::addPathsJob.isInitialized) {
+            addPathsJob = Job()
+        }
+
+        // Start service notification intent
 
         val resultIntent = Intent(this, MainActivity::class.java).apply {
             putExtra("test", 1)
@@ -140,9 +157,29 @@ class LocationService : Service() {
 
     override fun onDestroy() {
         fusedLocationClient.removeLocationUpdates(locationCallback)
-//        syncUserShift()
+        completeShift()
         stopForeground(true)
         stopSelf()
+    }
+
+    // End shift; set endTime and sync remaining points
+    private fun completeShift() {
+        if (locationList.isNotEmpty()) {
+            // Sync remaining points
+            CoroutineScope(IO).launch {
+                Repository.putLocations(mIdToken, mShiftId, mTestMode, locationList)
+            }
+        }
+
+        // Post endtime
+        CoroutineScope(IO).launch {
+            Repository.putEndTime(
+                mIdToken,
+                mShiftId,
+                mTestMode,
+                Calendar.getInstance().time.toString()
+            )
+        }
     }
 
     // Add user shift to database

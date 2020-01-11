@@ -47,4 +47,7 @@
     </string-array>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="start_tracking_desc">Click on the start button to start tracking</string>
+    <string name="starting_location_service">Starting Location Service</string>
+    <string name="started_shift">Started Shift</string>
 </resources>

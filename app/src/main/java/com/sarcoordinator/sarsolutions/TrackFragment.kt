@@ -155,11 +155,12 @@ class TrackFragment : Fragment() {
     // Update UI by observing viewModel data
     private fun observeService() {
         service?.getLastUpdated()?.observe(viewLifecycleOwner, Observer { lastUpdated ->
-            location_id.text = lastUpdated
+            location_desc.text = lastUpdated
         })
     }
 
     private fun startLocationService() {
+        location_desc.text = getString(R.string.starting_location_service)
         // Pass required extras and start location service
         val serviceIntent = Intent(context, LocationService::class.java)
         serviceIntent.putExtra(
@@ -203,7 +204,7 @@ class TrackFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
-        viewModel.lastUpdatedText = location_id.text.toString()
+        viewModel.lastUpdatedText = location_desc.text.toString()
         unbindService()
     }
 
@@ -213,7 +214,7 @@ class TrackFragment : Fragment() {
             disableButtons()
             // Service is alive and running but needs to be bound back to activity
             bindService()
-            location_id.text = viewModel.lastUpdatedText
+            location_desc.text = viewModel.lastUpdatedText
         }
     }
 

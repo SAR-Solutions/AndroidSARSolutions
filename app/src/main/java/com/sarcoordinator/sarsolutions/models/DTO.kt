@@ -13,6 +13,8 @@ data class LocationPoint(val latitude: Double, val longitude: Double)
 
 data class LocationBody(val paths: List<LocationPoint>)
 
+data class EndTimeBody(val endTime: String)
+
 data class Case(
     val description: String,
     val equipmentUsed: List<String>,

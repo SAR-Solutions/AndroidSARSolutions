@@ -7,11 +7,11 @@
     tools:context=".TrackFragment">
 
     <TextView
-        android:id="@+id/location_id"
+        android:id="@+id/location_desc"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="Location"
+        android:text="@string/start_tracking_desc"
         android:textSize="24sp"
         app:layout_constraintBottom_toTopOf="@id/start_button"
         app:layout_constraintEnd_toEndOf="parent"
@@ -23,10 +23,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:backgroundTint="@color/success"
-        android:text="Start"
+        android:text="@string/start"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/location_id" />
+        app:layout_constraintTop_toBottomOf="@id/location_desc" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

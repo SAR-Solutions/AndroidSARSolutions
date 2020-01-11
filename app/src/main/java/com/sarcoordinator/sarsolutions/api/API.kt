@@ -23,10 +23,18 @@ interface API {
     // NOTE: Return type 'Response<Unit>' is needed as success http code returned here is 204
     // Kotlin throws a null pointer exception (as of Retrofit 2.7.0)
     @PUT("putLocationsAuth")
-    suspend fun putLocationsAuth(
+    suspend fun putLocations(
         @Header("token-id") tokenId: String,
         @Query("shiftId") shiftId: String,
         @Query("isTest") isTest: Boolean,
         @Body paths: LocationBody
+    ): Response<Unit>
+
+    @PUT("putEndTimeAuth")
+    suspend fun putEndTime(
+        @Header("token-id") tokenId: String,
+        @Query("shiftId") shiftId: String,
+        @Query("isTest") isTest: Boolean,
+        @Body endTime: EndTimeBody
     ): Response<Unit>
 }
