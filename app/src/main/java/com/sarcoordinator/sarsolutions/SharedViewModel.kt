@@ -39,6 +39,12 @@ class SharedViewModel : ViewModel() {
         emit(result)
     }
 
+    fun mAuthTokenExists(): Boolean {
+        if (!::mAuthToken.isInitialized)
+            return false
+        return true
+    }
+
     fun getBinder(): LiveData<LocationService.LocalBinder> {
         return binder
     }

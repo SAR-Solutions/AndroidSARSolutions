@@ -46,6 +46,22 @@ class CasesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        setupRecyclerView()
+
+        // Only try for (and set) a new Auth token if one doesn't exist
+        if (!viewModel.mAuthTokenExists())
+            auth.currentUser!!.getIdToken(true).addOnSuccessListener {
+                viewModel.mAuthToken = it.token!!
+                observeCases()
+            }
+        else {
+            shimmer_layout.visibility = View.GONE
+            observeCases()
+        }
+    }
+
+    private fun setupRecyclerView() {
         viewManager = LinearLayoutManager(context)
         viewAdapter = Adapter()
         cases_recycler_view.apply {
@@ -53,9 +69,13 @@ class CasesFragment : Fragment() {
             layoutManager = viewManager
             adapter = viewAdapter
         }
+    }
 
-        viewModel.cases.observe(viewLifecycleOwner, Observer<ArrayList<Case>> {
-            viewAdapter.addCaseList(it)
+    private fun observeCases() {
+        viewModel.cases.observe(viewLifecycleOwner, Observer<ArrayList<Case>> { caseList ->
+            if (shimmer_layout.visibility != View.GONE)
+                shimmer_layout.visibility = View.GONE
+            viewAdapter.addCaseList(caseList)
         })
     }
 
