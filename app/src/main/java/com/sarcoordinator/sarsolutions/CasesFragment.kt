@@ -84,6 +84,7 @@ class CasesFragment : Fragment() {
         cases_recycler_view.adapter = null
     }
 
+    /** Recycler view item stuff **/
     class Adapter : RecyclerView.Adapter<Adapter.ViewHolder>() {
         private var data = ArrayList<Case>()
 
@@ -95,7 +96,7 @@ class CasesFragment : Fragment() {
                     .format(Date(Timestamp(case.date * 1000).time))
                 itemView.setOnClickListener {
                     itemView.findNavController()
-                        .navigate(CasesFragmentDirections.actionCasesFragmentToTrackFragment())
+                        .navigate(CasesFragmentDirections.actionCasesFragmentToTrackFragment(case))
                 }
             }
         }

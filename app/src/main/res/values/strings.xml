@@ -50,4 +50,10 @@
     <string name="start_tracking_desc">Click on the start button to start tracking</string>
     <string name="starting_location_service">Starting Location Service</string>
     <string name="started_shift">Started Shift</string>
+    <string name="case_info">Case Information</string>
+    <string name="case_id">Case Id</string>
+    <string name="reporter_name">Reporter Name</string>
+    <string name="missing_person">Missing Person</string>
+    <string name="missing_people">Missing People</string>
+    <string name="equipment_used">Equipment Used</string>
 </resources>

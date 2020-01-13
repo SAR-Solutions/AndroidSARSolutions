@@ -34,7 +34,9 @@ class SharedViewModel : ViewModel() {
     val cases: LiveData<ArrayList<Case>> = liveData(IO) {
         val result = ArrayList<Case>()
         Repository.getCases().caseIds.forEach { id ->
-            result.add(Repository.getCaseDetail(id, mAuthToken))
+            result.add(Repository.getCaseDetail(id, mAuthToken).also { case ->
+                case.id = id
+            })
         }
         emit(result)
     }

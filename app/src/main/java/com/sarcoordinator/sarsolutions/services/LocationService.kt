@@ -22,11 +22,8 @@ import com.sarcoordinator.sarsolutions.R
 import com.sarcoordinator.sarsolutions.api.Repository
 import com.sarcoordinator.sarsolutions.models.LocationPoint
 import com.sarcoordinator.sarsolutions.models.Shift
-import kotlinx.coroutines.CompletableJob
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.*
 import kotlin.collections.ArrayList
@@ -164,15 +161,19 @@ class LocationService : Service() {
 
     // End shift; set endTime and sync remaining points
     private fun completeShift() {
-        if (locationList.isNotEmpty()) {
-            // Sync remaining points
-            CoroutineScope(IO).launch {
-                Repository.putLocations(mIdToken, mShiftId, mTestMode, locationList)
-            }
-        }
-
         // Post endtime
         CoroutineScope(IO).launch {
+            while (!::mIdToken.isInitialized || !::mShiftId.isInitialized) {
+                Timber.d(
+                    "Shift didn't start and no points were recorded\n" +
+                            "Waiting to get shift and token id"
+                )
+                delay(1000)
+            }
+            if (locationList.isNotEmpty()) {
+                // Sync remaining points
+                Repository.putLocations(mIdToken, mShiftId, mTestMode, locationList)
+            }
             Repository.putEndTime(
                 mIdToken,
                 mShiftId,
@@ -181,40 +182,6 @@ class LocationService : Service() {
             )
         }
     }
-
-    // Add user shift to database
-//    private fun syncUserShift() {
-//        if(!locationList.isNullOrEmpty()) {
-//            val shift = Shift(
-//                startTime,
-//                Calendar.getInstance().time.toString(),
-//                BuildConfig.VERSION_NAME,
-//                locationList
-//            )
-//
-//            CoroutineScope(IO).launch {
-//                Repository.postShift(shift)
-//            }
-//
-//            user?.getIdToken(true)?.addOnCompleteListener { task ->
-//                if(task.isSuccessful) {
-//                    val idToken = task.result?.token
-//                    Timber.d("User token is: $idToken")
-//                }
-//            }
-//
-//            return
-//            //TODO: Replace with api call
-//            db.collection(if (testMode) "TestShift" else "Shift")
-//                .add(shift)
-//                .addOnSuccessListener { docRef ->
-//                    Timber.i(
-//                        "Added to ${if (testMode) "TestShift" else "Shift"}" +
-//                                " with id ${docRef.id}"
-//                    )
-//                }
-//        }
-//    }
 
     private fun getLocation() {
         val locationRequest = LocationRequest.create().apply {
@@ -239,24 +206,5 @@ class LocationService : Service() {
             locationCallback,
             Looper.myLooper()
         )
-    }
-
-    private fun activityRecognition() {
-        val transitions = mutableListOf<ActivityTransition>()
-
-        transitions += ActivityTransition.Builder()
-            .setActivityType(DetectedActivity.ON_FOOT)
-            .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
-            .build()
-
-        transitions += ActivityTransition.Builder()
-            .setActivityType(DetectedActivity.IN_VEHICLE)
-            .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
-            .build()
-
-        val request = ActivityTransitionRequest(transitions)
-//        val pendingIntent = PendingIntent.
-//        val task = ActivityRecognition.getClient(baseContext)
-//            .requestActivityTransitionUpdates(request, PendingIntent())
     }
 }

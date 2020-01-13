@@ -5,19 +5,18 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.PermissionToken
@@ -35,6 +34,8 @@ class TrackFragment : Fragment() {
     private lateinit var sharedPrefs: SharedPreferences
 
     private lateinit var viewModel: SharedViewModel
+
+    private val args by navArgs<TrackFragmentArgs>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -57,13 +58,19 @@ class TrackFragment : Fragment() {
         // Restore state depending on view model
         restoreState()
 
+        // Set case information
+        (requireActivity() as MainActivity).supportActionBar?.title = args.case.id
+        id_value_tv.text = args.case.id
+        reporter_value_tv.text = args.case.reporterName
+        missing_person_value_tv.text = listToOrderedList(args.case.missingPersonName)
+        equipment_value_tv.text = listToOrderedList(args.case.equipmentUsed)
+
         start_button.setOnClickListener {
             if (viewModel.getBinder().value == null) { // Start new service
                 requestLocPermission()
                 disableButtons()
                 startLocationService()
-            }
-            else { // Stop ongoing service
+            } else { // Stop ongoing service
                 stopLocationService()
                 enableButtons()
                 findNavController().navigate(TrackFragmentDirections.actionTrackFragmentToShiftReportFragment())
@@ -119,30 +126,6 @@ class TrackFragment : Fragment() {
                 Toast.makeText(context, "Unexpected error, try again", Toast.LENGTH_LONG).show()
             }
             .onSameThread()
-            .check()
-    }
-
-    @RequiresApi(Build.VERSION_CODES.Q)
-    private fun requestActivityPermission() {
-        // Ask for locational permission and handle response
-        Dexter.withActivity(activity)
-            .withPermission(Manifest.permission.ACTIVITY_RECOGNITION)
-            .withListener(object : PermissionListener {
-                override fun onPermissionGranted(response: PermissionGrantedResponse?) {
-                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-                }
-
-                override fun onPermissionRationaleShouldBeShown(
-                    permission: PermissionRequest?,
-                    token: PermissionToken?
-                ) {
-                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-                }
-
-                override fun onPermissionDenied(response: PermissionDeniedResponse?) {
-                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-                }
-            })
             .check()
     }
 
@@ -220,6 +203,23 @@ class TrackFragment : Fragment() {
     private fun enableButtons() {
         start_button.text = getString(R.string.start)
         start_button.setBackgroundColor(resources.getColor(R.color.success))
+    }
+
+    // Convert list of string to a ordered string
+    private fun listToOrderedList(list: List<String>): String {
+        if (list.count() <= 0)
+            return "None"
+        return if (list.count() == 1) {
+            list[0]
+        } else {
+            missing_person_tv.text = getString(R.string.missing_people)
+            var text = ""
+            for (i in 0 until list.count() - 1) {
+                text += "${list[i]}\n"
+            }
+            text += list[list.count() - 1]
+            text
+        }
     }
 }
 
