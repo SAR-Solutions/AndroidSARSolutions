@@ -29,7 +29,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Theme needs to be applied before calling super.onCreate
+        // Otherwise a new instance of this activity will be created
+        loadUserPreferences()
         super.onCreate(savedInstanceState)
+
 
         // Black status bar for old android version
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
@@ -38,7 +42,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-        loadUserPreferences()
 
         navController = findNavController(R.id.nav_host_fragment)
 
@@ -61,13 +64,6 @@ class MainActivity : AppCompatActivity() {
         // Set toolbar title depending on current destination
         supportActionBar?.title = navController.currentDestination?.label
 
-//        navController.addOnDestinationChangedListener { controller, destination, arguments ->
-//            when(destination.id) {
-//                R.id.loginFragment -> {
-//                    oncreateop
-//                }
-//            }
-//        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -127,10 +123,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     // Load user preferences using shared preferences
+    // NOTE: Call before super.onCreate as it sets the app theme
     private fun loadUserPreferences() {
         val sharedPrefs = getPreferences(Context.MODE_PRIVATE)
 
-        // System default theme
+        // Get system default theme
         val defaultTheme: String =
             this.resources.configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK).let {
                 when (it) {
