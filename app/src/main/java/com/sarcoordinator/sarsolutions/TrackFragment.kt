@@ -68,8 +68,6 @@ class TrackFragment : Fragment() {
         start_button.setOnClickListener {
             if (viewModel.getBinder().value == null) { // Start new service
                 requestLocPermission()
-                disableButtons()
-                startLocationService()
             } else { // Stop ongoing service
                 stopLocationService()
                 enableButtons()
@@ -90,6 +88,8 @@ class TrackFragment : Fragment() {
             .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
             .withListener(object : PermissionListener {
                 override fun onPermissionGranted(response: PermissionGrantedResponse) {
+                    disableButtons()
+                    startLocationService()
                 }
 
                 override fun onPermissionDenied(response: PermissionDeniedResponse) {
