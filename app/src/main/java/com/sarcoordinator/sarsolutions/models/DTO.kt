@@ -32,4 +32,4 @@ data class Volunteer(
     val roles: List<String>,
     val name: String,
     val userId: String
-)
+) : Serializable

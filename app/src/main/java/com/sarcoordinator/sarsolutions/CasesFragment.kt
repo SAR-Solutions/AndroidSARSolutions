@@ -1,9 +1,14 @@
 package com.sarcoordinator.sarsolutions
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -39,6 +44,7 @@ class CasesFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         viewModel = activity?.run {
             ViewModelProviders.of(this)[SharedViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
@@ -47,17 +53,60 @@ class CasesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupRecyclerView()
+        // Process only if internet connection is available
+        validateNetworkConnectivity()
+    }
 
-        // Only try for (and set) a new Auth token if one doesn't exist
-        if (!viewModel.mAuthTokenExists())
-            auth.currentUser!!.getIdToken(true).addOnSuccessListener {
-                viewModel.mAuthToken = it.token!!
+    private fun validateNetworkConnectivity() {
+        val cm =
+            requireActivity().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!cm.getNetworkCapabilities(cm.activeNetwork)
+                !!.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            ) {
+                disableRecyclerView(true)
+            } else {
+                disableRecyclerView(false)
+            }
+        } else {
+            @Suppress("DEPRECATION", "RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+            if (cm.activeNetworkInfo == null) {
+                disableRecyclerView(true)
+            } else if (!cm.activeNetworkInfo.isConnected) {
+                disableRecyclerView(true)
+            } else {
+                disableRecyclerView(false)
+            }
+        }
+    }
+
+    private fun disableRecyclerView(disable: Boolean) {
+        if (disable) {
+            cases_recycler_view.visibility = View.GONE
+            shimmer_layout.visibility = View.GONE
+            try_again_network_button.visibility = View.VISIBLE
+            Toast.makeText(context, "No network connection found", Toast.LENGTH_LONG).show()
+            try_again_network_button.setOnClickListener {
+                validateNetworkConnectivity()
+            }
+        } else {
+            cases_recycler_view.visibility = View.VISIBLE
+            shimmer_layout.visibility = View.VISIBLE
+            try_again_network_button.visibility = View.GONE
+
+            setupRecyclerView()
+
+            // Only try for (and set) a new Auth token if one doesn't exist
+            if (!viewModel.mAuthTokenExists())
+                auth.currentUser!!.getIdToken(true).addOnSuccessListener {
+                    viewModel.mAuthToken = it.token!!
+                    observeCases()
+                }
+            else {
+                shimmer_layout.visibility = View.GONE
                 observeCases()
             }
-        else {
-            shimmer_layout.visibility = View.GONE
-            observeCases()
+
         }
     }
 

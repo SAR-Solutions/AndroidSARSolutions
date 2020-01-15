@@ -144,6 +144,10 @@ class TrackFragment : Fragment() {
             LocationService.isTestMode,
             sharedPrefs.getBoolean(SettingsFragment.TESTING_MODE_PREFS, false)
         )
+        serviceIntent.putExtra(
+            LocationService.case,
+            args.case
+        )
         ContextCompat.startForegroundService(context!!, serviceIntent)
         bindService()
     }

@@ -56,4 +56,5 @@
     <string name="missing_person">Missing Person</string>
     <string name="missing_people">Missing People</string>
     <string name="equipment_used">Equipment Used</string>
+    <string name="try_again_for_network">Try again for network</string>
 </resources>

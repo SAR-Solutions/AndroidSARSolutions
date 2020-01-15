@@ -20,6 +20,7 @@ import com.sarcoordinator.sarsolutions.MainActivity
 import com.sarcoordinator.sarsolutions.MyApplication.Companion.CHANNEL_ID
 import com.sarcoordinator.sarsolutions.R
 import com.sarcoordinator.sarsolutions.api.Repository
+import com.sarcoordinator.sarsolutions.models.Case
 import com.sarcoordinator.sarsolutions.models.LocationPoint
 import com.sarcoordinator.sarsolutions.models.Shift
 import kotlinx.coroutines.*
@@ -33,9 +34,11 @@ class LocationService : Service() {
 
     companion object {
         const val isTestMode = "TEST_MODE"
+        const val case = "CASE"
     }
 
     private var mTestMode: Boolean = false
+    private lateinit var mCase: Case
     private lateinit var mShiftId: String
     private lateinit var mIdToken: String
 
@@ -101,7 +104,7 @@ class LocationService : Service() {
         if (intent == null)
             throw Exception("Service needs to be called with specified intent fields")
         mTestMode = intent.extras!!.getBoolean(isTestMode, false)
-        intent.getBooleanExtra(isTestMode, false)
+        mCase = intent.extras!!.getSerializable(case) as Case
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
@@ -114,7 +117,7 @@ class LocationService : Service() {
             )
             CoroutineScope(IO).launch {
                 mShiftId = Repository
-                    .postStartShift(mIdToken, shift, "YlNtlx3VTh6rAv6KC9dU", mTestMode).shiftId
+                    .postStartShift(mIdToken, shift, mCase.id, mTestMode).shiftId
                 lastUpdated.postValue(getString(R.string.started_shift))
             }
         }
@@ -138,7 +141,10 @@ class LocationService : Service() {
         // Notification is needed for >= API 26 for foreground services
         val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID).apply {
             setContentTitle(getString(R.string.loc_notification_title))
-            setContentText("CaseId YlNtlx3VTh6rAv6KC9dU")
+            setContentText(
+                "CaseId: ${mCase.id}\n" +
+                        "Date: ${mCase.date}"
+            )
             setSmallIcon(R.drawable.ic_location)
             setContentIntent(resultPendingIntent)
         }.build()
