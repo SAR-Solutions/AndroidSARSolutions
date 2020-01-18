@@ -29,16 +29,7 @@ class ShiftReportFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        spinner?.adapter = this.context?.let {
-            ArrayAdapter(
-                it,
-                R.layout.support_simple_spinner_dropdown_item,
-                resources.getStringArray(R.array.vehicle_array)
-            )
-        }
-        spinner.onItemSelectedListener = this
-
+        initSpinners()
         initViewListeners()
     }
 
@@ -54,27 +45,57 @@ class ShiftReportFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
     private fun initViewListeners() {
         countyVehicleCheckBox.setOnCheckedChangeListener { buttonView, isChecked ->
-            if (isChecked) {
-                spinner.visibility = View.VISIBLE
-                personalVehicleCheckBox.isEnabled = false
-            } else {
-                spinner.visibility = View.GONE
-                personalVehicleCheckBox.isEnabled = true
-            }
+            if(isChecked) personalVehicleCheckBox.isChecked = !isChecked
+        }
+        countyVehicle2CheckBox.setOnCheckedChangeListener { buttonView, isChecked ->
+            if(isChecked) personalVehicle2CheckBox.isChecked = !isChecked
+        }
+        countyVehicle3CheckBox.setOnCheckedChangeListener { buttonView, isChecked ->
+            if(isChecked) personalVehicle3CheckBox.isChecked = !isChecked
         }
 
+        //Only one type of vehicle checked at a time
         personalVehicleCheckBox.setOnCheckedChangeListener { buttonView, isChecked ->
-            if(isChecked){
-                spinner.visibility = View.VISIBLE
-                countyVehicleCheckBox.isEnabled = false
-            } else {
-                spinner.visibility = View.GONE
-                countyVehicleCheckBox.isEnabled = true
-            }
+            if(isChecked) countyVehicleCheckBox.isChecked = !isChecked
+        }
+        personalVehicle2CheckBox.setOnCheckedChangeListener { buttonView, isChecked ->
+            if(isChecked) countyVehicle2CheckBox.isChecked = !isChecked
+        }
+        personalVehicle3CheckBox.setOnCheckedChangeListener { buttonView, isChecked ->
+            if(isChecked) countyVehicle3CheckBox.isChecked = !isChecked
         }
 
         endShiftButton.setOnClickListener {
             findNavController().navigate(ShiftReportFragmentDirections.actionShiftReportFragmentToCasesFragment())
         }
+    }
+
+    private fun initSpinners(){
+        spinner?.adapter = this.context?.let {
+            ArrayAdapter(
+                it,
+                R.layout.support_simple_spinner_dropdown_item,
+                resources.getStringArray(R.array.vehicle_array)
+            )
+        }
+        spinner.onItemSelectedListener = this
+
+        spinner2?.adapter = this.context?.let {
+            ArrayAdapter(
+                it,
+                R.layout.support_simple_spinner_dropdown_item,
+                resources.getStringArray(R.array.vehicle_array)
+            )
+        }
+        spinner2.onItemSelectedListener = this
+
+        spinner3?.adapter = this.context?.let {
+            ArrayAdapter(
+                it,
+                R.layout.support_simple_spinner_dropdown_item,
+                resources.getStringArray(R.array.vehicle_array)
+            )
+        }
+        spinner3.onItemSelectedListener = this
     }
 }

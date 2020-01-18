@@ -32,18 +32,17 @@
     </string-array>
     <string-array name="vehicle_array">
         <item>4WD</item>
-        <item>Auto</item>
-        <item>Trailer</item>
         <item>ATV</item>
-        <item>Motorcycle</item>
+        <item>Auto</item>
         <item>Boat</item>
+        <item>Motorcycle</item>
         <item>PWC</item>
         <item>Snowmobile</item>
-        <item>Horses</item>
+        <item>Trailer</item>
         <item>Dogs</item>
+        <item>Horses</item>
         <item>Helicopter</item>
         <item>Fixed Wing</item>
-
     </string-array>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
