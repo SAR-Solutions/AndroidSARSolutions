@@ -46,7 +46,6 @@ class MainActivity : AppCompatActivity() {
         navController = findNavController(R.id.nav_host_fragment)
 
         if (savedInstanceState == null) {
-            // If user is logged in, navigate to case list fragment
             if (auth.currentUser != null) {
                 navController.navigate(LoginFragmentDirections.actionLoginFragmentToCasesFragment())
             }

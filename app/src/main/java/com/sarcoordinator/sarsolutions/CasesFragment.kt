@@ -2,8 +2,6 @@ package com.sarcoordinator.sarsolutions
 
 import android.content.Context
 import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +13,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.models.Case
 import kotlinx.android.synthetic.main.fragment_cases.*
@@ -57,26 +56,23 @@ class CasesFragment : Fragment() {
         validateNetworkConnectivity()
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString("Test", "Saved")
+        Toast.makeText(requireContext(), "String is Saved", Toast.LENGTH_LONG).show()
+    }
+
     private fun validateNetworkConnectivity() {
         val cm =
             requireActivity().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!cm.getNetworkCapabilities(cm.activeNetwork)
-                !!.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-            ) {
-                disableRecyclerView(true)
-            } else {
+
+        try {
+            if (cm.activeNetworkInfo.isConnected) {
                 disableRecyclerView(false)
-            }
-        } else {
-            @Suppress("DEPRECATION", "RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-            if (cm.activeNetworkInfo == null) {
+            } else
                 disableRecyclerView(true)
-            } else if (!cm.activeNetworkInfo.isConnected) {
-                disableRecyclerView(true)
-            } else {
-                disableRecyclerView(false)
-            }
+        } catch (e: Exception) {
+            disableRecyclerView(true)
         }
     }
 
@@ -85,7 +81,7 @@ class CasesFragment : Fragment() {
             cases_recycler_view.visibility = View.GONE
             shimmer_layout.visibility = View.GONE
             try_again_network_button.visibility = View.VISIBLE
-            Toast.makeText(context, "No network connection found", Toast.LENGTH_LONG).show()
+            Snackbar.make(requireView(), "No network connection found", Snackbar.LENGTH_LONG).show()
             try_again_network_button.setOnClickListener {
                 validateNetworkConnectivity()
             }

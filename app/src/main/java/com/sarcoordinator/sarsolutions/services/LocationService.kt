@@ -2,8 +2,10 @@ package com.sarcoordinator.sarsolutions.services
 
 import android.Manifest
 import android.app.Notification
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Binder
@@ -72,6 +74,9 @@ class LocationService : Service() {
                     continue
                 locationList.add(LocationPoint(location.latitude, location.longitude))
                 lastUpdated.postValue("Last updated at \n" + Calendar.getInstance().time)
+                (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
+                    .notify(1, getNotification(lastUpdated.value!!))
+
                 Timber.d(lastUpdated.value)
 
                 // Start addPathsjob if 10 or more locations exist and job isn't running
@@ -128,9 +133,20 @@ class LocationService : Service() {
 
         // Start service notification intent
 
+
+        // Id must NOT be 0
+        // Ref: https://developer.android.com/guide/components/services.html#kotlin
+        startForeground(1, getNotification(getString(R.string.loc_notification_title)))
+
+        Timber.d("Location service started")
+        getLocation()
+        return START_NOT_STICKY
+    }
+
+    fun getNotification(title: String): Notification {
         val resultIntent = Intent(this, MainActivity::class.java).apply {
             putExtra("test", 1)
-            setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
         }
 
         val resultPendingIntent = PendingIntent.getActivity(
@@ -139,23 +155,23 @@ class LocationService : Service() {
         )
 
         // Notification is needed for >= API 26 for foreground services
-        val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID).apply {
-            setContentTitle(getString(R.string.loc_notification_title))
+        return NotificationCompat.Builder(this, CHANNEL_ID).apply {
+            setContentTitle(title)
             setContentText(
                 "CaseId: ${mCase.id}\n" +
                         "Date: ${mCase.date}"
             )
             setSmallIcon(R.drawable.ic_location)
             setContentIntent(resultPendingIntent)
+            setStyle(
+                NotificationCompat.BigTextStyle()
+                    .setBigContentTitle(title)
+                    .bigText(
+                        "CaseId: ${mCase.id}\n" +
+                                "Date: ${mCase.date}"
+                    )
+            )
         }.build()
-
-        // Id must NOT be 0
-        // Ref: https://developer.android.com/guide/components/services.html#kotlin
-        startForeground(1, notification)
-
-        Timber.d("Location service started")
-        getLocation()
-        return START_NOT_STICKY
     }
 
     override fun onDestroy() {
