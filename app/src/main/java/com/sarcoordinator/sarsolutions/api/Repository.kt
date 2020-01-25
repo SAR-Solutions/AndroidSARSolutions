@@ -1,5 +1,8 @@
 package com.sarcoordinator.sarsolutions.api
 
+import com.google.android.gms.tasks.Tasks
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.sarcoordinator.sarsolutions.models.*
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -9,6 +12,8 @@ import java.util.concurrent.TimeUnit
 
 object Repository {
     private const val SAR_FUNCTIONS_URL = "https://us-central1-sar-solutions.cloudfunctions.net/"
+
+    private val user: FirebaseUser = FirebaseAuth.getInstance().currentUser!!
 
     private val interceptor: HttpLoggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
@@ -29,12 +34,17 @@ object Repository {
             .build().create(API::class.java)
     }
 
-    suspend fun getCases(): Cases {
-        return service.getCases()
+    suspend fun getCases(): List<Case> {
+        return service.getCases(getToken())
     }
 
-    suspend fun getCaseDetail(caseId: String, idToken: String): Case {
-        return service.getCaseData(caseId, idToken)
+    suspend fun getCaseDetail(caseId: String): Case {
+        return service.getCaseData(caseId, getToken())
+    }
+
+    // Synchronously get user token
+    private fun getToken(): String {
+        return Tasks.await(user.getIdToken(true)).token!!
     }
 
     suspend fun postStartShift(

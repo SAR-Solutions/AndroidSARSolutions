@@ -7,7 +7,7 @@ import retrofit2.http.*
 @JvmSuppressWildcards
 interface API {
     @GET("getCases")
-    suspend fun getCases(): Cases
+    suspend fun getCases(@Header("authorization") tokenId: String): List<Case>
 
     @GET("getCaseData")
     suspend fun getCaseData(

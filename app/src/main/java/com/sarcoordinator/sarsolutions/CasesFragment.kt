@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -52,14 +51,12 @@ class CasesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        if (!viewModel.cases.value.isNullOrEmpty()) {
+            setupRecyclerView()
+            observeCases()
+        } else
         // Process only if internet connection is available
-        validateNetworkConnectivity()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putString("Test", "Saved")
-        Toast.makeText(requireContext(), "String is Saved", Toast.LENGTH_LONG).show()
+            validateNetworkConnectivity()
     }
 
     private fun validateNetworkConnectivity() {
@@ -79,7 +76,7 @@ class CasesFragment : Fragment() {
     private fun disableRecyclerView(disable: Boolean) {
         if (disable) {
             cases_recycler_view.visibility = View.GONE
-            shimmer_layout.visibility = View.GONE
+            list_shimmer_layout.visibility = View.GONE
             try_again_network_button.visibility = View.VISIBLE
             Snackbar.make(requireView(), "No network connection found", Snackbar.LENGTH_LONG).show()
             try_again_network_button.setOnClickListener {
@@ -87,7 +84,7 @@ class CasesFragment : Fragment() {
             }
         } else {
             cases_recycler_view.visibility = View.VISIBLE
-            shimmer_layout.visibility = View.VISIBLE
+            list_shimmer_layout.visibility = View.VISIBLE
             try_again_network_button.visibility = View.GONE
 
             setupRecyclerView()
@@ -99,10 +96,9 @@ class CasesFragment : Fragment() {
                     observeCases()
                 }
             else {
-                shimmer_layout.visibility = View.GONE
+                list_shimmer_layout.visibility = View.GONE
                 observeCases()
             }
-
         }
     }
 
@@ -118,8 +114,8 @@ class CasesFragment : Fragment() {
 
     private fun observeCases() {
         viewModel.cases.observe(viewLifecycleOwner, Observer<ArrayList<Case>> { caseList ->
-            if (shimmer_layout.visibility != View.GONE)
-                shimmer_layout.visibility = View.GONE
+            if (list_shimmer_layout.visibility != View.GONE)
+                list_shimmer_layout.visibility = View.GONE
             viewAdapter.addCaseList(caseList)
         })
     }
@@ -141,7 +137,7 @@ class CasesFragment : Fragment() {
                     .format(Date(Timestamp(case.date * 1000).time))
                 itemView.setOnClickListener {
                     itemView.findNavController()
-                        .navigate(CasesFragmentDirections.actionCasesFragmentToTrackFragment(case))
+                        .navigate(CasesFragmentDirections.actionCasesFragmentToTrackFragment(case.id))
                 }
             }
         }

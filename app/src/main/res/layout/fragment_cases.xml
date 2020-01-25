@@ -20,7 +20,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <com.facebook.shimmer.ShimmerFrameLayout
-        android:id="@+id/shimmer_layout"
+        android:id="@+id/list_shimmer_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:shimmer_auto_start="true">
@@ -29,6 +29,10 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
+
+            <include layout="@layout/list_view_item_shimmer" />
+
+            <include layout="@layout/list_view_item_shimmer" />
 
             <include layout="@layout/list_view_item_shimmer" />
 

@@ -3,14 +3,13 @@ package com.sarcoordinator.sarsolutions
 import android.content.ComponentName
 import android.content.ServiceConnection
 import android.os.IBinder
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.liveData
+import androidx.lifecycle.*
 import com.sarcoordinator.sarsolutions.api.Repository
 import com.sarcoordinator.sarsolutions.models.Case
 import com.sarcoordinator.sarsolutions.services.LocationService
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 // Viewmodel is shared between all fragments and parent activity
@@ -33,12 +32,23 @@ class SharedViewModel : ViewModel() {
 
     val cases: LiveData<ArrayList<Case>> = liveData(IO) {
         val result = ArrayList<Case>()
-        Repository.getCases().caseIds.forEach { id ->
-            result.add(Repository.getCaseDetail(id, mAuthToken).also { case ->
-                case.id = id
-            })
+        Repository.getCases().forEach { case ->
+            result.add(case)
         }
         emit(result)
+    }
+
+    val currentCase = MutableLiveData<Case>()
+
+    fun getCaseDetails(caseId: String): LiveData<Case> {
+        viewModelScope.launch {
+            withContext(IO) {
+                currentCase.postValue(Repository.getCaseDetail(caseId).also {
+                    it.id = caseId
+                })
+            }
+        }
+        return currentCase
     }
 
     fun mAuthTokenExists(): Boolean {

@@ -9,8 +9,6 @@ data class Shift(
     val appVersion: String
 )
 
-data class Cases(val caseIds: List<String>)
-
 data class LocationPoint(val latitude: Double, val longitude: Double)
 
 data class LocationBody(val paths: List<LocationPoint>)
@@ -18,6 +16,8 @@ data class LocationBody(val paths: List<LocationPoint>)
 data class EndTimeBody(val endTime: String)
 
 data class Case(
+    var caseName: String,
+    var caseStatus: String,
     var id: String,
     val description: String,
     val equipmentUsed: List<String>,

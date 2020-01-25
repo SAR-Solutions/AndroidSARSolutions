@@ -24,6 +24,7 @@ import com.karumi.dexter.listener.PermissionDeniedResponse
 import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
+import com.sarcoordinator.sarsolutions.models.Case
 import com.sarcoordinator.sarsolutions.services.LocationService
 import kotlinx.android.synthetic.main.fragment_track.*
 import timber.log.Timber
@@ -58,12 +59,16 @@ class TrackFragment : Fragment() {
         // Restore state depending on view model
         restoreState()
 
-        // Set case information
-        (requireActivity() as MainActivity).supportActionBar?.title = args.case.id
-        id_value_tv.text = args.case.id
-        reporter_value_tv.text = args.case.reporterName
-        missing_person_value_tv.text = listToOrderedList(args.case.missingPersonName)
-        equipment_value_tv.text = listToOrderedList(args.case.equipmentUsed)
+        // Only fetch data if detailed case isn't in cache
+        if (!viewModel.currentCase.value?.id.equals(args.caseId)) {
+            viewModel.currentCase.value = null
+            viewModel.getCaseDetails(args.caseId).observe(viewLifecycleOwner, Observer { case ->
+                if (case != null)
+                    populateViewWithCase(case)
+            })
+        } else {
+            populateViewWithCase(viewModel.currentCase.value!!)
+        }
 
         start_button.setOnClickListener {
             if (viewModel.getBinder().value == null) { // Start new service
@@ -80,6 +85,15 @@ class TrackFragment : Fragment() {
             service = binder?.getService()
             observeService()
         })
+    }
+
+    // Set case information
+    private fun populateViewWithCase(case: Case) {
+        (requireActivity() as MainActivity).supportActionBar?.title = case.id
+        id_value_tv.text = case.id
+        reporter_value_tv.text = case.reporterName
+        missing_person_value_tv.text = listToOrderedList(case.missingPersonName)
+        equipment_value_tv.text = listToOrderedList(case.equipmentUsed)
     }
 
     private fun requestLocPermission() {
@@ -146,7 +160,7 @@ class TrackFragment : Fragment() {
         )
         serviceIntent.putExtra(
             LocationService.case,
-            args.case
+            viewModel.currentCase.value
         )
         ContextCompat.startForegroundService(context!!, serviceIntent)
         bindService()

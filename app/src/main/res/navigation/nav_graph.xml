@@ -30,8 +30,8 @@
             app:destination="@id/shiftReportFragment"
             app:popUpTo="@id/trackFragment" />
         <argument
-            android:name="case"
-            app:argType="com.sarcoordinator.sarsolutions.models.Case" />
+            android:name="caseId"
+            app:argType="string" />
     </fragment>
     <fragment
         android:id="@+id/resetPasswordFragment"
