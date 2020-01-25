@@ -63,9 +63,12 @@ class TrackFragment : Fragment() {
         if (!viewModel.currentCase.value?.id.equals(args.caseId)) {
             viewModel.currentCase.value = null
             viewModel.getCaseDetails(args.caseId).observe(viewLifecycleOwner, Observer { case ->
-                if (case != null)
+                if (case != null) {
                     populateViewWithCase(case)
+                    start_button.isEnabled = true
+                }
             })
+            start_button.isEnabled = false
         } else {
             populateViewWithCase(viewModel.currentCase.value!!)
         }
