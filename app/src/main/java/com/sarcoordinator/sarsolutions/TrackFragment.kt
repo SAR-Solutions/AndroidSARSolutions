@@ -61,14 +61,14 @@ class TrackFragment : Fragment() {
 
         // Only fetch data if detailed case isn't in cache
         if (!viewModel.currentCase.value?.id.equals(args.caseId)) {
+            enableLoadingState(true)
             viewModel.currentCase.value = null
             viewModel.getCaseDetails(args.caseId).observe(viewLifecycleOwner, Observer { case ->
                 if (case != null) {
                     populateViewWithCase(case)
-                    start_button.isEnabled = true
+                    enableLoadingState(false)
                 }
             })
-            start_button.isEnabled = false
         } else {
             populateViewWithCase(viewModel.currentCase.value!!)
         }
@@ -88,6 +88,18 @@ class TrackFragment : Fragment() {
             service = binder?.getService()
             observeService()
         })
+    }
+
+    private fun enableLoadingState(enable: Boolean) {
+        if (enable) {
+            track_fragment_shimmer.visibility = View.VISIBLE
+            case_info_material_card.visibility = View.GONE
+            start_button.isEnabled = false
+        } else {
+            track_fragment_shimmer.visibility = View.GONE
+            case_info_material_card.visibility = View.VISIBLE
+            start_button.isEnabled = true
+        }
     }
 
     // Set case information

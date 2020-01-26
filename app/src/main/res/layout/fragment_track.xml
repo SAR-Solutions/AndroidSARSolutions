@@ -12,14 +12,25 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <com.facebook.shimmer.ShimmerFrameLayout
+            android:id="@+id/track_fragment_shimmer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            app:shimmer_auto_start="true">
+
+            <include layout="@layout/detailed_material_card_shimmer" />
+
+        </com.facebook.shimmer.ShimmerFrameLayout>
+
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/materialCardView"
+            android:id="@+id/case_info_material_card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/mtrl_card_spacing"
             android:layout_marginTop="@dimen/mtrl_card_spacing"
             android:layout_marginEnd="@dimen/mtrl_card_spacing"
-            android:elevation="4dp"
+            app:cardElevation="4dp"
             app:cardCornerRadius="4dp">
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -140,7 +151,7 @@
             android:layout_marginStart="@dimen/mtrl_card_spacing"
             android:layout_marginTop="@dimen/mtrl_card_spacing"
             android:layout_marginEnd="@dimen/mtrl_card_spacing"
-            android:elevation="4dp"
+            app:cardElevation="4dp"
             app:cardCornerRadius="4dp">
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -174,7 +185,6 @@
                     app:layout_constraintTop_toBottomOf="@id/location_desc" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
-
         </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
