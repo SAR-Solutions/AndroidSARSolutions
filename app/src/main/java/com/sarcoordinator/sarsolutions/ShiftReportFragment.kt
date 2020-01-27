@@ -1,9 +1,7 @@
 package com.sarcoordinator.sarsolutions
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
@@ -13,19 +11,11 @@ import kotlinx.android.synthetic.main.fragment_shift_report.*
 /**
  * Fragment for volunteer shift report at the end of a shift
  */
-class ShiftReportFragment : Fragment(), AdapterView.OnItemSelectedListener {
+class ShiftReportFragment : Fragment(R.layout.fragment_shift_report),
+    AdapterView.OnItemSelectedListener {
 
     //todo: Remove dummy data
     val vehicleTypes = arrayOf("Ford Explorer", "Snowmobile", "ATV")
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        setHasOptionsMenu(true)
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_shift_report, container, false)
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

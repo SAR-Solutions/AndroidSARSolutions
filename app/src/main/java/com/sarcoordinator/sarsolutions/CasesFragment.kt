@@ -16,30 +16,19 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.models.Case
+import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import kotlinx.android.synthetic.main.fragment_cases.*
 import kotlinx.android.synthetic.main.list_view_item.view.*
-import java.sql.Timestamp
-import java.text.SimpleDateFormat
-import java.util.*
-import kotlin.collections.ArrayList
 
 /**
  * This fragment displays the list of cases for the user
  */
-class CasesFragment : Fragment() {
+class CasesFragment : Fragment(R.layout.fragment_cases) {
 
     private lateinit var viewModel: SharedViewModel
     private lateinit var viewManager: RecyclerView.LayoutManager
     private lateinit var viewAdapter: Adapter
     private val auth = FirebaseAuth.getInstance()
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_cases, container, false)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -163,8 +152,7 @@ class CasesFragment : Fragment() {
             fun bindView(case: Case) {
                 itemView.missing_person_text.text =
                     case.missingPersonName.toString().removeSurrounding("[", "]")
-                itemView.date.text = SimpleDateFormat("MMMM d, yyyy", Locale.getDefault())
-                    .format(Date(Timestamp(case.date * 1000).time))
+                itemView.date.text = GlobalUtil.convertEpochToDate(case.date)
                 itemView.setOnClickListener {
                     itemView.findNavController()
                         .navigate(CasesFragmentDirections.actionCasesFragmentToTrackFragment(case.id))

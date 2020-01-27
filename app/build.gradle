@@ -22,8 +22,8 @@ android {
         applicationId "com.sarcoordinator.sarsolutions"
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 14
-        versionName "1.0-alpha8.3"
+        versionCode 15
+        versionName "1.0-alpha9"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

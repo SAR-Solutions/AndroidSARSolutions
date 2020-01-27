@@ -36,39 +36,35 @@ object Repository {
 
     suspend fun getCases(): List<Case> {
         return service.getCases(getToken())
-//        return service.getCases("!2")
     }
 
     suspend fun getCaseDetail(caseId: String): Case {
         return service.getCaseData(caseId, getToken())
     }
 
-    // Synchronously get user token
-    private fun getToken(): String {
-        return Tasks.await(user.getIdToken(true)).token!!
-    }
-
     suspend fun postStartShift(
-        tokenId: String,
         shift: Shift,
         caseId: String,
         isTest: Boolean
     ) =
-        service.postStartShift(tokenId, shift, caseId, isTest)
+        service.postStartShift(getToken(), shift, caseId, isTest)
 
     suspend fun putLocations(
-        tokenId: String,
         shiftId: String,
         isTest: Boolean,
         paths: List<LocationPoint>
     ) =
-        service.putLocations(tokenId, shiftId, isTest, LocationBody(paths))
+        service.putLocations(getToken(), shiftId, isTest, LocationBody(paths))
 
     suspend fun putEndTime(
-        tokenId: String,
         shiftId: String,
         isTest: Boolean,
         endTime: String
     ) =
-        service.putEndTime(tokenId, shiftId, isTest, EndTimeBody(endTime))
+        service.putEndTime(getToken(), shiftId, isTest, EndTimeBody(endTime))
+
+    // Synchronously get user token
+    private fun getToken(): String {
+        return Tasks.await(user.getIdToken(true)).token!!
+    }
 }

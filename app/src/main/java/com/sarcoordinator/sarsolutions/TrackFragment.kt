@@ -7,9 +7,7 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -25,11 +23,11 @@ import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
 import com.sarcoordinator.sarsolutions.models.Case
-import com.sarcoordinator.sarsolutions.services.LocationService
+import com.sarcoordinator.sarsolutions.util.LocationService
 import kotlinx.android.synthetic.main.fragment_track.*
 import timber.log.Timber
 
-class TrackFragment : Fragment() {
+class TrackFragment : Fragment(R.layout.fragment_track) {
 
     private var service: LocationService? = null
     private lateinit var sharedPrefs: SharedPreferences
@@ -37,13 +35,6 @@ class TrackFragment : Fragment() {
     private lateinit var viewModel: SharedViewModel
 
     private val args by navArgs<TrackFragmentArgs>()
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_track, container, false)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

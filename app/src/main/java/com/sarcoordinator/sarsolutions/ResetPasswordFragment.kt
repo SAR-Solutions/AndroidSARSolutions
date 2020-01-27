@@ -3,7 +3,9 @@ package com.sarcoordinator.sarsolutions
 import android.os.Build
 import android.os.Bundle
 import android.util.Patterns
-import android.view.*
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
@@ -13,20 +15,12 @@ import kotlinx.android.synthetic.main.fragment_reset_password.*
 /**
  * A simple [Fragment] subclass.
  */
-class ResetPasswordFragment : Fragment() {
+class ResetPasswordFragment : Fragment(R.layout.fragment_reset_password) {
 
     private val auth = FirebaseAuth.getInstance()
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        setHasOptionsMenu(true)
-        return inflater.inflate(R.layout.fragment_reset_password, container, false)
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         // Set autofill hint
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -42,7 +36,7 @@ class ResetPasswordFragment : Fragment() {
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         Toast.makeText(context, "Email Sent.", Toast.LENGTH_LONG).show()
-                        view!!.findNavController().popBackStack()
+                        view.findNavController().popBackStack()
                     } else {
                         Toast.makeText(
                             context,

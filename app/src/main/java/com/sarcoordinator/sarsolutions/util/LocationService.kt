@@ -1,4 +1,4 @@
-package com.sarcoordinator.sarsolutions.services
+package com.sarcoordinator.sarsolutions.util
 
 import android.Manifest
 import android.app.Notification
@@ -16,7 +16,6 @@ import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.location.*
-import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.BuildConfig
 import com.sarcoordinator.sarsolutions.MainActivity
 import com.sarcoordinator.sarsolutions.MyApplication.Companion.CHANNEL_ID
@@ -42,12 +41,10 @@ class LocationService : Service() {
     private var mTestMode: Boolean = false
     private lateinit var mCase: Case
     private lateinit var mShiftId: String
-    private lateinit var mIdToken: String
 
     private val lastUpdated = MutableLiveData<String>()
     fun getLastUpdated(): LiveData<String> = lastUpdated
 
-    private val user = FirebaseAuth.getInstance().currentUser
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val UPDATE_INTERVAL = 4000L
     private val FASTEST_INTERVAL = 2000L
@@ -62,7 +59,7 @@ class LocationService : Service() {
             super.onLocationResult(locationResult)
 
             locationResult ?: return
-            if (!::mIdToken.isInitialized || !::mShiftId.isInitialized)
+            if (!::mShiftId.isInitialized)
                 return
 
             for (location in locationResult.locations) {
@@ -77,8 +74,6 @@ class LocationService : Service() {
                 (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
                     .notify(1, getNotification(lastUpdated.value!!))
 
-                Timber.d(lastUpdated.value)
-
                 // Start addPathsjob if 10 or more locations exist and job isn't running
                 if (locationList.size >= 10 && !addPathsJobIsSyncing) {
                     addPathsJobIsSyncing = true
@@ -86,7 +81,7 @@ class LocationService : Service() {
                     tempList.addAll(locationList)
                     locationList.clear()
                     CoroutineScope(IO + addPathsJob).launch {
-                        Repository.putLocations(mIdToken, mShiftId, mTestMode, tempList)
+                        Repository.putLocations(mShiftId, mTestMode, tempList)
                     }.invokeOnCompletion {
                         addPathsJobIsSyncing = false
                     }
@@ -113,18 +108,15 @@ class LocationService : Service() {
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        // Create shift; get and set mShiftId, mIdToken
-        user?.getIdToken(true)?.addOnSuccessListener {
-            mIdToken = it.token!!
+        // Get and set mShiftId
+        CoroutineScope(IO).launch {
             val shift = Shift(
                 Calendar.getInstance().time.toString(),
                 BuildConfig.VERSION_NAME
             )
-            CoroutineScope(IO).launch {
-                mShiftId = Repository
-                    .postStartShift(mIdToken, shift, mCase.id, mTestMode).shiftId
-                lastUpdated.postValue(getString(R.string.started_shift))
-            }
+            mShiftId = Repository
+                .postStartShift(shift, mCase.id, mTestMode).shiftId
+            lastUpdated.postValue(getString(R.string.started_shift))
         }
 
         if (!::addPathsJob.isInitialized) {
@@ -132,8 +124,6 @@ class LocationService : Service() {
         }
 
         // Start service notification intent
-
-
         // Id must NOT be 0
         // Ref: https://developer.android.com/guide/components/services.html#kotlin
         startForeground(1, getNotification(getString(R.string.loc_notification_title)))
@@ -145,7 +135,6 @@ class LocationService : Service() {
 
     fun getNotification(title: String): Notification {
         val resultIntent = Intent(this, MainActivity::class.java).apply {
-            putExtra("test", 1)
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
         }
 
@@ -168,7 +157,7 @@ class LocationService : Service() {
                     .setBigContentTitle(title)
                     .bigText(
                         "CaseId: ${mCase.id}\n" +
-                                "Date: ${mCase.date}"
+                                "Date: ${GlobalUtil.convertEpochToDate(mCase.date)}"
                     )
             )
         }.build()
@@ -185,7 +174,7 @@ class LocationService : Service() {
     private fun completeShift() {
         // Post endtime
         CoroutineScope(IO).launch {
-            while (!::mIdToken.isInitialized || !::mShiftId.isInitialized) {
+            while (!::mShiftId.isInitialized) {
                 Timber.d(
                     "Shift didn't start and no points were recorded\n" +
                             "Waiting to get shift and token id"
@@ -194,10 +183,9 @@ class LocationService : Service() {
             }
             if (locationList.isNotEmpty()) {
                 // Sync remaining points
-                Repository.putLocations(mIdToken, mShiftId, mTestMode, locationList)
+                Repository.putLocations(mShiftId, mTestMode, locationList)
             }
             Repository.putEndTime(
-                mIdToken,
                 mShiftId,
                 mTestMode,
                 Calendar.getInstance().time.toString()

@@ -31,7 +31,7 @@
             android:windowSoftInputMode="adjustResize" />
 
         <service
-            android:name=".services.LocationService"
+            android:name=".util.LocationService"
             android:foregroundServiceType="location"
             android:stopWithTask="true" />
     </application>
