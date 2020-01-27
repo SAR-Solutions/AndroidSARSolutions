@@ -3,12 +3,15 @@ package com.sarcoordinator.sarsolutions
 import android.content.ComponentName
 import android.content.ServiceConnection
 import android.os.IBinder
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.sarcoordinator.sarsolutions.api.Repository
 import com.sarcoordinator.sarsolutions.models.Case
 import com.sarcoordinator.sarsolutions.services.LocationService
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -19,6 +22,7 @@ class SharedViewModel : ViewModel() {
     lateinit var lastUpdatedText: String
     private val binder = MutableLiveData<LocationService.LocalBinder>()
     lateinit var mAuthToken: String
+
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(p0: ComponentName?, iBinder: IBinder?) {
             Timber.d("Connected to service")
@@ -31,13 +35,32 @@ class SharedViewModel : ViewModel() {
         }
     }
 
-    val cases: LiveData<ArrayList<Case>> = liveData(IO) {
-        val result = ArrayList<Case>()
-        delay(5000)
-        Repository.getCases().forEach { case ->
-            result.add(case)
+    // Observe coroutineFailureText to get notified on network failure
+    private val networkException = CoroutineExceptionHandler { coroutineContext, throwable ->
+        Timber.e(throwable)
+        netWorkExceptionText.postValue("Failed network call, try again.")
+    }
+
+    private val netWorkExceptionText = MutableLiveData<String>()
+
+    fun getNetworkExceptionObservable(): LiveData<String> {
+        return netWorkExceptionText
+    }
+
+
+    private val cases = MutableLiveData<ArrayList<Case>>()
+    fun getCases(): LiveData<ArrayList<Case>> {
+        return cases
+    }
+
+    fun refreshCases() {
+        viewModelScope.launch(IO + networkException) {
+            val result = ArrayList<Case>()
+            Repository.getCases().forEach { case ->
+                result.add(case)
+            }
+            cases.postValue(result)
         }
-        emit(result)
     }
 
     val currentCase = MutableLiveData<Case>()
@@ -51,12 +74,6 @@ class SharedViewModel : ViewModel() {
             }
         }
         return currentCase
-    }
-
-    fun mAuthTokenExists(): Boolean {
-        if (!::mAuthToken.isInitialized)
-            return false
-        return true
     }
 
     fun getBinder(): LiveData<LocationService.LocalBinder> {

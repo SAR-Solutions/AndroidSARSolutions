@@ -36,6 +36,7 @@ object Repository {
 
     suspend fun getCases(): List<Case> {
         return service.getCases(getToken())
+//        return service.getCases("!2")
     }
 
     suspend fun getCaseDetail(caseId: String): Case {

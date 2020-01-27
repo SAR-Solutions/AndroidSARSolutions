@@ -3,10 +3,8 @@
 
     <item android:drawable="@color/gray" />
 
-    <item>
-        <bitmap
-            android:gravity="center"
-            android:src="@mipmap/app_icon_white_text_small" />
+    <item android:gravity="center">
+        <bitmap android:src="@mipmap/app_icon_white_text_small" />
     </item>
 
 </layer-list>
