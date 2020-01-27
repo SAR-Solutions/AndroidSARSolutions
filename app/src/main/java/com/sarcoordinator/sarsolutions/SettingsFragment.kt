@@ -1,6 +1,7 @@
 package com.sarcoordinator.sarsolutions
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.*
@@ -8,6 +9,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.google.android.material.switchmaterial.SwitchMaterial
 import kotlinx.android.synthetic.main.fragment_settings.*
 import timber.log.Timber
@@ -70,6 +72,11 @@ class SettingsFragment : Fragment() {
                 }
             }
         }
+
+        license_text_view.setOnClickListener {
+            OssLicensesMenuActivity.setActivityTitle(getString(R.string.licenses))
+            startActivity(Intent(requireContext(), OssLicensesMenuActivity::class.java))
+        }
     }
 
     // Set ui elements based on user preferences
@@ -86,6 +93,9 @@ class SettingsFragment : Fragment() {
 
         // Testing mode
         testing_mode_switch.isChecked = sharedPrefs.getBoolean(TESTING_MODE_PREFS, false)
+
+        // app version
+        app_version_value.text = BuildConfig.VERSION_NAME
     }
 
     // Sets theme preference to parameter and changes theme

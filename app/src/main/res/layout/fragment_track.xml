@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
+    android:fillViewport="true"
     tools:context=".TrackFragment">
 
     <LinearLayout
@@ -15,7 +16,10 @@
         <com.facebook.shimmer.ShimmerFrameLayout
             android:id="@+id/track_fragment_shimmer"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/mtrl_card_spacing"
+            android:layout_marginTop="@dimen/mtrl_card_spacing"
+            android:layout_marginEnd="@dimen/mtrl_card_spacing"
             android:visibility="gone"
             app:shimmer_auto_start="true">
 
@@ -48,6 +52,7 @@
                     android:id="@+id/case_info_heading_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    style="@style/Base.Widget.AppCompat.TextView.Heading"
                     android:padding="16dp"
                     android:text="@string/case_info"
                     android:textSize="24sp"

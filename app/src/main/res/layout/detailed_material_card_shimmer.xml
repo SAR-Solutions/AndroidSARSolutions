@@ -3,9 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginStart="@dimen/mtrl_card_spacing"
-    android:layout_marginTop="@dimen/mtrl_card_spacing"
-    android:layout_marginEnd="@dimen/mtrl_card_spacing"
     app:cardCornerRadius="4dp"
     app:cardElevation="4dp">
 
@@ -15,12 +12,11 @@
 
         <TextView
             android:id="@+id/shim_title"
-            android:layout_width="200dp"
+            style="@style/Base.Widget.AppCompat.TextView.Heading"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:background="@android:color/darker_gray"
+            android:layout_width="wrap_content"
+            android:text="@string/case_info"
             android:padding="16dp"
-            android:textSize="24sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 

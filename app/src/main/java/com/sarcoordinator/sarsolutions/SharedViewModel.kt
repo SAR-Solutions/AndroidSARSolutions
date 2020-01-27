@@ -8,6 +8,7 @@ import com.sarcoordinator.sarsolutions.api.Repository
 import com.sarcoordinator.sarsolutions.models.Case
 import com.sarcoordinator.sarsolutions.services.LocationService
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -32,6 +33,7 @@ class SharedViewModel : ViewModel() {
 
     val cases: LiveData<ArrayList<Case>> = liveData(IO) {
         val result = ArrayList<Case>()
+        delay(5000)
         Repository.getCases().forEach { case ->
             result.add(case)
         }
