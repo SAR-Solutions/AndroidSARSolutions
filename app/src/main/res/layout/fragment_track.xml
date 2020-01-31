@@ -2,196 +2,213 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/track_parent_scroll_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
     android:fillViewport="true"
     tools:context=".TrackFragment">
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="wrap_content">
 
-        <com.facebook.shimmer.ShimmerFrameLayout
-            android:id="@+id/track_fragment_shimmer"
-            android:layout_width="match_parent"
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/location_service_fab"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/mtrl_card_spacing"
-            android:layout_marginTop="@dimen/mtrl_card_spacing"
-            android:layout_marginEnd="@dimen/mtrl_card_spacing"
-            android:visibility="gone"
-            app:shimmer_auto_start="true">
+            android:layout_gravity="end|bottom"
+            android:layout_margin="16dp"
+            android:backgroundTint="@color/orange"
+            android:src="@drawable/ic_baseline_play_arrow_24"
+            app:borderWidth="0dp" />
 
-            <include layout="@layout/detailed_material_card_shimmer" />
-
-        </com.facebook.shimmer.ShimmerFrameLayout>
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/case_info_material_card"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/mtrl_card_spacing"
-            android:layout_marginTop="@dimen/mtrl_card_spacing"
-            android:layout_marginEnd="@dimen/mtrl_card_spacing"
-            app:cardElevation="4dp"
-            app:cardCornerRadius="4dp">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+
+            <com.facebook.shimmer.ShimmerFrameLayout
+                android:id="@+id/track_fragment_shimmer"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/mtrl_card_spacing"
+                android:layout_marginTop="@dimen/mtrl_card_spacing"
+                android:layout_marginEnd="@dimen/mtrl_card_spacing"
+                android:visibility="gone"
+                app:shimmer_auto_start="true">
 
-                <androidx.constraintlayout.widget.Guideline
-                    android:id="@+id/guideline"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    app:layout_constraintGuide_percent="0.30" />
+                <include layout="@layout/detailed_material_card_shimmer" />
 
-                <TextView
-                    android:id="@+id/case_info_heading_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    style="@style/Base.Widget.AppCompat.TextView.Heading"
-                    android:padding="16dp"
-                    android:text="@string/case_info"
-                    android:textSize="24sp"
-                    android:textStyle="bold"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+            </com.facebook.shimmer.ShimmerFrameLayout>
 
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/id_tv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="8dp"
-                    android:text="@string/case_id"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toStartOf="@+id/guideline"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/case_info_heading_text" />
-
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/id_value_tv"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:padding="8dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="@+id/guideline"
-                    app:layout_constraintTop_toBottomOf="@id/case_info_heading_text" />
-
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/reporter_tv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="8dp"
-                    android:text="@string/reporter_name"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toStartOf="@+id/guideline"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/id_value_tv" />
-
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/reporter_value_tv"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:padding="8dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="@+id/guideline"
-                    app:layout_constraintTop_toTopOf="@id/reporter_tv" />
-
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/missing_person_tv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="8dp"
-                    android:text="@string/missing_person"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toStartOf="@id/guideline"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/reporter_value_tv" />
-
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/missing_person_value_tv"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:padding="8dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="@id/guideline"
-                    app:layout_constraintTop_toTopOf="@id/missing_person_tv" />
-
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/equipment_tv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="8dp"
-                    android:text="@string/equipment_used"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toStartOf="@id/guideline"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/missing_person_value_tv" />
-
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/equipment_value_tv"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:padding="8dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="@id/guideline"
-                    app:layout_constraintTop_toTopOf="@id/equipment_tv" />
-
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/tracking_card"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/mtrl_card_spacing"
-            android:layout_marginTop="@dimen/mtrl_card_spacing"
-            android:layout_marginEnd="@dimen/mtrl_card_spacing"
-            app:cardElevation="4dp"
-            app:cardCornerRadius="4dp">
-
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/case_info_material_card"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/mtrl_card_spacing"
+                android:layout_marginTop="@dimen/mtrl_card_spacing"
+                android:layout_marginEnd="@dimen/mtrl_card_spacing"
+                app:cardCornerRadius="4dp"
+                app:cardElevation="4dp">
 
-                <TextView
-                    android:id="@+id/location_desc"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:minLines="2"
-                    android:padding="8dp"
-                    android:text="@string/start_tracking_desc"
-                    android:textSize="24sp"
-                    app:layout_constraintBottom_toTopOf="@id/start_button"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
 
-                <Button
-                    android:id="@+id/start_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:backgroundTint="@color/success"
-                    android:padding="8dp"
-                    android:text="@string/start"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/location_desc" />
+                    <androidx.constraintlayout.widget.Guideline
+                        android:id="@+id/guideline"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        app:layout_constraintGuide_percent="0.30" />
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </com.google.android.material.card.MaterialCardView>
+                    <TextView
+                        android:id="@+id/case_info_heading_text"
+                        style="@style/Base.Widget.AppCompat.TextView.Heading"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="16dp"
+                        android:text="@string/case_info"
+                        android:textSize="24sp"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-    </LinearLayout>
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/id_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        android:text="@string/case_id"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toStartOf="@+id/guideline"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/case_info_heading_text" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/id_value_tv"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:padding="8dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="@+id/guideline"
+                        app:layout_constraintTop_toBottomOf="@id/case_info_heading_text" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/reporter_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        android:text="@string/reporter_name"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toStartOf="@+id/guideline"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/id_value_tv" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/reporter_value_tv"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:padding="8dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="@+id/guideline"
+                        app:layout_constraintTop_toTopOf="@id/reporter_tv" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/missing_person_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        android:text="@string/missing_person"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toStartOf="@id/guideline"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/reporter_value_tv" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/missing_person_value_tv"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:padding="8dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="@id/guideline"
+                        app:layout_constraintTop_toTopOf="@id/missing_person_tv" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/equipment_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        android:text="@string/equipment_used"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toStartOf="@id/guideline"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/missing_person_value_tv" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/equipment_value_tv"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:padding="8dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="@id/guideline"
+                        app:layout_constraintTop_toTopOf="@id/equipment_tv" />
+
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/tracking_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/mtrl_card_spacing"
+                android:layout_marginTop="@dimen/mtrl_card_spacing"
+                android:layout_marginEnd="@dimen/mtrl_card_spacing"
+                app:cardCornerRadius="4dp"
+                app:cardElevation="4dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/information_heading_text"
+                        style="@style/Base.Widget.AppCompat.TextView.Heading"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="16dp"
+                        android:text="@string/tracking_information"
+                        android:textSize="24sp"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/location_desc"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:minLines="2"
+                        android:padding="8dp"
+                        android:text="@string/start_tracking_desc"
+                        android:textSize="24sp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/information_heading_text" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+    </FrameLayout>
 
 </ScrollView>

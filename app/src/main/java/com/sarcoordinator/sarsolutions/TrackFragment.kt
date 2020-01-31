@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
@@ -64,7 +65,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
             populateViewWithCase(viewModel.currentCase.value!!)
         }
 
-        start_button.setOnClickListener {
+        location_service_fab.setOnClickListener {
             if (viewModel.getBinder().value == null) { // Start new service
                 requestLocPermission()
             } else { // Stop ongoing service
@@ -85,11 +86,11 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         if (enable) {
             track_fragment_shimmer.visibility = View.VISIBLE
             case_info_material_card.visibility = View.GONE
-            start_button.isEnabled = false
+            location_service_fab.isEnabled = false
         } else {
             track_fragment_shimmer.visibility = View.GONE
             case_info_material_card.visibility = View.VISIBLE
-            start_button.isEnabled = true
+            location_service_fab.isEnabled = true
         }
     }
 
@@ -220,13 +221,25 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
     }
 
     private fun disableButtons() {
-        start_button.text = getString(R.string.stop)
-        start_button.setBackgroundColor(resources.getColor(R.color.error))
+        location_service_fab.setImageDrawable(
+            resources.getDrawable(
+                R.drawable.ic_baseline_stop_24,
+                requireContext().theme
+            )
+        )
+        location_service_fab.backgroundTintList =
+            ColorStateList.valueOf(resources.getColor(R.color.error))
     }
 
     private fun enableButtons() {
-        start_button.text = getString(R.string.start)
-        start_button.setBackgroundColor(resources.getColor(R.color.success))
+        location_service_fab.setImageDrawable(
+            resources.getDrawable(
+                R.drawable.ic_baseline_stop_24,
+                requireContext().theme
+            )
+        )
+        location_service_fab.backgroundTintList =
+            ColorStateList.valueOf(resources.getColor(R.color.orange))
     }
 
     // Convert list of string to a ordered string

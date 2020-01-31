@@ -1,223 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:fillViewport="true"
     tools:context=".ShiftReportFragment">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/shift_report_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:backgroundTint="@color/orange"
+        android:src="@drawable/ic_baseline_add_24"
+        app:borderWidth="0dp" />
+
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
 
-        <Spinner
-            android:id="@+id/spinner"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:visibility="visible"
-            app:layout_constraintEnd_toEndOf="@+id/milesTraveledEditText"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/countyVehicleCheckBox" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/shift_report_parent_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/vehicle1TextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
-            android:text="Vehicle 1"
-            android:textStyle="bold"
-            android:textColor="?colorPrimary"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/vehicleDetailsTextView" />
+            <TextView
+                android:id="@+id/generalDetailsTextView"
+                style="@style/Base.Widget.AppCompat.TextView.Heading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:text="@string/general"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        <CheckBox
-            android:id="@+id/countyVehicleCheckBox"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:text="@string/county_vehicle"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/vehicle1TextView" />
+            <EditText
+                android:id="@+id/shiftHoursEditText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:ems="10"
+                android:hint="@string/hours_on_search"
+                android:importantForAutofill="no"
+                android:inputType="textPersonName"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/generalDetailsTextView" />
 
-        <CheckBox
-            android:id="@+id/personalVehicleCheckBox"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:text="@string/personal_vehicle"
-            app:layout_constraintStart_toEndOf="@+id/countyVehicleCheckBox"
-            app:layout_constraintTop_toTopOf="@+id/countyVehicleCheckBox" />
+            <TextView
+                android:id="@+id/vehicle_heading_text"
+                style="@style/Base.Widget.AppCompat.TextView.Heading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:text="@string/vehicle"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/shiftHoursEditText" />
 
-        <EditText
-            android:id="@+id/milesTraveledEditText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:ems="10"
-            android:hint="@string/miles_traveled"
-            android:inputType="textPersonName"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/spinner" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/vehicle_recycler_view"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/vehicle_heading_text" />
 
-        <EditText
-            android:id="@+id/shiftHoursEditText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
-            android:ems="10"
-            android:hint="@string/hours_on_search"
-            android:inputType="textPersonName"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/generalDetailsTextView" />
-
-        <TextView
-            android:id="@+id/vehicleDetailsTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="20dp"
-            android:text="@string/vehicle"
-            android:textColor="?colorSecondary"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/shiftHoursEditText" />
-
-        <TextView
-            android:id="@+id/generalDetailsTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
-            android:text="@string/general"
-            android:textColor="?colorSecondary"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <Button
-            android:id="@+id/endShiftButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="10dp"
-            android:text="@string/end_shift"
-            android:textColor="#ffffff"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/milesTraveled3EditText" />
-
-        <TextView
-            android:id="@+id/vehicle2TextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="15dp"
-            android:text="Vehicle 2"
-            android:textColor="?colorPrimary"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/milesTraveledEditText" />
-
-        <Spinner
-            android:id="@+id/spinner2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:visibility="visible"
-            app:layout_constraintEnd_toEndOf="@+id/milesTraveled2EditText"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/countyVehicle2CheckBox" />
-
-
-        <CheckBox
-            android:id="@+id/countyVehicle2CheckBox"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:text="@string/county_vehicle"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/vehicle2TextView" />
-
-        <CheckBox
-            android:id="@+id/personalVehicle2CheckBox"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:text="@string/personal_vehicle"
-            app:layout_constraintStart_toEndOf="@+id/countyVehicle2CheckBox"
-            app:layout_constraintTop_toTopOf="@+id/countyVehicle2CheckBox" />
-
-        <EditText
-            android:id="@+id/milesTraveled2EditText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:ems="10"
-            android:hint="@string/miles_traveled"
-            android:inputType="textPersonName"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/spinner2" />
-
-        <TextView
-            android:id="@+id/vehicle3TextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="15dp"
-            android:text="Vehicle 3"
-            android:textColor="?colorPrimary"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/milesTraveled2EditText" />
-
-        <Spinner
-            android:id="@+id/spinner3"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:visibility="visible"
-            app:layout_constraintEnd_toEndOf="@+id/milesTraveled3EditText"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/countyVehicle3CheckBox" />
-
-
-        <CheckBox
-            android:id="@+id/countyVehicle3CheckBox"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:text="@string/county_vehicle"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/vehicle3TextView" />
-
-        <CheckBox
-            android:id="@+id/personalVehicle3CheckBox"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:text="@string/personal_vehicle"
-            app:layout_constraintStart_toEndOf="@+id/countyVehicle3CheckBox"
-            app:layout_constraintTop_toTopOf="@+id/countyVehicle3CheckBox" />
-
-        <EditText
-            android:id="@+id/milesTraveled3EditText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:ems="10"
-            android:hint="@string/miles_traveled"
-            android:inputType="textPersonName"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/spinner3" />
-
+            <Button
+                android:id="@+id/endShiftButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="10dp"
+                android:text="@string/end_shift"
+                android:textColor="#ffffff"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/vehicle_recycler_view" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-    </ScrollView>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

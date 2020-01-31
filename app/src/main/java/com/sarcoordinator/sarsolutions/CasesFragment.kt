@@ -19,6 +19,7 @@ import com.sarcoordinator.sarsolutions.models.Case
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import kotlinx.android.synthetic.main.fragment_cases.*
 import kotlinx.android.synthetic.main.list_view_item.view.*
+import timber.log.Timber
 
 /**
  * This fragment displays the list of cases for the user
@@ -132,6 +133,7 @@ class CasesFragment : Fragment(R.layout.fragment_cases) {
     private fun observeNetworkErrors() {
         viewModel.getNetworkExceptionObservable().observe(viewLifecycleOwner, Observer { error ->
             if (!error.isNullOrEmpty()) {
+                Timber.e(error)
                 Snackbar.make(requireView(), "Error, pull down to try again", Snackbar.LENGTH_LONG)
                     .show()
                 list_shimmer_layout.stopShimmer()

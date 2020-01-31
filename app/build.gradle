@@ -8,7 +8,6 @@ apply plugin: 'io.fabric'
 apply plugin: 'com.google.firebase.firebase-perf'
 apply plugin: 'com.google.android.gms.oss-licenses-plugin'
 
-
 android {
     // Needed to avoid the following error:
     // Invoke-customs are only supported starting with Android O (--min-api 26)
