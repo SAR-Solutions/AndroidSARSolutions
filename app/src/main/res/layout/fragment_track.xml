@@ -5,7 +5,6 @@
     android:id="@+id/track_parent_scroll_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:animateLayoutChanges="true"
     android:fillViewport="true"
     tools:context=".TrackFragment">
 
@@ -19,6 +18,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="end|bottom"
             android:layout_margin="16dp"
+            android:elevation="6dp"
             android:backgroundTint="@color/orange"
             android:src="@drawable/ic_baseline_play_arrow_24"
             app:borderWidth="0dp" />

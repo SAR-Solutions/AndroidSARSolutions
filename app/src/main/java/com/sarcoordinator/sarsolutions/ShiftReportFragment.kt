@@ -14,6 +14,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
+import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import kotlinx.android.synthetic.main.fragment_shift_report.*
 import kotlinx.android.synthetic.main.vehicle_material_card.view.*
 import timber.log.Timber
@@ -67,18 +69,37 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
 
     private fun initViewListeners() {
         endShiftButton.setOnClickListener {
-            // TODO: Check for validity
-            viewModel.submitShiftReport(
-                args.shiftId,
-                shiftHoursEditText.text.toString(),
-                resources.getStringArray(R.array.vehicle_array).toList()
-            )
-            findNavController().navigate(ShiftReportFragmentDirections.actionShiftReportFragmentToCasesFragment())
+
+            // Validate form input
+            if (shiftHoursEditText.text.isNullOrEmpty() || !areVehicleFormsValid()) {
+                Snackbar.make(
+                    requireView(),
+                    "Complete shift report to proceed",
+                    Snackbar.LENGTH_LONG
+                ).show()
+            } else {
+                viewModel.submitShiftReport(
+                    args.shiftId,
+                    shiftHoursEditText.text.toString(),
+                    resources.getStringArray(R.array.vehicle_array).toList()
+                )
+                GlobalUtil.hideKeyboard(requireActivity())
+                findNavController().navigate(ShiftReportFragmentDirections.actionShiftReportFragmentToCasesFragment())
+            }
         }
 
         shift_report_fab.setOnClickListener {
             addVehicle()
         }
+    }
+
+    // True if all vehicles have required data set, false otherwise
+    private fun areVehicleFormsValid(): Boolean {
+        viewModel.vehicleList.forEach { vehicle ->
+            if (vehicle.milesTraveled.isNullOrBlank())
+                return false
+        }
+        return true
     }
 
     private fun setupRecyclerView() {

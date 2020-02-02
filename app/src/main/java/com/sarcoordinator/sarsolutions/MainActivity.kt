@@ -71,7 +71,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.sign_out -> {
-                if (viewModel.getBinder().value == null) {
+                if (viewModel.getBinder().value == null && viewModel.isShiftReportSubmitted) {
                     auth.signOut()
                     navController.navigate(
                         R.id.loginFragment,
@@ -86,7 +86,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             }
 
             R.id.settings -> {
-                if (viewModel.getBinder().value == null) {
+                if (viewModel.getBinder().value == null && viewModel.isShiftReportSubmitted) {
                     navController.navigate(R.id.settingFragment)
                 } else {
                     Snackbar.make(

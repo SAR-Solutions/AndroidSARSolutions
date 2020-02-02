@@ -60,7 +60,7 @@ class LocationService : Service() {
             super.onLocationResult(locationResult)
 
             locationResult ?: return
-            if (shiftId.value != null)
+            if (shiftId.value == null)
                 return
 
             for (location in locationResult.locations) {

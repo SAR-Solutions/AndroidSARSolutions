@@ -107,11 +107,11 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         if (enable) {
             track_fragment_shimmer.visibility = View.VISIBLE
             case_info_material_card.visibility = View.GONE
-            location_service_fab.isEnabled = false
+            location_service_fab.hide()
         } else {
             track_fragment_shimmer.visibility = View.GONE
             case_info_material_card.visibility = View.VISIBLE
-            location_service_fab.isEnabled = true
+            location_service_fab.show()
         }
     }
 

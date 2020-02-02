@@ -15,7 +15,7 @@ interface API {
         @Header("authorization") tokenId: String
     ): Case
 
-    @POST("postStartShiftAuth")
+    @POST("postStartShift")
     suspend fun postStartShift(
         @Header("authorization") tokenId: String,
         @Body shift: Shift,
@@ -25,7 +25,7 @@ interface API {
 
     // NOTE: Return type 'Response<Unit>' is needed as success http code returned here is 204
     // Kotlin throws a null pointer exception (as of Retrofit 2.7.0)
-    @PUT("putLocationsAuth")
+    @PUT("putLocations")
     suspend fun putLocations(
         @Header("authorization") tokenId: String,
         @Query("shiftId") shiftId: String,
@@ -33,7 +33,7 @@ interface API {
         @Body paths: LocationBody
     ): Response<Unit>
 
-    @PUT("putEndTimeAuth")
+    @PUT("putEndTime")
     suspend fun putEndTime(
         @Header("authorization") tokenId: String,
         @Query("shiftId") shiftId: String,
