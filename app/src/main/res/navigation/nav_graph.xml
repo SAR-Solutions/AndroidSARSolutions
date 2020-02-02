@@ -56,12 +56,14 @@
         android:id="@+id/shiftReportFragment"
         android:name="com.sarcoordinator.sarsolutions.ShiftReportFragment"
         android:label="ShiftReport"
-        tools:layout="@layout/fragment_shift_report"
-        >
+        tools:layout="@layout/fragment_shift_report">
         <action
             android:id="@+id/action_shiftReportFragment_to_casesFragment"
             app:destination="@id/casesFragment"
             app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true" />
+        <argument
+            android:name="shiftId"
+            app:argType="string" />
     </fragment>
 </navigation>

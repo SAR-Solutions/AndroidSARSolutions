@@ -33,3 +33,15 @@ data class Volunteer(
     val name: String,
     val userId: String
 ) : Serializable
+
+data class ShiftReport(
+    val searchDuration: String,
+    val vehicles: List<Vehicle>
+)
+
+data class Vehicle(
+    val isCountyVehicle: Boolean,
+    val isPersonalVehicle: Boolean,
+    val type: String,
+    val milesTraveled: String
+)

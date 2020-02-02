@@ -9,8 +9,9 @@ import android.widget.ArrayAdapter
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.fragment_shift_report.*
@@ -22,17 +23,22 @@ import timber.log.Timber
  */
 class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
 
-    private lateinit var viewModel: ShiftReportViewModel
+    private val args by navArgs<ShiftReportFragmentArgs>()
+
+    private lateinit var viewModel: SharedViewModel
     private lateinit var viewManager: RecyclerView.LayoutManager
     private lateinit var viewAdapter: Adapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider(this)[ShiftReportViewModel::class.java]
+        viewModel = activity?.run {
+            ViewModelProviders.of(this)[SharedViewModel::class.java]
+        } ?: throw Exception("Invalid Activity")
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        viewModel.isShiftReportSubmitted = false
         setupRecyclerView()
         initViewListeners()
         if (viewModel.vehicleList.isNotEmpty())
@@ -61,6 +67,12 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
 
     private fun initViewListeners() {
         endShiftButton.setOnClickListener {
+            // TODO: Check for validity
+            viewModel.submitShiftReport(
+                args.shiftId,
+                shiftHoursEditText.text.toString(),
+                resources.getStringArray(R.array.vehicle_array).toList()
+            )
             findNavController().navigate(ShiftReportFragmentDirections.actionShiftReportFragmentToCasesFragment())
         }
 
@@ -78,16 +90,16 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
         }
     }
 
-    class Adapter(val viewModel: ShiftReportViewModel) :
+    class Adapter(val viewModel: SharedViewModel) :
         RecyclerView.Adapter<Adapter.Viewholder>() {
 
-        private var data = ArrayList<ShiftReportViewModel.VehicleCardContent>()
+        private var data = ArrayList<SharedViewModel.VehicleCardContent>()
 
-        class Viewholder(itemView: View, private val viewModel: ShiftReportViewModel) :
+        class Viewholder(itemView: View, private val viewModel: SharedViewModel) :
             RecyclerView.ViewHolder(itemView) {
 
             fun bindView(
-                vehicleCardContent: ShiftReportViewModel.VehicleCardContent,
+                vehicleCardContent: SharedViewModel.VehicleCardContent,
                 position: Int
             ) {
 
@@ -154,13 +166,13 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
             holder.bindView(data[position], position)
         }
 
-        fun addItem(item: ShiftReportViewModel.VehicleCardContent) {
+        fun addItem(item: SharedViewModel.VehicleCardContent) {
             val position = data.size
             data.add(item)
             notifyItemInserted(position)
         }
 
-        fun addAll(list: ArrayList<ShiftReportViewModel.VehicleCardContent>) {
+        fun addAll(list: ArrayList<SharedViewModel.VehicleCardContent>) {
             data.addAll(list)
             notifyDataSetChanged()
         }

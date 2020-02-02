@@ -26,6 +26,12 @@ import com.karumi.dexter.listener.single.PermissionListener
 import com.sarcoordinator.sarsolutions.models.Case
 import com.sarcoordinator.sarsolutions.util.LocationService
 import kotlinx.android.synthetic.main.fragment_track.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 class TrackFragment : Fragment(R.layout.fragment_track) {
@@ -34,6 +40,8 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
     private lateinit var sharedPrefs: SharedPreferences
 
     private lateinit var viewModel: SharedViewModel
+
+    private lateinit var currentShiftId: String
 
     private val args by navArgs<TrackFragmentArgs>()
 
@@ -71,7 +79,20 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
             } else { // Stop ongoing service
                 stopLocationService()
                 enableButtons()
-                findNavController().navigate(TrackFragmentDirections.actionTrackFragmentToShiftReportFragment())
+
+                CoroutineScope(IO).launch {
+                    // Delay till shiftId is fetched
+                    //TODO: Show loading status of some kind
+                    while (!::currentShiftId.isInitialized)
+                        delay(1000)
+                    withContext(Main) {
+                        findNavController().navigate(
+                            TrackFragmentDirections.actionTrackFragmentToShiftReportFragment(
+                                currentShiftId
+                            )
+                        )
+                    }
+                }
             }
         }
 
@@ -152,9 +173,14 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
 
     // Update UI by observing viewModel data
     private fun observeService() {
-        service?.getLastUpdated()?.observe(viewLifecycleOwner, Observer { lastUpdated ->
-            location_desc.text = lastUpdated
-        })
+        service?.let {
+            it.getLastUpdated().observe(viewLifecycleOwner, Observer { lastUpdated ->
+                location_desc.text = lastUpdated
+            })
+            it.getShiftId().observe(viewLifecycleOwner, Observer { shiftId ->
+                currentShiftId = shiftId
+            })
+        }
     }
 
     private fun startLocationService() {

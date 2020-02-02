@@ -40,4 +40,11 @@ interface API {
         @Query("isTest") isTest: Boolean,
         @Body endTime: EndTimeBody
     ): Response<Unit>
+
+    @POST("postShiftReport")
+    suspend fun postShiftReport(
+        @Header("authorization") tokenId: String,
+        @Query("shiftId") shiftId: String,
+        @Body report: ShiftReport
+    ): Response<Unit>
 }

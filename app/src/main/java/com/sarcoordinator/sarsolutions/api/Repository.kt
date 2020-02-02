@@ -63,6 +63,12 @@ object Repository {
     ) =
         service.putEndTime(getToken(), shiftId, isTest, EndTimeBody(endTime))
 
+    suspend fun postShiftReport(
+        shiftId: String,
+        report: ShiftReport
+    ) =
+        service.postShiftReport(getToken(), shiftId, report)
+
     // Synchronously get user token
     private fun getToken(): String {
         return Tasks.await(user.getIdToken(true)).token!!

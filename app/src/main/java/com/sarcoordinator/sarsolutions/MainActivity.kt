@@ -19,7 +19,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     private val auth = FirebaseAuth.getInstance()
     private lateinit var navController: NavController
@@ -34,20 +34,18 @@ class MainActivity : AppCompatActivity() {
         loadUserPreferences()
         super.onCreate(savedInstanceState)
 
-
         // Black status bar for old android version
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
             window.statusBarColor = Color.BLACK
 
-        setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
-
 
         navController = findNavController(R.id.nav_host_fragment)
 
         if (savedInstanceState == null) {
             if (auth.currentUser != null) {
                 navController.navigate(LoginFragmentDirections.actionLoginFragmentToCasesFragment())
+//                navController.navigate(R.id.shiftReportFragment)
             }
         }
 
@@ -109,6 +107,9 @@ class MainActivity : AppCompatActivity() {
         if (viewModel.getBinder().value != null) {
             Snackbar.make(parent_layout, "Click the 'stop' button to go back", Snackbar.LENGTH_LONG)
                 .show()
+            return true
+        } else if (!viewModel.isShiftReportSubmitted) { // Don't allow navigating back if shift report isn't submitted
+            Snackbar.make(parent_layout, "Submit report to go back", Snackbar.LENGTH_LONG).show()
             return true
         } else if (!navController.popBackStack()) {
             return navController.navigateUp()

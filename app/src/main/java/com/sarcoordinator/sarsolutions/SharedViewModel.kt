@@ -9,6 +9,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sarcoordinator.sarsolutions.api.Repository
 import com.sarcoordinator.sarsolutions.models.Case
+import com.sarcoordinator.sarsolutions.models.ShiftReport
+import com.sarcoordinator.sarsolutions.models.Vehicle
 import com.sarcoordinator.sarsolutions.util.LocationService
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers.IO
@@ -18,6 +20,9 @@ import timber.log.Timber
 
 // Viewmodel is shared between all fragments and parent activity
 class SharedViewModel : ViewModel() {
+
+    var isShiftReportSubmitted = true
+    var vehicleList = ArrayList<VehicleCardContent>()
 
     lateinit var lastUpdatedText: String
     private val binder = MutableLiveData<LocationService.LocalBinder>()
@@ -87,4 +92,56 @@ class SharedViewModel : ViewModel() {
     fun removeService() {
         binder.postValue(null)
     }
+
+    fun addVehicle() {
+        vehicleList.add(
+            VehicleCardContent(
+                name = "Vehicle ${vehicleList.size + 1}",
+                isCountyVehicle = false,
+                isPersonalVehicle = false,
+                milesTraveled = null,
+                vehicleType = 0
+            )
+        )
+    }
+
+    fun updateAtPosition(position: Int, vehicle: VehicleCardContent) {
+        vehicleList[position] = vehicle
+    }
+
+    fun submitShiftReport(caseId: String, searchDuration: String, vehicleTypeArray: List<String>) {
+        val report = ShiftReport(
+            searchDuration = searchDuration,
+            vehicles = vehicleListToObjects(vehicleTypeArray)
+        )
+        viewModelScope.launch(IO) {
+            Repository.postShiftReport(caseId, report)
+        }
+        vehicleList.clear()
+        isShiftReportSubmitted = true
+    }
+
+    // Convert vehicleList to list of Vehicle objects
+    private fun vehicleListToObjects(vehicleTypeArray: List<String>): List<Vehicle> {
+        val list = ArrayList<Vehicle>()
+        vehicleList.forEach { vehicle ->
+            list.add(
+                Vehicle(
+                    isCountyVehicle = vehicle.isCountyVehicle,
+                    isPersonalVehicle = vehicle.isPersonalVehicle,
+                    type = vehicleTypeArray[vehicle.vehicleType],
+                    milesTraveled = vehicle.milesTraveled.toString()
+                )
+            )
+        }
+        return list
+    }
+
+    data class VehicleCardContent(
+        var name: String,
+        var isCountyVehicle: Boolean,
+        var isPersonalVehicle: Boolean,
+        var milesTraveled: String?,
+        var vehicleType: Int
+    )
 }

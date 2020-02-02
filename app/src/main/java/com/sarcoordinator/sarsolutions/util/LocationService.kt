@@ -40,7 +40,8 @@ class LocationService : Service() {
 
     private var mTestMode: Boolean = false
     private lateinit var mCase: Case
-    private lateinit var mShiftId: String
+    private val shiftId = MutableLiveData<String>()
+    fun getShiftId(): LiveData<String> = shiftId
 
     private val lastUpdated = MutableLiveData<String>()
     fun getLastUpdated(): LiveData<String> = lastUpdated
@@ -59,7 +60,7 @@ class LocationService : Service() {
             super.onLocationResult(locationResult)
 
             locationResult ?: return
-            if (!::mShiftId.isInitialized)
+            if (shiftId.value != null)
                 return
 
             for (location in locationResult.locations) {
@@ -81,7 +82,7 @@ class LocationService : Service() {
                     tempList.addAll(locationList)
                     locationList.clear()
                     CoroutineScope(IO + addPathsJob).launch {
-                        Repository.putLocations(mShiftId, mTestMode, tempList)
+                        Repository.putLocations(shiftId.value!!, mTestMode, tempList)
                     }.invokeOnCompletion {
                         addPathsJobIsSyncing = false
                     }
@@ -114,8 +115,10 @@ class LocationService : Service() {
                 Calendar.getInstance().time.toString(),
                 BuildConfig.VERSION_NAME
             )
-            mShiftId = Repository
-                .postStartShift(shift, mCase.id, mTestMode).shiftId
+            shiftId.postValue(
+                Repository
+                    .postStartShift(shift, mCase.id, mTestMode).shiftId
+            )
             lastUpdated.postValue(getString(R.string.started_shift))
         }
 
@@ -174,7 +177,7 @@ class LocationService : Service() {
     private fun completeShift() {
         // Post endtime
         CoroutineScope(IO).launch {
-            while (!::mShiftId.isInitialized) {
+            while (shiftId.value == null) {
                 Timber.d(
                     "Shift didn't start and no points were recorded\n" +
                             "Waiting to get shift and token id"
@@ -183,10 +186,10 @@ class LocationService : Service() {
             }
             if (locationList.isNotEmpty()) {
                 // Sync remaining points
-                Repository.putLocations(mShiftId, mTestMode, locationList)
+                Repository.putLocations(shiftId.value!!, mTestMode, locationList)
             }
             Repository.putEndTime(
-                mShiftId,
+                shiftId.value!!,
                 mTestMode,
                 Calendar.getInstance().time.toString()
             )
