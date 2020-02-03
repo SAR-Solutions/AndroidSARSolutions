@@ -1,19 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/orange</item>
-        <item name="colorAccent">@color/orange</item>
-        <item name="colorPrimaryVariant">@color/darkOrange</item>
-        <item name="colorOnPrimary">@android:color/black</item>
-        <item name="colorSecondary">@color/blue</item>
-        <item name="colorSecondaryVariant">@color/darkBlue</item>
-        <item name="colorOnSecondary">@android:color/white</item>
-        <item name="backgroundColor">@color/paleBlue</item>
-        <item name="colorOnBackground">@color/darkBlue</item>
-        <item name="colorOnSurface">@color/orange</item>
-        <item name="colorError">@color/error</item>
-        <item name="colorPrimaryDark">@android:color/white</item>
+    <!--    Day/Light theme for API 27 and up-->
+    <style name="AppTheme27" parent="AppTheme">
         <item name="android:navigationBarColor">@android:color/white</item>
         <item name="android:windowLightNavigationBar">true</item>
         <item name="android:windowLightStatusBar">true</item>

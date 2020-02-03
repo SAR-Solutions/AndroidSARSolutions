@@ -103,7 +103,7 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
     }
 
     private fun setupRecyclerView() {
-        viewManager = LinearLayoutManager(context)
+        viewManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         viewAdapter = Adapter(viewModel)
         vehicle_recycler_view.apply {
             layoutManager = viewManager

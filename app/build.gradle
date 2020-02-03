@@ -21,8 +21,8 @@ android {
         applicationId "com.sarcoordinator.sarsolutions"
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 15
-        versionName "1.0-alpha9"
+        versionCode 16
+        versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -66,7 +66,7 @@ dependencies {
     // Firebase
     implementation 'com.google.firebase:firebase-analytics:17.2.2'
     implementation 'com.google.firebase:firebase-auth:19.2.0'
-    implementation 'com.google.firebase:firebase-firestore:21.3.1'
+    implementation 'com.google.firebase:firebase-firestore:21.4.0'
 
     // Lifecycle
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'

@@ -57,7 +57,7 @@
     <string name="equipment_used">Equipment Used</string>
     <string name="try_again_for_network">Try again for network</string>
     <string name="about">About</string>
-    <string name="app_version">App Version</string>
+    <string name="app_version">App Version:</string>
     <string name="license">License</string>
     <string name="licenses">Licenses</string>
     <string name="view_licenses">View Licenses</string>

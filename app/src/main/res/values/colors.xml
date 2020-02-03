@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="orange">#EA7854</color>
+    <color name="lightOrange">#EDB19E</color>
     <color name="darkOrange">#c5282b</color>
     <color name="blue">#577399</color>
     <color name="darkBlue">#495867</color>
@@ -11,4 +12,7 @@
     <color name="gray">#121212</color>
     <color name="green">#2AD6B5</color>
     <color name="darkGreen">#357266</color>
+    <color name="newRed">#fa163f</color>
+    <color name="newBlue">#12cad6</color>
+    <color name="newPurple">#633a82</color>
 </resources>

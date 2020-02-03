@@ -8,6 +8,7 @@
     android:layout_marginTop="@dimen/mtrl_card_spacing"
     android:layout_marginRight="@dimen/mtrl_card_spacing"
     app:cardCornerRadius="4dp"
+    app:cardBackgroundColor="@color/lightOrange"
     app:cardElevation="4dp">
 
     <LinearLayout
@@ -21,7 +22,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="8dp"
-            android:background="@android:color/darker_gray"
             android:padding="8dp"
             android:textColor="?colorPrimary"
             android:textSize="24sp"
@@ -33,7 +33,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginBottom="10dp"
-            android:background="@android:color/darker_gray"
             android:padding="4dp"
             android:textColor="?colorSecondary"
             android:textStyle="bold" />

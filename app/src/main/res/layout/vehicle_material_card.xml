@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
+    style="@style/Widget.MaterialComponents.CardView.Standard"
     android:layout_height="wrap_content"
-    android:layout_marginStart="@dimen/mtrl_card_spacing"
-    android:layout_marginTop="@dimen/mtrl_card_spacing"
-    android:layout_marginEnd="@dimen/mtrl_card_spacing"
-    app:cardCornerRadius="4dp"
-    app:cardElevation="4dp">
+    android:layout_width="wrap_content">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -15,13 +11,12 @@
 
         <TextView
             android:id="@+id/vehicle_title_text_view"
+            style="@style/Base.Widget.AppCompat.TextView.SubHeading.Color"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:text="Vehicle"
-            android:textColor="?colorPrimary"
-            android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -29,9 +24,10 @@
             android:id="@+id/county_vehicle_check_box"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:checked="false"
+            android:layout_margin="8dp"
             android:text="@string/county_vehicle"
+            app:layout_constraintEnd_toStartOf="@+id/personal_vehicle_check_box"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/vehicle_title_text_view" />
 
@@ -39,9 +35,11 @@
             android:id="@+id/personal_vehicle_check_box"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:checked="false"
+            android:layout_margin="8dp"
             android:text="@string/personal_vehicle"
+            app:layout_constraintBottom_toBottomOf="@+id/county_vehicle_check_box"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/county_vehicle_check_box"
             app:layout_constraintTop_toTopOf="@+id/county_vehicle_check_box" />
 
@@ -49,21 +47,19 @@
             android:id="@+id/vehicle_type_spinner"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:visibility="visible"
-            app:layout_constraintEnd_toEndOf="@+id/miles_traveled_edit_text"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/personal_vehicle_check_box"
+            app:layout_constraintStart_toStartOf="@+id/county_vehicle_check_box"
             app:layout_constraintTop_toBottomOf="@+id/county_vehicle_check_box" />
 
         <EditText
             android:id="@+id/miles_traveled_edit_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
             android:ems="10"
             android:hint="@string/miles_traveled"
             android:inputType="numberDecimal"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/personal_vehicle_check_box"
+            app:layout_constraintStart_toStartOf="@+id/county_vehicle_check_box"
             app:layout_constraintTop_toBottomOf="@+id/vehicle_type_spinner" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
