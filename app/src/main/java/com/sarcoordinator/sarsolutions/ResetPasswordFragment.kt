@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import com.google.firebase.auth.FirebaseAuth
+import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import kotlinx.android.synthetic.main.fragment_reset_password.*
 
 /**
@@ -28,10 +29,15 @@ class ResetPasswordFragment : Fragment(R.layout.fragment_reset_password) {
         }
 
         forgot_password_button.setOnClickListener {
-            if (!Patterns.EMAIL_ADDRESS.matcher(email_input_text.text.toString()).matches()) { // Validate input is email
+            if (!GlobalUtil.isNetworkConnectivityAvailable(requireActivity(), requireView()))
+                return@setOnClickListener
+
+            // Validate input is email
+            if (!Patterns.EMAIL_ADDRESS.matcher(email_input_text.text.toString()).matches()) {
                 Toast.makeText(context, "Enter valid email", Toast.LENGTH_LONG).show()
                 return@setOnClickListener
             }
+
             auth.sendPasswordResetEmail(email_input_text.text.toString())
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {

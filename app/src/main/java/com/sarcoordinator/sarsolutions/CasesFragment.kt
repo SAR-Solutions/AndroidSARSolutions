@@ -1,7 +1,5 @@
 package com.sarcoordinator.sarsolutions
 
-import android.content.Context
-import android.net.ConnectivityManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,13 +11,11 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.models.Case
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import kotlinx.android.synthetic.main.fragment_cases.*
 import kotlinx.android.synthetic.main.list_view_item.view.*
-import timber.log.Timber
 
 /**
  * This fragment displays the list of cases for the user
@@ -54,20 +50,13 @@ class CasesFragment : Fragment(R.layout.fragment_cases) {
         }
     }
 
-    private fun validateNetworkConnectivity() {
-        val cm =
-            requireActivity().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-        try {
-            if (cm.activeNetworkInfo.isConnected) {
-                disableRecyclerView(false)
-            } else {
-                disableRecyclerView(true)
-                Snackbar.make(requireView(), "No network connection found", Snackbar.LENGTH_LONG)
-                    .show()
-            }
-        } catch (e: Exception) {
+    private fun validateNetworkConnectivity(): Boolean {
+        return if (GlobalUtil.isNetworkConnectivityAvailable(requireActivity(), requireView())) {
+            disableRecyclerView(false)
+            true
+        } else {
             disableRecyclerView(true)
+            false
         }
     }
 
@@ -109,7 +98,7 @@ class CasesFragment : Fragment(R.layout.fragment_cases) {
         swipe_refresh_layout.setColorSchemeColors(
             ContextCompat.getColor(
                 requireContext(),
-                R.color.orange
+                R.color.newRed
             )
         )
         swipe_refresh_layout.setOnRefreshListener {
@@ -133,10 +122,8 @@ class CasesFragment : Fragment(R.layout.fragment_cases) {
     private fun observeNetworkErrors() {
         viewModel.getNetworkExceptionObservable().observe(viewLifecycleOwner, Observer { error ->
             if (!error.isNullOrEmpty()) {
-                Timber.e(error)
-                Snackbar.make(requireView(), "Error, pull down to try again", Snackbar.LENGTH_LONG)
-                    .show()
-                list_shimmer_layout.stopShimmer()
+                viewModel.clearNetworkExceptions()
+                validateNetworkConnectivity()
             }
         })
     }
@@ -154,6 +141,7 @@ class CasesFragment : Fragment(R.layout.fragment_cases) {
             fun bindView(case: Case) {
                 itemView.missing_person_text.text =
                     case.missingPersonName.toString().removeSurrounding("[", "]")
+                itemView.person_avatar_view.setText(case.missingPersonName[0])
                 itemView.date.text = GlobalUtil.convertEpochToDate(case.date)
                 itemView.setOnClickListener {
                     itemView.findNavController()

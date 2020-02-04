@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
@@ -42,6 +41,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
     private lateinit var viewModel: SharedViewModel
 
     private lateinit var currentShiftId: String
+    private var isRetryNetworkFab = false
 
     private val args by navArgs<TrackFragmentArgs>()
 
@@ -56,9 +56,6 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         super.onViewCreated(view, savedInstanceState)
         sharedPrefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
 
-        // Restore state depending on view model
-        restoreState()
-
         // Only fetch data if detailed case isn't in cache
         if (!viewModel.currentCase.value?.id.equals(args.caseId)) {
             enableLoadingState(true)
@@ -67,21 +64,29 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
                 if (case != null) {
                     populateViewWithCase(case)
                     enableLoadingState(false)
+                    enableStartTrackingFab()
                 }
             })
         } else {
+            // Fetch from cache
             populateViewWithCase(viewModel.currentCase.value!!)
+            enableStartTrackingFab()
+
+            // Restore state depending on view model
+            restoreState()
         }
 
         location_service_fab.setOnClickListener {
-            if (viewModel.getBinder().value == null) { // Start new service
+            // Start new service
+            if (viewModel.getBinder().value == null) {
                 requestLocPermission()
-            } else { // Stop ongoing service
+            } else {
+                // Stop ongoing service
                 stopLocationService()
-                enableButtons()
+                enableStartTrackingFab()
 
+                // Delay till shiftId is fetched
                 CoroutineScope(IO).launch {
-                    // Delay till shiftId is fetched
                     //TODO: Show loading status of some kind
                     while (!::currentShiftId.isInitialized)
                         delay(1000)
@@ -107,13 +112,45 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         if (enable) {
             track_fragment_shimmer.visibility = View.VISIBLE
             case_info_material_card.visibility = View.GONE
-            location_service_fab.hide()
+//            location_service_fab.hide()
         } else {
             track_fragment_shimmer.visibility = View.GONE
             case_info_material_card.visibility = View.VISIBLE
-            location_service_fab.show()
+//            location_service_fab.show()
         }
     }
+
+    private fun enableStartTrackingFab() {
+        location_service_fab.setImageDrawable(
+            resources.getDrawable(
+                R.drawable.ic_baseline_play_arrow_24,
+                requireContext().theme
+            )
+        )
+        location_service_fab.backgroundTintList = resources.getColorStateList(R.color.newBlue)
+    }
+
+    private fun enableStopTrackingFab() {
+        location_service_fab.setImageDrawable(
+            resources.getDrawable(
+                R.drawable.ic_baseline_stop_24,
+                requireContext().theme
+            )
+        )
+        location_service_fab.backgroundTintList = resources.getColorStateList(R.color.orange)
+    }
+
+    private fun enableRetryNetworkFab() {
+        isRetryNetworkFab = true
+        location_service_fab.setImageDrawable(
+            resources.getDrawable(
+                R.drawable.ic_baseline_refresh_24,
+                requireContext().theme
+            )
+        )
+        location_service_fab.backgroundTintList = resources.getColorStateList(R.color.newRed)
+    }
+
 
     // Set case information
     private fun populateViewWithCase(case: Case) {
@@ -130,7 +167,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
             .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
             .withListener(object : PermissionListener {
                 override fun onPermissionGranted(response: PermissionGrantedResponse) {
-                    disableButtons()
+                    enableStopTrackingFab()
                     startLocationService()
                 }
 
@@ -239,33 +276,11 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
     // Restore view state on configuration change
     private fun restoreState() {
         if (viewModel.getBinder().value != null) {
-            disableButtons()
             // Service is alive and running but needs to be bound back to activity
             bindService()
+            enableStopTrackingFab()
             location_desc.text = viewModel.lastUpdatedText
         }
-    }
-
-    private fun disableButtons() {
-        location_service_fab.setImageDrawable(
-            resources.getDrawable(
-                R.drawable.ic_baseline_stop_24,
-                requireContext().theme
-            )
-        )
-        location_service_fab.backgroundTintList =
-            ColorStateList.valueOf(resources.getColor(R.color.error))
-    }
-
-    private fun enableButtons() {
-        location_service_fab.setImageDrawable(
-            resources.getDrawable(
-                R.drawable.ic_baseline_stop_24,
-                requireContext().theme
-            )
-        )
-        location_service_fab.backgroundTintList =
-            ColorStateList.valueOf(resources.getColor(R.color.orange))
     }
 
     // Convert list of string to a ordered string

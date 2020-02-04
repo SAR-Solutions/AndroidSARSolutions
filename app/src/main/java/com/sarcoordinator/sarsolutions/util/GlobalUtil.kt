@@ -1,8 +1,13 @@
 package com.sarcoordinator.sarsolutions.util
 
 import android.app.Activity
+import android.content.Context
+import android.net.ConnectivityManager
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import androidx.core.content.ContextCompat
+import com.google.android.material.snackbar.Snackbar
+import com.sarcoordinator.sarsolutions.R
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.*
@@ -28,5 +33,36 @@ object GlobalUtil {
         }
         imm.hideSoftInputFromWindow(view.windowToken, 0)
         view.clearFocus()
+    }
+
+    fun isNetworkConnectivityAvailable(activity: Activity, view: View): Boolean {
+        val cm =
+            activity.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+        return try {
+            if (cm.activeNetworkInfo.isConnected) {
+                true
+            } else {
+                Snackbar.make(view, "Device isn't connected to the internet", Snackbar.LENGTH_LONG)
+                    .setBackgroundTint(
+                        ContextCompat.getColor(
+                            activity.applicationContext,
+                            R.color.error
+                        )
+                    )
+                    .show()
+                false
+            }
+        } catch (e: Exception) {
+            Snackbar.make(view, "Error validating network connectivity", Snackbar.LENGTH_LONG)
+                .setBackgroundTint(
+                    ContextCompat.getColor(
+                        activity.applicationContext,
+                        R.color.error
+                    )
+                )
+                .show()
+            false
+        }
     }
 }

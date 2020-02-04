@@ -62,4 +62,5 @@
     <string name="licenses">Licenses</string>
     <string name="view_licenses">View Licenses</string>
     <string name="tracking_information">Tracking Information</string>
+    <string name="no_network_desc">No network connectivity, click on the button to try again</string>
 </resources>

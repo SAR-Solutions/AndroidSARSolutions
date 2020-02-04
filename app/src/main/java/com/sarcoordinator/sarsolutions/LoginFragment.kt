@@ -13,6 +13,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import com.google.firebase.auth.FirebaseAuth
+import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import kotlinx.android.synthetic.main.fragment_login.*
 
 /**
@@ -37,6 +38,12 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         }
 
         signin_button.setOnClickListener {
+
+            // Proceed only if network connection is available
+            if (!GlobalUtil.isNetworkConnectivityAvailable(requireActivity(), requireView())) {
+                return@setOnClickListener
+            }
+
             it.isEnabled = false // Disable button
 
             // Hide keyboard
@@ -46,12 +53,14 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                 imm.hideSoftInputFromWindow(it.windowToken, 0)
             }
 
-            if (!Patterns.EMAIL_ADDRESS.matcher(email_input_text.text.toString()).matches()) { // Validate input is email
+            // Validate input is email
+            if (!Patterns.EMAIL_ADDRESS.matcher(email_input_text.text.toString()).matches()) {
                 Toast.makeText(context, "Enter valid email", Toast.LENGTH_LONG).show()
                 it.isEnabled = true
                 return@setOnClickListener
             }
 
+            // Validate password format
             if (password_input_text.text.isNullOrEmpty()) {
                 Toast.makeText(context, "Password can't be empty", Toast.LENGTH_LONG).show()
                 it.isEnabled = true

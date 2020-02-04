@@ -1,171 +1,176 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context=".SettingsFragment">
 
-    <com.google.android.material.card.MaterialCardView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="@style/Widget.MaterialComponents.CardView.Standard">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.MaterialComponents.CardView.Standard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/general_heading_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/Base.Widget.AppCompat.TextView.Heading"
-                android:padding="16dp"
-                android:text="@string/general"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-            <TextView
-                android:id="@+id/theme_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/Base.Widget.AppCompat.TextView.SubHeading"
-                android:text="@string/theme"
-                app:layout_constraintEnd_toStartOf="@+id/guideline5"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/general_heading_text" />
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/general_heading_text"
+                    style="@style/Base.Widget.AppCompat.TextView.Heading"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    android:text="@string/general"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-            <Spinner
-                android:id="@+id/theme_spinner"
-                style="?spinnerStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:entries="@array/theme_array"
-                android:padding="8dp"
-                android:layout_margin="8dp"
-                android:prompt="@string/select_theme"
-                app:layout_constraintBottom_toBottomOf="@+id/theme_text"
-                app:layout_constraintStart_toStartOf="@+id/guideline5"
-                app:layout_constraintTop_toBottomOf="@id/general_heading_text" />
+                <TextView
+                    android:id="@+id/theme_text"
+                    style="@style/Base.Widget.AppCompat.TextView.SubHeading"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/theme"
+                    app:layout_constraintEnd_toStartOf="@+id/guideline5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/general_heading_text" />
 
-            <TextView
-                android:id="@+id/testing_mode_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/Base.Widget.AppCompat.TextView.SubHeading"
-                android:text="@string/testing_mode"
-                app:layout_constraintEnd_toStartOf="@+id/guideline5"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/theme_text" />
+                <Spinner
+                    android:id="@+id/theme_spinner"
+                    style="?spinnerStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:entries="@array/theme_array"
+                    android:padding="8dp"
+                    android:prompt="@string/select_theme"
+                    app:layout_constraintBottom_toBottomOf="@+id/theme_text"
+                    app:layout_constraintStart_toStartOf="@+id/guideline5"
+                    app:layout_constraintTop_toBottomOf="@id/general_heading_text" />
 
-            <com.google.android.material.switchmaterial.SwitchMaterial
-                android:id="@+id/testing_mode_switch"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="8dp"
-                app:layout_constraintTop_toTopOf="@+id/testing_mode_text"
-                app:layout_constraintBottom_toBottomOf="@+id/testing_mode_text"
-                app:layout_constraintStart_toStartOf="@+id/theme_spinner"
-                app:useMaterialThemeColors="true" />
+                <TextView
+                    android:id="@+id/testing_mode_text"
+                    style="@style/Base.Widget.AppCompat.TextView.SubHeading"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/testing_mode"
+                    app:layout_constraintEnd_toStartOf="@+id/guideline5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/theme_text" />
 
-            <androidx.constraintlayout.widget.Guideline
-                android:id="@+id/guideline5"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                app:layout_constraintGuide_percent="0.40" />
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/testing_mode_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/testing_mode_text"
+                    app:layout_constraintStart_toStartOf="@+id/theme_spinner"
+                    app:layout_constraintTop_toTopOf="@+id/testing_mode_text"
+                    app:useMaterialThemeColors="true" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </com.google.android.material.card.MaterialCardView>
+                <androidx.constraintlayout.widget.Guideline
+                    android:id="@+id/guideline5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_percent="0.40" />
 
-    <com.google.android.material.card.MaterialCardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/mtrl_card_spacing"
-        android:layout_marginTop="@dimen/mtrl_card_spacing"
-        android:layout_marginEnd="@dimen/mtrl_card_spacing"
-        app:cardCornerRadius="4dp"
-        app:cardElevation="4dp">
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/mtrl_card_spacing"
+            android:layout_marginTop="@dimen/mtrl_card_spacing"
+            android:layout_marginEnd="@dimen/mtrl_card_spacing"
+            app:cardCornerRadius="4dp"
+            app:cardElevation="4dp">
 
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/about_heading_text"
-                style="@style/Base.Widget.AppCompat.TextView.Heading"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="16dp"
-                android:text="@string/about"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/appCompatImageView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:padding="8dp"
-                android:src="@drawable/ic_baseline_info_24"
-                app:layout_constraintEnd_toStartOf="@+id/guideline6"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/about_heading_text" />
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/about_heading_text"
+                    style="@style/Base.Widget.AppCompat.TextView.Heading"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    android:text="@string/about"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/appCompatTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/Base.Widget.AppCompat.TextView.SubHeading"
-                android:text="@string/app_version"
-                app:layout_constraintBottom_toBottomOf="@+id/appCompatImageView"
-                app:layout_constraintStart_toStartOf="@+id/guideline6"
-                app:layout_constraintTop_toTopOf="@+id/appCompatImageView" />
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/appCompatImageView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_baseline_info_24"
+                    app:layout_constraintEnd_toStartOf="@+id/guideline6"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/about_heading_text" />
 
-            <androidx.constraintlayout.widget.Guideline
-                android:id="@+id/guideline6"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                app:layout_constraintGuide_percent="0.40" />
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/appCompatTextView"
+                    style="@style/Base.Widget.AppCompat.TextView.SubHeading"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/app_version"
+                    app:layout_constraintBottom_toBottomOf="@+id/appCompatImageView"
+                    app:layout_constraintStart_toStartOf="@+id/guideline6"
+                    app:layout_constraintTop_toTopOf="@+id/appCompatImageView" />
 
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/app_version_value"
-                style="@style/Base.Widget.AppCompat.TextView.SubHeading"
-                android:layout_height="wrap_content"
-                android:layout_width="0dp"
-                android:text="placeholder"
-                android:textStyle="normal"
-                app:layout_constraintBottom_toBottomOf="@+id/appCompatTextView"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/appCompatTextView"
-                app:layout_constraintTop_toTopOf="@+id/appCompatTextView" />
+                <androidx.constraintlayout.widget.Guideline
+                    android:id="@+id/guideline6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_percent="0.40" />
 
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/license_text_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/Base.Widget.AppCompat.TextView.SubHeading.Color"
-                android:text="@string/view_licenses"
-                app:layout_constraintBottom_toBottomOf="@+id/appCompatImageView2"
-                app:layout_constraintStart_toStartOf="@+id/guideline6"
-                app:layout_constraintTop_toTopOf="@+id/appCompatImageView2" />
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/app_version_value"
+                    style="@style/Base.Widget.AppCompat.TextView.SubHeading"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="placeholder"
+                    android:textStyle="normal"
+                    app:layout_constraintBottom_toBottomOf="@+id/appCompatTextView"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/appCompatTextView"
+                    app:layout_constraintTop_toTopOf="@+id/appCompatTextView" />
 
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/appCompatImageView2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:padding="8dp"
-                android:src="@drawable/ic_baseline_library_24"
-                app:layout_constraintEnd_toStartOf="@+id/guideline6"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/appCompatTextView" />
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/license_text_view"
+                    style="@style/Base.Widget.AppCompat.TextView.SubHeading.Color"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/view_licenses"
+                    app:layout_constraintBottom_toBottomOf="@+id/appCompatImageView2"
+                    app:layout_constraintStart_toStartOf="@+id/guideline6"
+                    app:layout_constraintTop_toTopOf="@+id/appCompatImageView2" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </com.google.android.material.card.MaterialCardView>
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/appCompatImageView2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_baseline_library_24"
+                    app:layout_constraintEnd_toStartOf="@+id/guideline6"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/appCompatTextView" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
 
 
-</LinearLayout>
+    </LinearLayout>
+</ScrollView>
 

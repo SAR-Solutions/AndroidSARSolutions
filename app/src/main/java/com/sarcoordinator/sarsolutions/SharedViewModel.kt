@@ -52,6 +52,10 @@ class SharedViewModel : ViewModel() {
         return netWorkExceptionText
     }
 
+    fun clearNetworkExceptions() {
+        netWorkExceptionText.value = null
+    }
+
 
     private val cases = MutableLiveData<ArrayList<Case>>()
     fun getCases(): LiveData<ArrayList<Case>> {
@@ -61,10 +65,14 @@ class SharedViewModel : ViewModel() {
     fun refreshCases() {
         viewModelScope.launch(IO + networkException) {
             val result = ArrayList<Case>()
-            Repository.getCases().forEach { case ->
-                result.add(case)
+            try {
+                Repository.getCases().forEach { case ->
+                    result.add(case)
+                }
+                cases.postValue(result)
+            } catch (e: Exception) {
+                netWorkExceptionText.postValue(e.toString())
             }
-            cases.postValue(result)
         }
     }
 
@@ -72,10 +80,14 @@ class SharedViewModel : ViewModel() {
 
     fun getCaseDetails(caseId: String): LiveData<Case> {
         viewModelScope.launch {
-            withContext(IO) {
-                currentCase.postValue(Repository.getCaseDetail(caseId).also {
-                    it.id = caseId
-                })
+            withContext(IO + networkException) {
+                try {
+                    currentCase.postValue(Repository.getCaseDetail(caseId).also {
+                        it.id = caseId
+                    })
+                } catch (e: Exception) {
+                    netWorkExceptionText.postValue(e.toString())
+                }
             }
         }
         return currentCase
@@ -114,8 +126,12 @@ class SharedViewModel : ViewModel() {
             searchDuration = searchDuration,
             vehicles = vehicleListToObjects(vehicleTypeArray)
         )
-        viewModelScope.launch(IO) {
-            Repository.postShiftReport(caseId, report)
+        viewModelScope.launch(IO + networkException) {
+            try {
+                Repository.postShiftReport(caseId, report)
+            } catch (e: Exception) {
+                netWorkExceptionText.postValue(e.toString())
+            }
         }
         vehicleList.clear()
         isShiftReportSubmitted = true

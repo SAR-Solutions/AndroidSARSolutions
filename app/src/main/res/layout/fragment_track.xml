@@ -10,9 +10,8 @@
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/location_service_fab"
         style="@style/Widget.MaterialComponents.FloatingActionButton.Standard"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_baseline_play_arrow_24" />
+        android:layout_width="match_parent" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -43,11 +42,7 @@
                 android:id="@+id/case_info_material_card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/mtrl_card_spacing"
-                android:layout_marginTop="@dimen/mtrl_card_spacing"
-                android:layout_marginEnd="@dimen/mtrl_card_spacing"
-                app:cardCornerRadius="4dp"
-                app:cardElevation="4dp">
+                style="@style/Widget.MaterialComponents.CardView.Standard">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -165,11 +160,7 @@
                 android:id="@+id/tracking_card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/mtrl_card_spacing"
-                android:layout_marginTop="@dimen/mtrl_card_spacing"
-                android:layout_marginEnd="@dimen/mtrl_card_spacing"
-                app:cardCornerRadius="4dp"
-                app:cardElevation="4dp">
+                style="@style/Widget.MaterialComponents.CardView.Standard">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
