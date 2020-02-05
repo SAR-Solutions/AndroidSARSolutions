@@ -115,10 +115,14 @@ class LocationService : Service() {
                 Calendar.getInstance().time.toString(),
                 BuildConfig.VERSION_NAME
             )
-            shiftId.postValue(
-                Repository
-                    .postStartShift(shift, mCase.id, mTestMode).shiftId
-            )
+
+            try {
+                shiftId.postValue(Repository.postStartShift(shift, mCase.id, mTestMode).shiftId)
+            } catch (e: Exception) {
+                //TODO: Handle network exception
+                Timber.e("Error with shiftId")
+            }
+
             lastUpdated.postValue(getString(R.string.started_shift))
         }
 

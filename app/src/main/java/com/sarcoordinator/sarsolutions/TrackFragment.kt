@@ -23,6 +23,7 @@ import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
 import com.sarcoordinator.sarsolutions.models.Case
+import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.LocationService
 import kotlinx.android.synthetic.main.fragment_track.*
 import kotlinx.coroutines.CoroutineScope
@@ -56,6 +57,19 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         super.onViewCreated(view, savedInstanceState)
         sharedPrefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
 
+        initFabClickListener()
+        validateNetworkConnectivity()
+    }
+
+    private fun validateNetworkConnectivity() {
+        if (!GlobalUtil.isNetworkConnectivityAvailable(requireActivity(), requireView())) {
+            enableRetryNetworkState()
+        } else {
+            setupInterface()
+        }
+    }
+
+    private fun setupInterface() {
         // Only fetch data if detailed case isn't in cache
         if (!viewModel.currentCase.value?.id.equals(args.caseId)) {
             enableLoadingState(true)
@@ -76,31 +90,6 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
             restoreState()
         }
 
-        location_service_fab.setOnClickListener {
-            // Start new service
-            if (viewModel.getBinder().value == null) {
-                requestLocPermission()
-            } else {
-                // Stop ongoing service
-                stopLocationService()
-                enableStartTrackingFab()
-
-                // Delay till shiftId is fetched
-                CoroutineScope(IO).launch {
-                    //TODO: Show loading status of some kind
-                    while (!::currentShiftId.isInitialized)
-                        delay(1000)
-                    withContext(Main) {
-                        findNavController().navigate(
-                            TrackFragmentDirections.actionTrackFragmentToShiftReportFragment(
-                                currentShiftId
-                            )
-                        )
-                    }
-                }
-            }
-        }
-
         viewModel.getBinder().observe(viewLifecycleOwner, Observer { binder ->
             // Either service was bound or unbound
             service = binder?.getService()
@@ -108,15 +97,45 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         })
     }
 
+    private fun initFabClickListener() {
+        location_service_fab.setOnClickListener {
+            if (isRetryNetworkFab) {
+                isRetryNetworkFab = false
+                validateNetworkConnectivity()
+            } else {
+                // Start new service
+                if (viewModel.getBinder().value == null) {
+                    requestLocPermission()
+                } else {
+                    // Stop ongoing service
+                    stopLocationService()
+                    enableStartTrackingFab()
+
+                    // Delay till shiftId is fetched
+                    CoroutineScope(IO).launch {
+                        //TODO: Show loading status of some kind
+                        while (!::currentShiftId.isInitialized)
+                            delay(1000)
+                        withContext(Main) {
+                            findNavController().navigate(
+                                TrackFragmentDirections.actionTrackFragmentToShiftReportFragment(
+                                    currentShiftId
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private fun enableLoadingState(enable: Boolean) {
         if (enable) {
             track_fragment_shimmer.visibility = View.VISIBLE
             case_info_material_card.visibility = View.GONE
-//            location_service_fab.hide()
         } else {
             track_fragment_shimmer.visibility = View.GONE
             case_info_material_card.visibility = View.VISIBLE
-//            location_service_fab.show()
         }
     }
 
@@ -140,7 +159,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         location_service_fab.backgroundTintList = resources.getColorStateList(R.color.orange)
     }
 
-    private fun enableRetryNetworkFab() {
+    private fun enableRetryNetworkState() {
         isRetryNetworkFab = true
         location_service_fab.setImageDrawable(
             resources.getDrawable(
@@ -149,6 +168,9 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
             )
         )
         location_service_fab.backgroundTintList = resources.getColorStateList(R.color.newRed)
+
+        case_info_material_card.visibility = View.GONE
+        location_desc.text = getString(R.string.no_network_desc)
     }
 
 

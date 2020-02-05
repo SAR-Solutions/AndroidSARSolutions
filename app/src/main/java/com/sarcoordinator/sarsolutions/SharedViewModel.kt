@@ -26,7 +26,6 @@ class SharedViewModel : ViewModel() {
 
     lateinit var lastUpdatedText: String
     private val binder = MutableLiveData<LocationService.LocalBinder>()
-    lateinit var mAuthToken: String
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(p0: ComponentName?, iBinder: IBinder?) {

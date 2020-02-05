@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -11,7 +12,6 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.models.Case
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import kotlinx.android.synthetic.main.fragment_cases.*
@@ -25,7 +25,6 @@ class CasesFragment : Fragment(R.layout.fragment_cases) {
     private lateinit var viewModel: SharedViewModel
     private lateinit var viewManager: RecyclerView.LayoutManager
     private lateinit var viewAdapter: Adapter
-    private val auth = FirebaseAuth.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,17 +38,15 @@ class CasesFragment : Fragment(R.layout.fragment_cases) {
         super.onViewCreated(view, savedInstanceState)
 
         observeNetworkErrors()
+        setupRecyclerView()
+        observeCases()
 
-        if (!viewModel.getCases().value.isNullOrEmpty()) {
-            setupRecyclerView()
-            // Observe cases takes care of removing shimmer layout
-            observeCases()
-        } else {
-            // Process only if internet connection is available
-            validateNetworkConnectivity()
+        if (viewModel.getCases().value.isNullOrEmpty()) {
+            refreshCaseList()
         }
     }
 
+    // Disables or enables recyclerview depending on network connectivity status
     private fun validateNetworkConnectivity(): Boolean {
         return if (GlobalUtil.isNetworkConnectivityAvailable(requireActivity(), requireView())) {
             disableRecyclerView(false)
@@ -61,28 +58,31 @@ class CasesFragment : Fragment(R.layout.fragment_cases) {
     }
 
     // Disabled recyclerview and shows try again button
-    // Note: actually disables swipe refresh layout
+// Note: actually disables swipe refresh layout
     private fun disableRecyclerView(toDisable: Boolean) {
         if (toDisable) {
             swipe_refresh_layout.visibility = View.GONE
             list_shimmer_layout.visibility = View.GONE
             try_again_network_button.visibility = View.VISIBLE
             try_again_network_button.setOnClickListener {
-                validateNetworkConnectivity()
+                refreshCaseList()
             }
         } else {
             swipe_refresh_layout.visibility = View.VISIBLE
             list_shimmer_layout.visibility = View.VISIBLE
             try_again_network_button.visibility = View.GONE
-
-            setupRecyclerView()
-
-            auth.currentUser!!.getIdToken(true).addOnSuccessListener {
-                viewModel.mAuthToken = it.token!!
-                observeCases()
-                viewModel.refreshCases()
-            }
         }
+    }
+
+    // Makes new network call and observes for case list
+    private fun observeCases() {
+        viewModel.getCases().observe(viewLifecycleOwner, Observer<ArrayList<Case>> { caseList ->
+            if (list_shimmer_layout.visibility != View.GONE)
+                list_shimmer_layout.visibility = View.GONE
+            if (swipe_refresh_layout.isRefreshing)
+                swipe_refresh_layout.isRefreshing = false
+            viewAdapter.setCaseList(caseList)
+        })
     }
 
     // Sets up recyclerview and refresh layout
@@ -102,30 +102,27 @@ class CasesFragment : Fragment(R.layout.fragment_cases) {
             )
         )
         swipe_refresh_layout.setOnRefreshListener {
-            viewAdapter = Adapter()
-            cases_recycler_view.adapter = viewAdapter
-            viewModel.refreshCases()
+            refreshCaseList()
         }
-    }
-
-    // Makes new network call and observes for case list
-    private fun observeCases() {
-        viewModel.getCases().observe(viewLifecycleOwner, Observer<ArrayList<Case>> { caseList ->
-            if (list_shimmer_layout.visibility != View.GONE)
-                list_shimmer_layout.visibility = View.GONE
-            if (swipe_refresh_layout.isRefreshing)
-                swipe_refresh_layout.isRefreshing = false
-            viewAdapter.addCaseList(caseList)
-        })
     }
 
     private fun observeNetworkErrors() {
         viewModel.getNetworkExceptionObservable().observe(viewLifecycleOwner, Observer { error ->
             if (!error.isNullOrEmpty()) {
                 viewModel.clearNetworkExceptions()
-                validateNetworkConnectivity()
+                Toast.makeText(requireContext(), "Internet connection error", Toast.LENGTH_LONG)
+                    .show()
+                disableRecyclerView(true)
             }
         })
+    }
+
+    private fun refreshCaseList() {
+        if (validateNetworkConnectivity()) {
+            viewAdapter = Adapter()
+            cases_recycler_view.adapter = viewAdapter
+            viewModel.refreshCases()
+        }
     }
 
     override fun onDestroyView() {
@@ -162,8 +159,8 @@ class CasesFragment : Fragment(R.layout.fragment_cases) {
             holder.bindView(data[position])
         }
 
-        fun addCaseList(list: ArrayList<Case>) {
-            data.addAll(list)
+        fun setCaseList(list: ArrayList<Case>) {
+            data = list
             notifyDataSetChanged()
         }
     }

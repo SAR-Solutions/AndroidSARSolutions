@@ -111,7 +111,7 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
         }
     }
 
-    class Adapter(val viewModel: SharedViewModel) :
+    class Adapter(private val viewModel: SharedViewModel) :
         RecyclerView.Adapter<Adapter.Viewholder>() {
 
         private var data = ArrayList<SharedViewModel.VehicleCardContent>()
@@ -197,5 +197,10 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
             data.addAll(list)
             notifyDataSetChanged()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        vehicle_recycler_view.adapter = null
     }
 }

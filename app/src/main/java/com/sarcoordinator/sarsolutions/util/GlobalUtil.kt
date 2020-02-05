@@ -8,6 +8,7 @@ import android.view.inputmethod.InputMethodManager
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
 import com.sarcoordinator.sarsolutions.R
+import timber.log.Timber
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.*
@@ -35,7 +36,7 @@ object GlobalUtil {
         view.clearFocus()
     }
 
-    fun isNetworkConnectivityAvailable(activity: Activity, view: View): Boolean {
+    fun isNetworkConnectivityAvailable(activity: Activity, view: View?): Boolean {
         val cm =
             activity.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
@@ -43,7 +44,26 @@ object GlobalUtil {
             if (cm.activeNetworkInfo.isConnected) {
                 true
             } else {
-                Snackbar.make(view, "Device isn't connected to the internet", Snackbar.LENGTH_LONG)
+                Timber.e("Not network connectivity")
+                if (view != null)
+                    Snackbar.make(
+                        view,
+                        "Device isn't connected to the internet",
+                        Snackbar.LENGTH_LONG
+                    )
+                        .setBackgroundTint(
+                            ContextCompat.getColor(
+                                activity.applicationContext,
+                                R.color.error
+                            )
+                        )
+                        .show()
+                false
+            }
+        } catch (e: Exception) {
+            Timber.e("Error validating network connectivity:\n$e")
+            if (view != null)
+                Snackbar.make(view, "Error validating network connectivity", Snackbar.LENGTH_LONG)
                     .setBackgroundTint(
                         ContextCompat.getColor(
                             activity.applicationContext,
@@ -51,17 +71,6 @@ object GlobalUtil {
                         )
                     )
                     .show()
-                false
-            }
-        } catch (e: Exception) {
-            Snackbar.make(view, "Error validating network connectivity", Snackbar.LENGTH_LONG)
-                .setBackgroundTint(
-                    ContextCompat.getColor(
-                        activity.applicationContext,
-                        R.color.error
-                    )
-                )
-                .show()
             false
         }
     }
