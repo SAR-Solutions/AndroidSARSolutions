@@ -87,7 +87,7 @@ dependencies {
     implementation 'com.facebook.shimmer:shimmer:0.5.0'
 
     // Firebase Crashlytics
-//    implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
+    implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
 
     // Open Source Notices
     implementation 'com.google.android.gms:play-services-oss-licenses:17.0.0'

@@ -71,9 +71,9 @@ class LocationService : Service() {
                 if (locationList.contains(LocationPoint(location.latitude, location.longitude)))
                     continue
                 locationList.add(LocationPoint(location.latitude, location.longitude))
-                lastUpdated.postValue("Last updated at \n" + Calendar.getInstance().time)
+                lastUpdated.value = "Last updated at \n" + Calendar.getInstance().time
                 (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
-                    .notify(1, getNotification(lastUpdated.value!!))
+                    .notify(1, getNotification(lastUpdated.value.toString()))
 
                 // Start addPathsjob if 10 or more locations exist and job isn't running
                 if (locationList.size >= 10 && !addPathsJobIsSyncing) {

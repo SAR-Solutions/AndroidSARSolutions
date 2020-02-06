@@ -199,8 +199,4 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        vehicle_recycler_view.adapter = null
-    }
 }
