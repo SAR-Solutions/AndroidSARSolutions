@@ -7,7 +7,6 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
-import android.util.TypedValue
 import android.view.View
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -148,11 +147,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
             )
         )
 
-        val typeValue = TypedValue()
-        requireContext().theme.resolveAttribute(R.attr.colorSecondary, typeValue, true)
-        val color: Int = typeValue.data
-
-        location_service_fab.backgroundTintList = resources.getColorStateList(color)
+        location_service_fab.backgroundTintList = resources.getColorStateList(R.color.newBlue)
     }
 
     private fun enableStopTrackingFab() {
