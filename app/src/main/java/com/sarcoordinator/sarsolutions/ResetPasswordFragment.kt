@@ -14,9 +14,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import kotlinx.android.synthetic.main.fragment_reset_password.*
 
-/**
- * A simple [Fragment] subclass.
- */
 class ResetPasswordFragment : Fragment(R.layout.fragment_reset_password) {
 
     private val auth = FirebaseAuth.getInstance()
@@ -26,6 +23,8 @@ class ResetPasswordFragment : Fragment(R.layout.fragment_reset_password) {
         // Set shared element transition
         sharedElementEnterTransition = TransitionInflater.from(context)
             .inflateTransition(android.R.transition.move)
+
+        setHasOptionsMenu(true)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

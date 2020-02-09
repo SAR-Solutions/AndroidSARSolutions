@@ -15,7 +15,6 @@ import com.sarcoordinator.sarsolutions.util.LocationService
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 // Viewmodel is shared between all fragments and parent activity
@@ -78,15 +77,13 @@ class SharedViewModel : ViewModel() {
     val currentCase = MutableLiveData<Case>()
 
     fun getCaseDetails(caseId: String): LiveData<Case> {
-        viewModelScope.launch {
-            withContext(IO + networkException) {
-                try {
-                    currentCase.postValue(Repository.getCaseDetail(caseId).also {
-                        it.id = caseId
-                    })
-                } catch (e: Exception) {
-                    netWorkExceptionText.postValue(e.toString())
-                }
+        viewModelScope.launch(IO + networkException) {
+            try {
+                currentCase.postValue(Repository.getCaseDetail(caseId).also {
+                    it.id = caseId
+                })
+            } catch (e: Exception) {
+                netWorkExceptionText.postValue(e.toString())
             }
         }
         return currentCase
@@ -116,7 +113,8 @@ class SharedViewModel : ViewModel() {
         )
     }
 
-    fun updateAtPosition(position: Int, vehicle: VehicleCardContent) {
+    // Update vehicle object at position in vehicleList
+    fun updateVehicleAtPosition(position: Int, vehicle: VehicleCardContent) {
         vehicleList[position] = vehicle
     }
 
@@ -128,12 +126,12 @@ class SharedViewModel : ViewModel() {
         viewModelScope.launch(IO + networkException) {
             try {
                 Repository.postShiftReport(caseId, report)
+                vehicleList.clear()
+                isShiftReportSubmitted = true
             } catch (e: Exception) {
                 netWorkExceptionText.postValue(e.toString())
             }
         }
-        vehicleList.clear()
-        isShiftReportSubmitted = true
     }
 
     // Convert vehicleList to list of Vehicle objects

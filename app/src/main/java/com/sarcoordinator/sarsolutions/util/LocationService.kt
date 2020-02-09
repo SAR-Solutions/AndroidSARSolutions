@@ -46,14 +46,25 @@ class LocationService : Service() {
     private val lastUpdated = MutableLiveData<String>()
     fun getLastUpdated(): LiveData<String> = lastUpdated
 
+    private val shiftEndedWithError = MutableLiveData<Boolean>()
+    fun hasShiftEndedWithError(): LiveData<Boolean> = shiftEndedWithError
+
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val UPDATE_INTERVAL = 4000L
     private val FASTEST_INTERVAL = 2000L
 
     private lateinit var addPathsJob: CompletableJob
     private var addPathsJobIsSyncing = false
+    private var failedToStartShift = false
 
     private val locationList: ArrayList<LocationPoint> = ArrayList()
+    private val pendingSyncList: ArrayList<LocationPoint> = ArrayList()
+
+
+    /*
+    * Makes network call to post data
+    * Handles adding location to locationList or pendingSyncList
+    */
     private var locationCallback: LocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult?) {
             super.onLocationResult(locationResult)
@@ -76,13 +87,18 @@ class LocationService : Service() {
                     .notify(1, getNotification(lastUpdated.value.toString()))
 
                 // Start addPathsjob if 10 or more locations exist and job isn't running
-                if (locationList.size >= 10 && !addPathsJobIsSyncing) {
+                if (locationList.size >= 2 && !addPathsJobIsSyncing) {
                     addPathsJobIsSyncing = true
                     val tempList = ArrayList<LocationPoint>()
                     tempList.addAll(locationList)
                     locationList.clear()
                     CoroutineScope(IO + addPathsJob).launch {
-                        Repository.putLocations(shiftId.value!!, mTestMode, tempList)
+                        try {
+                            Repository.putLocations(shiftId.value!!, mTestMode, tempList)
+                        } catch (exception: Exception) {
+                            pendingSyncList.addAll(tempList)
+                            Timber.e("No internet connection found")
+                        }
                     }.invokeOnCompletion {
                         addPathsJobIsSyncing = false
                     }
@@ -119,8 +135,10 @@ class LocationService : Service() {
             try {
                 shiftId.postValue(Repository.postStartShift(shift, mCase.id, mTestMode).shiftId)
             } catch (e: Exception) {
-                //TODO: Handle network exception
                 Timber.e("Error with shiftId")
+                failedToStartShift = true
+                shiftEndedWithError.postValue(true)
+                onDestroy()
             }
 
             lastUpdated.postValue(getString(R.string.started_shift))
@@ -179,8 +197,13 @@ class LocationService : Service() {
 
     // End shift; set endTime and sync remaining points
     private fun completeShift() {
-        // Post endtime
         CoroutineScope(IO).launch {
+            // Nothing to do, if shift didn't start
+            if (failedToStartShift)
+                return@launch
+
+            val endTime = Calendar.getInstance().time.toString()
+
             while (shiftId.value == null) {
                 Timber.d(
                     "Shift didn't start and no points were recorded\n" +
@@ -188,15 +211,27 @@ class LocationService : Service() {
                 )
                 delay(1000)
             }
-            if (locationList.isNotEmpty()) {
-                // Sync remaining points
-                Repository.putLocations(shiftId.value!!, mTestMode, locationList)
+
+            // Sync remaining points
+            if (locationList.isNotEmpty() || pendingSyncList.isNotEmpty()) {
+                pendingSyncList.addAll(locationList)
+                try {
+                    Repository.putLocations(shiftId.value!!, mTestMode, pendingSyncList)
+                } catch (exception: Exception) {
+                    Timber.e("Error with network call putting locations\n$exception")
+                }
             }
-            Repository.putEndTime(
-                shiftId.value!!,
-                mTestMode,
-                Calendar.getInstance().time.toString()
-            )
+
+            // Post endtime
+            try {
+                Repository.putEndTime(
+                    shiftId.value!!,
+                    mTestMode,
+                    endTime
+                )
+            } catch (exception: Exception) {
+                Timber.e("Error with network call putting end time\n$exception")
+            }
         }
     }
 

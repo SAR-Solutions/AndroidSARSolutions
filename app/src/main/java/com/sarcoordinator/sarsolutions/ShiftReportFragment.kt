@@ -6,10 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -34,7 +35,7 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = activity?.run {
-            ViewModelProviders.of(this)[SharedViewModel::class.java]
+            ViewModelProvider(this)[SharedViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
     }
 
@@ -78,13 +79,28 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
                     Snackbar.LENGTH_LONG
                 ).show()
             } else {
-                viewModel.submitShiftReport(
-                    args.shiftId,
-                    shiftHoursEditText.text.toString(),
-                    resources.getStringArray(R.array.vehicle_array).toList()
-                )
-                GlobalUtil.hideKeyboard(requireActivity())
-                findNavController().navigate(ShiftReportFragmentDirections.actionShiftReportFragmentToCasesFragment())
+                // Only submit shift if internet connectivity is available
+                if (GlobalUtil.isNetworkConnectivityAvailable(
+                        requireActivity(),
+                        requireView(),
+                        false
+                    )
+                ) {
+                    viewModel.submitShiftReport(
+                        args.shiftId,
+                        shiftHoursEditText.text.toString(),
+                        resources.getStringArray(R.array.vehicle_array).toList()
+                    )
+                    GlobalUtil.hideKeyboard(requireActivity())
+                    findNavController().navigate(ShiftReportFragmentDirections.actionShiftReportFragmentToCasesFragment())
+                } else {
+                    Snackbar.make(
+                        requireView(), getString(R.string.submit_later), Snackbar.LENGTH_LONG
+                    ).setAction(getString(R.string.yes), View.OnClickListener {
+                        Toast.makeText(requireContext(), "Not implemented yet", Toast.LENGTH_LONG)
+                            .show()
+                    }).show()
+                }
             }
         }
 
@@ -143,17 +159,17 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
                 // Listeners
                 itemView.county_vehicle_check_box.setOnCheckedChangeListener { _, isChecked ->
                     vehicleCardContent.isCountyVehicle = isChecked
-                    viewModel.updateAtPosition(position, vehicleCardContent)
+                    viewModel.updateVehicleAtPosition(position, vehicleCardContent)
                 }
 
                 itemView.personal_vehicle_check_box.setOnCheckedChangeListener { _, isChecked ->
                     vehicleCardContent.isPersonalVehicle = isChecked
-                    viewModel.updateAtPosition(position, vehicleCardContent)
+                    viewModel.updateVehicleAtPosition(position, vehicleCardContent)
                 }
 
                 itemView.miles_traveled_edit_text.addTextChangedListener {
                     vehicleCardContent.milesTraveled = it.toString()
-                    viewModel.updateAtPosition(position, vehicleCardContent)
+                    viewModel.updateVehicleAtPosition(position, vehicleCardContent)
                 }
 
                 itemView.vehicle_type_spinner.onItemSelectedListener =
@@ -169,7 +185,7 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
                             d: Long
                         ) {
                             vehicleCardContent.vehicleType = pos
-                            viewModel.updateAtPosition(position, vehicleCardContent)
+                            viewModel.updateVehicleAtPosition(position, vehicleCardContent)
                         }
                     }
             }

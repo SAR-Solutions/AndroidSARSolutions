@@ -12,9 +12,10 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.PermissionToken
@@ -49,7 +50,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = activity?.run {
-            ViewModelProviders.of(this)[SharedViewModel::class.java]
+            ViewModelProvider(this)[SharedViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
     }
 
@@ -65,11 +66,14 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         if (!GlobalUtil.isNetworkConnectivityAvailable(requireActivity(), requireView())) {
             enableRetryNetworkState()
         } else {
+            // If coming from retry network fab, change case info card visibility
+            case_info_material_card.visibility = View.VISIBLE
             setupInterface()
         }
     }
 
     private fun setupInterface() {
+
         // Only fetch data if detailed case isn't in cache
         if (!viewModel.currentCase.value?.id.equals(args.caseId)) {
             enableLoadingState(true)
@@ -111,9 +115,19 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
                     stopLocationService()
                     enableStartTrackingFab()
 
+                    location_service_fab.isEnabled = false
+
+                    // Init, set and start circular progress bar
+                    val progressCircle = CircularProgressDrawable(requireContext()).apply {
+                        strokeWidth = 10f
+                    }
+                    location_service_fab.setImageDrawable(progressCircle)
+                    progressCircle.start()
+
+                    location_desc.text = getString(R.string.waiting_for_server)
+
                     // Delay till shiftId is fetched
                     CoroutineScope(IO).launch {
-                        //TODO: Show loading status of some kind
                         while (!::currentShiftId.isInitialized)
                             delay(1000)
                         withContext(Main) {
@@ -240,6 +254,14 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
             it.getShiftId().observe(viewLifecycleOwner, Observer { shiftId ->
                 currentShiftId = shiftId
             })
+            it.hasShiftEndedWithError().observe(viewLifecycleOwner, Observer { hasShiftEnded ->
+                if (hasShiftEnded) {
+                    Timber.e("Shift ended due to some error")
+                    stopLocationService()
+                    enableStartTrackingFab()
+                    validateNetworkConnectivity()
+                }
+            })
         }
     }
 
@@ -259,15 +281,6 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         bindService()
     }
 
-    private fun bindService() {
-        val serviceIntent = Intent(context, LocationService::class.java)
-        activity?.bindService(
-            serviceIntent,
-            viewModel.getServiceConnection(),
-            Context.BIND_AUTO_CREATE
-        )
-    }
-
     private fun stopLocationService() {
         val serviceIntent = Intent(context, LocationService::class.java)
         unbindService()
@@ -276,6 +289,15 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         // Will not be re-bind on configuration change
         // NOTE: Must call unbindService() before removeService()
         viewModel.removeService()
+    }
+
+    private fun bindService() {
+        val serviceIntent = Intent(context, LocationService::class.java)
+        activity?.bindService(
+            serviceIntent,
+            viewModel.getServiceConnection(),
+            Context.BIND_AUTO_CREATE
+        )
     }
 
     private fun unbindService() {

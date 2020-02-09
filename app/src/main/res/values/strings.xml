@@ -63,4 +63,8 @@
     <string name="view_licenses">View Licenses</string>
     <string name="tracking_information">Tracking Information</string>
     <string name="no_network_desc">No network connectivity, click on the button to try again</string>
+    <string name="waiting_for_server">Waiting for server</string>
+    <string name="submit_later">No internet connection found. Submit later?</string>
+    <string name="yes">Yes</string>
+    <string name="error_starting">Error starting shift. Check network connection</string>
 </resources>

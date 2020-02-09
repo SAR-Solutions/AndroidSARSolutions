@@ -14,7 +14,11 @@
         android:elevation="6dp"
         android:src="@drawable/ic_baseline_play_arrow_24"
         android:layout_height="wrap_content"
-        android:layout_width="match_parent" />
+        android:layout_width="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -25,7 +29,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-
 
             <com.facebook.shimmer.ShimmerFrameLayout
                 android:id="@+id/track_fragment_shimmer"
@@ -197,9 +200,7 @@
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
-
         </LinearLayout>
-
     </ScrollView>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

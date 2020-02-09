@@ -24,6 +24,11 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
 
     private var afm: AutofillManager? = null
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 

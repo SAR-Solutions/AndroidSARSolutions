@@ -45,7 +45,16 @@ object GlobalUtil {
         view.clearFocus()
     }
 
-    fun isNetworkConnectivityAvailable(activity: Activity, view: View?): Boolean {
+    /**
+     * Returns true and false depending on network connection availability
+     * If false, shows a snackbar with reference to passed view with error message
+     * Snackbar will not be shown is showSnackbar is set to false
+     */
+    fun isNetworkConnectivityAvailable(
+        activity: Activity,
+        view: View?,
+        showSnackbar: Boolean = true
+    ): Boolean {
         val cm =
             activity.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
@@ -54,7 +63,7 @@ object GlobalUtil {
                 true
             } else {
                 Timber.e("Not network connectivity")
-                if (view != null)
+                if (view != null && showSnackbar)
                     Snackbar.make(
                         view,
                         "Device isn't connected to the internet",
@@ -71,7 +80,7 @@ object GlobalUtil {
             }
         } catch (e: Exception) {
             Timber.e("Error validating network connectivity:\n$e")
-            if (view != null)
+            if (view != null && showSnackbar)
                 Snackbar.make(view, "Error validating network connectivity", Snackbar.LENGTH_LONG)
                     .setBackgroundTint(
                         ContextCompat.getColor(
