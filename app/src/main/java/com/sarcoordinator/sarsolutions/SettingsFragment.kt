@@ -7,10 +7,10 @@ import android.os.Bundle
 import android.view.*
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.google.android.material.switchmaterial.SwitchMaterial
+import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import kotlinx.android.synthetic.main.fragment_settings.*
 import timber.log.Timber
 
@@ -18,10 +18,6 @@ class SettingsFragment : Fragment() {
 
     companion object {
         const val TESTING_MODE_PREFS = "TESTING_MODE"
-        const val THEME_PREFS = "THEME_PREFS"
-        const val THEME_LIGHT = "THEME_LIGHT"
-        const val THEME_DARK = "THEME_DARK"
-        const val THEME_DEFAULT = "THEME_DEFAULT"
     }
 
     private lateinit var sharedPrefs: SharedPreferences
@@ -64,12 +60,7 @@ class SettingsFragment : Fragment() {
 
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, pos: Int, d: Long) {
                 Timber.d("$pos selected in theme spinner")
-                when (pos) {
-                    0 -> setThemePref(THEME_LIGHT)
-                    1 -> setThemePref(THEME_DARK)
-                    2 -> setThemePref(THEME_DEFAULT)
-                    else -> throw Exception("Invalid position($pos) selected in theme spinner")
-                }
+                GlobalUtil.setTheme(sharedPrefs, pos)
             }
         }
 
@@ -81,14 +72,9 @@ class SettingsFragment : Fragment() {
 
     // Set ui elements based on user preferences
     private fun loadPreferences() {
-        // Theme
-        sharedPrefs.getString(THEME_PREFS, THEME_DEFAULT).let {
-            when (it) {
-                THEME_LIGHT -> theme_spinner.setSelection(0)
-                THEME_DARK -> theme_spinner.setSelection(1)
-                THEME_DEFAULT -> theme_spinner.setSelection(2)
-                else -> throw Exception("SharedPreferences returned unexpected value for current theme")
-            }
+        // Set spinner based on theme
+        GlobalUtil.getTheme(sharedPrefs, resources).let {
+            theme_spinner.setSelection(it)
         }
 
         // Testing mode
@@ -96,20 +82,6 @@ class SettingsFragment : Fragment() {
 
         // app version
         app_version_value.text = BuildConfig.VERSION_NAME
-    }
-
-    // Sets theme preference to parameter and changes theme
-    private fun setThemePref(theme: String) {
-        with(sharedPrefs.edit()) {
-            putString(THEME_PREFS, theme)
-            commit()
-        }
-        when (theme) {
-            THEME_LIGHT -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-            THEME_DARK -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-            THEME_DEFAULT -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-            else -> throw Exception("Invalid argument passed to setThemePref: argument = $theme")
-        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

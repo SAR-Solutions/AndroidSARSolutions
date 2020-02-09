@@ -12,13 +12,12 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.FragmentNavigatorExtras
+import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import kotlinx.android.synthetic.main.fragment_login.*
 
-/**
- * A simple [Fragment] subclass.
- */
 class LoginFragment : Fragment(R.layout.fragment_login) {
 
     private val auth = FirebaseAuth.getInstance()
@@ -31,6 +30,20 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             afm = requireContext().getSystemService(AutofillManager::class.java)
         }
+
+        // Set app icon based on app theme
+        if (GlobalUtil.getThemeMode(resources) == GlobalUtil.THEME_DARK)
+            imageView.setImageResource(R.mipmap.app_icon_white_text)
+
+        password_text_layout.apply {
+            alpha = 0f
+            visibility = View.VISIBLE
+
+            animate()
+                .alpha(1f).duration =
+                resources.getInteger(android.R.integer.config_shortAnimTime).toLong()
+        }
+
         // Set autofill hints
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             email_input_text.setAutofillHints(View.AUTOFILL_HINT_USERNAME)
@@ -101,12 +114,19 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                 Toast.makeText(context, "Unknown error occurred. Try again", Toast.LENGTH_LONG)
                     .show()
             }
-
         }
 
         forgot_password_button.setOnClickListener {
-            view?.findNavController()
-                ?.navigate(LoginFragmentDirections.actionLoginFragmentToResetPasswordFragment())
+            val extras = FragmentNavigatorExtras(
+                email_text_layout to "email",
+                imageView to "appImage",
+                signin_button to "button"
+            )
+            findNavController()
+                .navigate(
+                    LoginFragmentDirections.actionLoginFragmentToResetPasswordFragment(),
+                    extras
+                )
         }
     }
 

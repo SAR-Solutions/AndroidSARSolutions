@@ -2,6 +2,7 @@ package com.sarcoordinator.sarsolutions
 
 import android.os.Build
 import android.os.Bundle
+import android.transition.TransitionInflater
 import android.util.Patterns
 import android.view.Menu
 import android.view.MenuInflater
@@ -20,6 +21,13 @@ class ResetPasswordFragment : Fragment(R.layout.fragment_reset_password) {
 
     private val auth = FirebaseAuth.getInstance()
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // Set shared element transition
+        sharedElementEnterTransition = TransitionInflater.from(context)
+            .inflateTransition(android.R.transition.move)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -27,6 +35,9 @@ class ResetPasswordFragment : Fragment(R.layout.fragment_reset_password) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             email_input_text.setAutofillHints(View.AUTOFILL_HINT_EMAIL_ADDRESS)
         }
+
+        if (GlobalUtil.getThemeMode(resources) == GlobalUtil.THEME_DARK)
+            imageView.setImageResource(R.mipmap.app_icon_white_text)
 
         forgot_password_button.setOnClickListener {
             if (!GlobalUtil.isNetworkConnectivityAvailable(requireActivity(), requireView()))

@@ -2,9 +2,13 @@ package com.sarcoordinator.sarsolutions.util
 
 import android.app.Activity
 import android.content.Context
+import android.content.SharedPreferences
+import android.content.res.Configuration
+import android.content.res.Resources
 import android.net.ConnectivityManager
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
 import com.sarcoordinator.sarsolutions.R
@@ -16,6 +20,11 @@ import java.util.*
 
 // Singleton class to access common methods
 object GlobalUtil {
+
+    private const val THEME_PREFS = "THEME_PREFS"
+    const val THEME_LIGHT = 0
+    const val THEME_DARK = 1
+    const val THEME_DEFAULT = 2
 
     fun convertEpochToDate(epochDate: Long): String {
         return SimpleDateFormat("MMMM d, yyyy", Locale.getDefault())
@@ -73,5 +82,48 @@ object GlobalUtil {
                     .show()
             false
         }
+    }
+
+    // Sets theme based on given string
+    // Also saves theme in shared preferences
+    // String must be one of the THEME_* constants; else an error is thrown
+    fun setTheme(sharedPref: SharedPreferences?, theme: Int) {
+        when (theme) {
+            THEME_LIGHT -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            THEME_DARK -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            THEME_DEFAULT -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+            else -> throw Exception("Invalid argument passed to setThemePref: argument = $theme")
+        }
+        sharedPref?.let {
+            with(it.edit()) {
+                putString(THEME_PREFS, theme.toString())
+                commit()
+            }
+        }
+    }
+
+    fun getTheme(preferences: SharedPreferences, resources: Resources): Int {
+        val def = preferences.getString(THEME_PREFS, getThemeMode(resources).toString())!!
+        return try {
+            def.toInt()
+        } catch (exception: NumberFormatException) {
+            THEME_DEFAULT
+        }
+    }
+
+    // Returns whether theme is light or dark
+    fun getThemeMode(resources: Resources): Int {
+        resources.configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK).let {
+            return when (it) {
+                Configuration.UI_MODE_NIGHT_YES -> THEME_DARK
+                Configuration.UI_MODE_NIGHT_NO -> THEME_LIGHT
+                else -> -1
+            }
+        }
+    }
+
+    fun setCurrentTheme(sharedPrefs: SharedPreferences, resources: Resources) {
+        val def = getTheme(sharedPrefs, resources)
+        setTheme(null, def)
     }
 }

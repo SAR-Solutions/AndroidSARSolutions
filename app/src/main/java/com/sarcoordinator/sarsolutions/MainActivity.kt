@@ -1,15 +1,14 @@
 package com.sarcoordinator.sarsolutions
 
 import android.content.Context
-import android.content.res.Configuration
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
@@ -17,15 +16,17 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
+import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     private val auth = FirebaseAuth.getInstance()
     private lateinit var navController: NavController
+    private lateinit var sharedPrefs: SharedPreferences
 
     private val viewModel: SharedViewModel by lazy {
-        ViewModelProviders.of(this)[SharedViewModel::class.java]
+        ViewModelProvider(this)[SharedViewModel::class.java]
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -125,24 +126,9 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     // Load user preferences using shared preferences
     // NOTE: Call before super.onCreate as it sets the app theme
     private fun loadUserPreferences() {
-        val sharedPrefs = getPreferences(Context.MODE_PRIVATE)
-
+        sharedPrefs = getPreferences(Context.MODE_PRIVATE)
         // Get system default theme
-        val defaultTheme: String =
-            this.resources.configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK).let {
-                when (it) {
-                    Configuration.UI_MODE_NIGHT_YES -> SettingsFragment.THEME_DARK
-                    Configuration.UI_MODE_NIGHT_NO -> SettingsFragment.THEME_LIGHT
-                    else -> SettingsFragment.THEME_DEFAULT
-                }
-            }
-
-        // Set theme
-        when (sharedPrefs.getString(SettingsFragment.THEME_PREFS, defaultTheme)) {
-            SettingsFragment.THEME_DARK -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-            SettingsFragment.THEME_LIGHT -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-            else -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-        }
+        GlobalUtil.setCurrentTheme(sharedPrefs, resources)
     }
 }
 
