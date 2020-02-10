@@ -3,9 +3,9 @@
     <!-- Night/Dark application theme. -->
     <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">@color/orange</item>
-        <item name="colorAccent">@color/orange</item>
+        <item name="colorAccent">@color/newBlue</item>
         <item name="colorOnPrimary">@android:color/black</item>
-        <item name="colorSecondary">@color/orange</item>
+        <item name="colorSecondary">@color/newBlue</item>
         <item name="colorOnSecondary">@android:color/black</item>
         <item name="colorError">@color/error</item>
         <item name="colorPrimaryDark">@color/gray</item>

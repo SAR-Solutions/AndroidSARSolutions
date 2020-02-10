@@ -26,6 +26,7 @@ import com.sarcoordinator.sarsolutions.models.LocationPoint
 import com.sarcoordinator.sarsolutions.models.Shift
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
 import timber.log.Timber
 import java.util.*
 import kotlin.collections.ArrayList
@@ -38,16 +39,24 @@ class LocationService : Service() {
         const val case = "CASE"
     }
 
+    enum class ShiftErrors {
+        START_SHIFT, PUT_END_TIME, PUT_LOCATIONS
+    }
+
     private var mTestMode: Boolean = false
     private lateinit var mCase: Case
     private val shiftId = MutableLiveData<String>()
     fun getShiftId(): LiveData<String> = shiftId
 
-    private val lastUpdated = MutableLiveData<String>()
-    fun getLastUpdated(): LiveData<String> = lastUpdated
+    private val serviceInfoText = MutableLiveData<String>()
+    fun getServiceInfo(): LiveData<String> = serviceInfoText
 
-    private val shiftEndedWithError = MutableLiveData<Boolean>()
-    fun hasShiftEndedWithError(): LiveData<Boolean> = shiftEndedWithError
+    private val shiftEndedWithError = MutableLiveData<ShiftErrors>()
+    fun hasShiftEndedWithError(): LiveData<ShiftErrors> = shiftEndedWithError
+
+    private val isServiceSyncRunning = MutableLiveData<Boolean>()
+    fun isServiceSyncRunning(): LiveData<Boolean> = isServiceSyncRunning
+
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val UPDATE_INTERVAL = 4000L
@@ -55,7 +64,6 @@ class LocationService : Service() {
 
     private lateinit var addPathsJob: CompletableJob
     private var addPathsJobIsSyncing = false
-    private var failedToStartShift = false
 
     private val locationList: ArrayList<LocationPoint> = ArrayList()
     private val pendingSyncList: ArrayList<LocationPoint> = ArrayList()
@@ -82,12 +90,12 @@ class LocationService : Service() {
                 if (locationList.contains(LocationPoint(location.latitude, location.longitude)))
                     continue
                 locationList.add(LocationPoint(location.latitude, location.longitude))
-                lastUpdated.value = "Last updated at \n" + Calendar.getInstance().time
+                serviceInfoText.value = "Last updated at \n" + Calendar.getInstance().time
                 (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
-                    .notify(1, getNotification(lastUpdated.value.toString()))
+                    .notify(1, getNotification(serviceInfoText.value.toString()))
 
                 // Start addPathsjob if 10 or more locations exist and job isn't running
-                if (locationList.size >= 2 && !addPathsJobIsSyncing) {
+                if (locationList.size >= 10 && !addPathsJobIsSyncing) {
                     addPathsJobIsSyncing = true
                     val tempList = ArrayList<LocationPoint>()
                     tempList.addAll(locationList)
@@ -97,7 +105,7 @@ class LocationService : Service() {
                             Repository.putLocations(shiftId.value!!, mTestMode, tempList)
                         } catch (exception: Exception) {
                             pendingSyncList.addAll(tempList)
-                            Timber.e("No internet connection found")
+                            Timber.e("No internet connection found, added paths to pendingSyncList")
                         }
                     }.invokeOnCompletion {
                         addPathsJobIsSyncing = false
@@ -117,9 +125,16 @@ class LocationService : Service() {
         return binder
     }
 
+    init {
+        isServiceSyncRunning.value = true
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+
+        // Intent and argument checks
         if (intent == null)
             throw Exception("Service needs to be called with specified intent fields")
+
         mTestMode = intent.extras!!.getBoolean(isTestMode, false)
         mCase = intent.extras!!.getSerializable(case) as Case
 
@@ -134,14 +149,16 @@ class LocationService : Service() {
 
             try {
                 shiftId.postValue(Repository.postStartShift(shift, mCase.id, mTestMode).shiftId)
+                Timber.d("Location service started")
+                serviceInfoText.postValue(getString(R.string.started_shift))
             } catch (e: Exception) {
-                Timber.e("Error with shiftId")
-                failedToStartShift = true
-                shiftEndedWithError.postValue(true)
+                Timber.e(getString(R.string.error_starting))
+                withContext(Main) {
+                    serviceInfoText.value = getString(R.string.error_starting)
+                    shiftEndedWithError.value = ShiftErrors.START_SHIFT
+                }
                 onDestroy()
             }
-
-            lastUpdated.postValue(getString(R.string.started_shift))
         }
 
         if (!::addPathsJob.isInitialized) {
@@ -151,9 +168,8 @@ class LocationService : Service() {
         // Start service notification intent
         // Id must NOT be 0
         // Ref: https://developer.android.com/guide/components/services.html#kotlin
-        startForeground(1, getNotification(getString(R.string.loc_notification_title)))
+        startForeground(1, getNotification(getString(R.string.starting_location_service)))
 
-        Timber.d("Location service started")
         getLocation()
         return START_NOT_STICKY
     }
@@ -172,8 +188,8 @@ class LocationService : Service() {
         return NotificationCompat.Builder(this, CHANNEL_ID).apply {
             setContentTitle(title)
             setContentText(
-                "CaseId: ${mCase.id}\n" +
-                        "Date: ${mCase.date}"
+                "Case ID: ${mCase.id}\n" +
+                        "Case Date: ${GlobalUtil.convertEpochToDate(mCase.date)}"
             )
             setSmallIcon(R.drawable.ic_location)
             setContentIntent(resultPendingIntent)
@@ -181,25 +197,31 @@ class LocationService : Service() {
                 NotificationCompat.BigTextStyle()
                     .setBigContentTitle(title)
                     .bigText(
-                        "CaseId: ${mCase.id}\n" +
-                                "Date: ${GlobalUtil.convertEpochToDate(mCase.date)}"
+                        "Case ID: ${mCase.id}\n" +
+                                "Case Date: ${GlobalUtil.convertEpochToDate(mCase.date)}"
                     )
             )
         }.build()
     }
 
     override fun onDestroy() {
-        fusedLocationClient.removeLocationUpdates(locationCallback)
-        completeShift()
         stopForeground(true)
         stopSelf()
     }
 
-    // End shift; set endTime and sync remaining points
-    private fun completeShift() {
+    /*
+     * Removed location update callback
+     * End shift, set endTime and sync remaining points
+     */
+    fun completeShift() {
+        if (::fusedLocationClient.isInitialized)
+            fusedLocationClient.removeLocationUpdates(locationCallback)
+
+        serviceInfoText.postValue("Syncing shift data with server")
+
         CoroutineScope(IO).launch {
             // Nothing to do, if shift didn't start
-            if (failedToStartShift)
+            if (shiftEndedWithError.value == ShiftErrors.START_SHIFT)
                 return@launch
 
             val endTime = Calendar.getInstance().time.toString()
@@ -219,6 +241,7 @@ class LocationService : Service() {
                     Repository.putLocations(shiftId.value!!, mTestMode, pendingSyncList)
                 } catch (exception: Exception) {
                     Timber.e("Error with network call putting locations\n$exception")
+                    shiftEndedWithError.postValue(ShiftErrors.PUT_LOCATIONS)
                 }
             }
 
@@ -231,7 +254,9 @@ class LocationService : Service() {
                 )
             } catch (exception: Exception) {
                 Timber.e("Error with network call putting end time\n$exception")
+                shiftEndedWithError.postValue(ShiftErrors.PUT_END_TIME)
             }
+            isServiceSyncRunning.postValue(false)
         }
     }
 

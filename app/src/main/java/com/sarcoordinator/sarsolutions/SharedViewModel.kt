@@ -14,6 +14,7 @@ import com.sarcoordinator.sarsolutions.models.Vehicle
 import com.sarcoordinator.sarsolutions.util.LocationService
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -118,16 +119,21 @@ class SharedViewModel : ViewModel() {
         vehicleList[position] = vehicle
     }
 
-    fun submitShiftReport(caseId: String, searchDuration: String, vehicleTypeArray: List<String>) {
+    fun submitShiftReport(
+        caseId: String,
+        searchDuration: String,
+        vehicleTypeArray: List<String>
+    ): Job {
+        isShiftReportSubmitted = true
+
         val report = ShiftReport(
             searchDuration = searchDuration,
             vehicles = vehicleListToObjects(vehicleTypeArray)
         )
-        viewModelScope.launch(IO + networkException) {
+        return viewModelScope.launch(IO + networkException) {
             try {
                 Repository.postShiftReport(caseId, report)
                 vehicleList.clear()
-                isShiftReportSubmitted = true
             } catch (e: Exception) {
                 netWorkExceptionText.postValue(e.toString())
             }

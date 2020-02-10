@@ -58,16 +58,22 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         super.onViewCreated(view, savedInstanceState)
         sharedPrefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
 
+        location_service_fab.hide()
         initFabClickListener()
         validateNetworkConnectivity()
     }
 
     private fun validateNetworkConnectivity() {
-        if (!GlobalUtil.isNetworkConnectivityAvailable(requireActivity(), requireView())) {
+        // If service is already running, disregard network state
+        if (!GlobalUtil.isNetworkConnectivityAvailable(requireActivity(), requireView())
+            && viewModel.getBinder().value != null
+        ) {
             enableRetryNetworkState()
         } else {
-            // If coming from retry network fab, change case info card visibility
+            // If coming from retry network fab, change case info card visibility and desc text
             case_info_material_card.visibility = View.VISIBLE
+            location_desc.text = getString(R.string.start_tracking_desc)
+
             setupInterface()
         }
     }
@@ -111,9 +117,8 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
                 if (viewModel.getBinder().value == null) {
                     requestLocPermission()
                 } else {
-                    // Stop ongoing service
-                    stopLocationService()
                     enableStartTrackingFab()
+                    service?.completeShift()
 
                     location_service_fab.isEnabled = false
 
@@ -130,12 +135,21 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
                     CoroutineScope(IO).launch {
                         while (!::currentShiftId.isInitialized)
                             delay(1000)
+
+                        // Observe service and shut down once it has finished syncing
                         withContext(Main) {
-                            findNavController().navigate(
-                                TrackFragmentDirections.actionTrackFragmentToShiftReportFragment(
-                                    currentShiftId
-                                )
-                            )
+                            service?.isServiceSyncRunning()?.observe(viewLifecycleOwner, Observer {
+                                if (!it) {
+                                    // Stop ongoing service
+                                    stopLocationService()
+
+                                    findNavController().navigate(
+                                        TrackFragmentDirections.actionTrackFragmentToShiftReportFragment(
+                                            currentShiftId
+                                        )
+                                    )
+                                }
+                            })
                         }
                     }
                 }
@@ -154,6 +168,9 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
     }
 
     private fun enableStartTrackingFab() {
+
+        location_service_fab.show()
+
         location_service_fab.setImageDrawable(
             resources.getDrawable(
                 R.drawable.ic_baseline_play_arrow_24,
@@ -204,7 +221,6 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
             .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
             .withListener(object : PermissionListener {
                 override fun onPermissionGranted(response: PermissionGrantedResponse) {
-                    enableStopTrackingFab()
                     startLocationService()
                 }
 
@@ -248,15 +264,27 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
     // Update UI by observing viewModel data
     private fun observeService() {
         service?.let {
-            it.getLastUpdated().observe(viewLifecycleOwner, Observer { lastUpdated ->
+            it.getServiceInfo().observe(viewLifecycleOwner, Observer { lastUpdated ->
                 location_desc.text = lastUpdated
             })
             it.getShiftId().observe(viewLifecycleOwner, Observer { shiftId ->
                 currentShiftId = shiftId
             })
-            it.hasShiftEndedWithError().observe(viewLifecycleOwner, Observer { hasShiftEnded ->
-                if (hasShiftEnded) {
-                    Timber.e("Shift ended due to some error")
+            // Handle shift errors
+            it.hasShiftEndedWithError().observe(viewLifecycleOwner, Observer { error ->
+                error?.let {
+                    when (error) {
+                        LocationService.ShiftErrors.START_SHIFT -> {
+                            Timber.e("Shift failed to start")
+                        }
+                        LocationService.ShiftErrors.PUT_LOCATIONS -> {
+                            Timber.e("All locations could not posted")
+                        }
+                        LocationService.ShiftErrors.PUT_END_TIME -> {
+                            Timber.e("Posting end time failed")
+                        }
+                        else -> Timber.e("Unhandled shift error")
+                    }
                     stopLocationService()
                     enableStartTrackingFab()
                     validateNetworkConnectivity()
@@ -279,6 +307,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         )
         ContextCompat.startForegroundService(context!!, serviceIntent)
         bindService()
+        enableStopTrackingFab()
     }
 
     private fun stopLocationService() {

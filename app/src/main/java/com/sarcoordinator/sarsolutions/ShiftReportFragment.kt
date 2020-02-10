@@ -71,6 +71,8 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
     private fun initViewListeners() {
         endShiftButton.setOnClickListener {
 
+            GlobalUtil.hideKeyboard(requireActivity())
+
             // Validate form input
             if (shiftHoursEditText.text.isNullOrEmpty() || !areVehicleFormsValid()) {
                 Snackbar.make(
@@ -91,7 +93,6 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
                         shiftHoursEditText.text.toString(),
                         resources.getStringArray(R.array.vehicle_array).toList()
                     )
-                    GlobalUtil.hideKeyboard(requireActivity())
                     findNavController().navigate(ShiftReportFragmentDirections.actionShiftReportFragmentToCasesFragment())
                 } else {
                     Snackbar.make(

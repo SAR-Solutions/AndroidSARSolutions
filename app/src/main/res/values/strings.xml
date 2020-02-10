@@ -67,4 +67,6 @@
     <string name="submit_later">No internet connection found. Submit later?</string>
     <string name="yes">Yes</string>
     <string name="error_starting">Error starting shift. Check network connection</string>
+    <string name="error_try_again">Error, try again</string>
+    <string name="shift_information">Shift Information</string>
 </resources>
