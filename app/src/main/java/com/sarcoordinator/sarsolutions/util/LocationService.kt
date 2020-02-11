@@ -67,7 +67,11 @@ class LocationService : Service() {
 
     private val locationList: ArrayList<LocationPoint> = ArrayList()
     private val pendingSyncList: ArrayList<LocationPoint> = ArrayList()
+    fun getSyncList(): ArrayList<LocationPoint> = pendingSyncList
 
+    init {
+        isServiceSyncRunning.value = true
+    }
 
     /*
     * Makes network call to post data
@@ -123,10 +127,6 @@ class LocationService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? {
         return binder
-    }
-
-    init {
-        isServiceSyncRunning.value = true
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -206,6 +206,8 @@ class LocationService : Service() {
 
     override fun onDestroy() {
         stopForeground(true)
+        if (::fusedLocationClient.isInitialized)
+            fusedLocationClient.removeLocationUpdates(locationCallback)
         stopSelf()
     }
 

@@ -65,17 +65,17 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
 
     private fun validateNetworkConnectivity() {
         // If service is already running, disregard network state
-        if (!GlobalUtil.isNetworkConnectivityAvailable(requireActivity(), requireView())
-            && viewModel.getBinder().value != null
-        ) {
-            enableRetryNetworkState()
-        } else {
-            // If coming from retry network fab, change case info card visibility and desc text
-            case_info_material_card.visibility = View.VISIBLE
-            location_desc.text = getString(R.string.start_tracking_desc)
-
-            setupInterface()
+        if (viewModel.getBinder().value == null) {
+            if (!GlobalUtil.isNetworkConnectivityAvailable(requireActivity(), requireView())) {
+                enableRetryNetworkState()
+                return
+            }
         }
+        // If coming from retry network fab, change case info card visibility and desc text
+        case_info_material_card.visibility = View.VISIBLE
+        location_desc.text = getString(R.string.start_tracking_desc)
+
+        setupInterface()
     }
 
     private fun setupInterface() {
@@ -200,6 +200,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
             )
         )
         location_service_fab.backgroundTintList = resources.getColorStateList(R.color.newRed)
+        location_service_fab.visibility = View.VISIBLE
 
         case_info_material_card.visibility = View.GONE
         location_desc.text = getString(R.string.no_network_desc)
@@ -273,21 +274,23 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
             // Handle shift errors
             it.hasShiftEndedWithError().observe(viewLifecycleOwner, Observer { error ->
                 error?.let {
+                    enableStartTrackingFab()
                     when (error) {
                         LocationService.ShiftErrors.START_SHIFT -> {
                             Timber.e("Shift failed to start")
+                            stopLocationService()
+                            validateNetworkConnectivity()
                         }
                         LocationService.ShiftErrors.PUT_LOCATIONS -> {
                             Timber.e("All locations could not posted")
+
+                            viewModel.addLocationsToCache(service!!.getSyncList())
                         }
                         LocationService.ShiftErrors.PUT_END_TIME -> {
                             Timber.e("Posting end time failed")
                         }
                         else -> Timber.e("Unhandled shift error")
                     }
-                    stopLocationService()
-                    enableStartTrackingFab()
-                    validateNetworkConnectivity()
                 }
             })
         }

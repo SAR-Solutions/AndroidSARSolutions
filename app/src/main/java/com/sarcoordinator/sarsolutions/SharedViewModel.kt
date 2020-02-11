@@ -1,31 +1,37 @@
 package com.sarcoordinator.sarsolutions
 
+import android.app.Application
 import android.content.ComponentName
 import android.content.ServiceConnection
 import android.os.IBinder
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sarcoordinator.sarsolutions.api.Repository
-import com.sarcoordinator.sarsolutions.models.Case
-import com.sarcoordinator.sarsolutions.models.ShiftReport
-import com.sarcoordinator.sarsolutions.models.Vehicle
+import com.sarcoordinator.sarsolutions.models.*
+import com.sarcoordinator.sarsolutions.util.CasesRoomDatabase
+import com.sarcoordinator.sarsolutions.util.LocalCacheRepository
 import com.sarcoordinator.sarsolutions.util.LocationService
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 // Viewmodel is shared between all fragments and parent activity
-class SharedViewModel : ViewModel() {
+class SharedViewModel(application: Application) : AndroidViewModel(application) {
 
     var isShiftReportSubmitted = true
     var vehicleList = ArrayList<VehicleCardContent>()
 
     lateinit var lastUpdatedText: String
     private val binder = MutableLiveData<LocationService.LocalBinder>()
+
+    private val cacheRepo: LocalCacheRepository =
+        LocalCacheRepository(CasesRoomDatabase.getDatabase(application).casesDao())
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(p0: ComponentName?, iBinder: IBinder?) {
@@ -99,7 +105,7 @@ class SharedViewModel : ViewModel() {
     }
 
     fun removeService() {
-        binder.postValue(null)
+        binder.value = null
     }
 
     fun addVehicle() {
@@ -138,6 +144,28 @@ class SharedViewModel : ViewModel() {
                 netWorkExceptionText.postValue(e.toString())
             }
         }
+    }
+
+    fun addLocationsToCache(locations: List<LocationPoint>) {
+        viewModelScope.launch(Default) {
+            val list = ArrayList<RoomLocation>()
+            locations.forEach { location ->
+                list.add(
+                    RoomLocation(
+                        currentCase.value!!.id,
+                        location.latitude,
+                        location.longitude
+                    )
+                )
+            }
+            withContext(IO) {
+                cacheRepo.insertLocationList(list)
+            }
+        }
+    }
+
+    fun getAllLocationsFromCache(): LiveData<List<RoomLocation>> {
+        return cacheRepo.allLocations
     }
 
     // Convert vehicleList to list of Vehicle objects
