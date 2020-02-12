@@ -39,7 +39,7 @@ class CasesFragment : Fragment(R.layout.fragment_cases) {
         super.onViewCreated(view, savedInstanceState)
 
         // If service is ongoing, restore state
-        if (viewModel.getBinder().value != null) {
+        if (viewModel.isShiftActive.value == true) {
             findNavController().navigate(
                 CasesFragmentDirections.actionCasesFragmentToTrackFragment(
                     viewModel.currentCase.value!!.id

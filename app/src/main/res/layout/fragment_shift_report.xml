@@ -13,63 +13,78 @@
         style="@style/Widget.MaterialComponents.FloatingActionButton.Standard"
         android:src="@drawable/ic_baseline_add_24" />
 
-    <androidx.core.widget.NestedScrollView
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:layout_height="match_parent">
 
-        <LinearLayout
-            android:id="@+id/shift_report_parent_layout"
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            style="@style/Toolbar"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
-                android:id="@+id/generalDetailsTextView"
-                style="@style/Base.Widget.AppCompat.TextView.Heading"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/general" />
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:fillViewport="true"
+            app:layout_constraintTop_toBottomOf="@id/toolbar">
 
-            <EditText
-                android:id="@+id/shiftHoursEditText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="10dp"
-                android:ems="10"
-                android:hint="@string/hours_on_search"
-                android:importantForAutofill="no"
-                android:inputType="numberDecimal" />
-
-            <TextView
-                android:id="@+id/vehicle_heading_text"
-                style="@style/Base.Widget.AppCompat.TextView.Heading"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/vehicle" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/vehicle_recycler_view"
+            <LinearLayout
+                android:id="@+id/shift_report_parent_layout"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:nestedScrollingEnabled="false"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:listitem="@layout/vehicle_material_card" />
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
-            <Button
-                android:id="@+id/endShiftButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:padding="8dp"
-                android:text="@string/end_shift"
-                android:textColor="#ffffff"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                <TextView
+                    android:id="@+id/generalDetailsTextView"
+                    style="@style/Base.Widget.AppCompat.TextView.Heading"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/general" />
 
-        </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
+                <EditText
+                    android:id="@+id/shiftHoursEditText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="10dp"
+                    android:ems="10"
+                    android:hint="@string/hours_on_search"
+                    android:importantForAutofill="no"
+                    android:inputType="numberDecimal" />
+
+                <TextView
+                    android:id="@+id/vehicle_heading_text"
+                    style="@style/Base.Widget.AppCompat.TextView.Heading"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/vehicle" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/vehicle_recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    android:orientation="horizontal"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:listitem="@layout/vehicle_material_card" />
+
+                <Button
+                    android:id="@+id/endShiftButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:padding="8dp"
+                    android:text="@string/end_shift"
+                    android:textColor="#ffffff"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

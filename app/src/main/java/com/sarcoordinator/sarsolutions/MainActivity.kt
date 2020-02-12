@@ -5,9 +5,9 @@ import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.view.Menu
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
@@ -33,6 +33,13 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         // Otherwise a new instance of this activity will be created
         loadUserPreferences()
         super.onCreate(savedInstanceState)
+
+        // Disable navigating to settings fragment is a shift is active
+        viewModel.isShiftActive.observe(this, Observer {
+            it?.let {
+                bottom_nav_bar.menu.findItem(R.id.settingsFragment).isEnabled = !it
+            }
+        })
 
         // Black status bar for old android version
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
@@ -67,20 +74,11 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.cases_menu, menu)
-        return true
-    }
-
-
     override fun onSupportNavigateUp(): Boolean {
         // Don't allow navigating back if LocationService is running
-        if (viewModel.getBinder().value != null) {
-            Snackbar.make(parent_layout, "Click the 'stop' button to go back", Snackbar.LENGTH_LONG)
+        if (viewModel.isShiftActive.value == true) {
+            Snackbar.make(parent_layout, "Complete shift to go back", Snackbar.LENGTH_LONG)
                 .show()
-            return true
-        } else if (!viewModel.isShiftReportSubmitted) { // Don't allow navigating back if shift report isn't submitted
-            Snackbar.make(parent_layout, "Submit report to go back", Snackbar.LENGTH_LONG).show()
             return true
         } else if (!navController.popBackStack()) {
             return navController.navigateUp()

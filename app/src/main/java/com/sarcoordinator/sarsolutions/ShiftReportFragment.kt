@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.navigation.ui.NavigationUI
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
@@ -41,7 +42,13 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.isShiftReportSubmitted = false
+
+        NavigationUI.setupWithNavController(toolbar, findNavController())
+
+        toolbar.setNavigationOnClickListener {
+            requireActivity().onBackPressed()
+        }
+
         setupRecyclerView()
         initViewListeners()
         if (viewModel.vehicleList.isNotEmpty())
@@ -88,6 +95,7 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
                         false
                     )
                 ) {
+                    viewModel.completeShiftReportSubmission()
                     viewModel.submitShiftReport(
                         args.shiftId,
                         shiftHoursEditText.text.toString(),

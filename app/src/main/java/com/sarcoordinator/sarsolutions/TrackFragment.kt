@@ -61,15 +61,20 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
 
         NavigationUI.setupWithNavController(toolbar, findNavController())
 
+        toolbar.setNavigationOnClickListener {
+            requireActivity().onBackPressed()
+        }
+
         location_service_fab.hide()
         initFabClickListener()
         validateNetworkConnectivity()
     }
 
+
     override fun onResume() {
         super.onResume()
         // Rebind service if an instance of a service exists
-        if (viewModel.getBinder().value != null)
+        if (viewModel.isShiftActive.value == true)
             bindService()
     }
 
@@ -82,7 +87,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
 
     // Restore view state on configuration change
     private fun restoreState() {
-        if (viewModel.getBinder().value != null) {
+        if (viewModel.isShiftActive.value == true) {
             // Service is alive and running but needs to be bound back to activity
             bindService()
             enableStopTrackingFab()
@@ -92,7 +97,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
 
     private fun validateNetworkConnectivity() {
         // If service is already running, disregard network state
-        if (viewModel.getBinder().value == null) {
+        if (viewModel.isShiftActive.value == true) {
             if (!GlobalUtil.isNetworkConnectivityAvailable(requireActivity(), requireView())) {
                 enableRetryNetworkState()
                 return
@@ -141,8 +146,8 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
                 isRetryNetworkFab = false
                 validateNetworkConnectivity()
             } else {
-                // Start new service
-                if (viewModel.getBinder().value == null) {
+                // Start new service, if there isn't a service running already
+                if (viewModel.isShiftActive.value == null || viewModel.isShiftActive.value == false) {
                     requestLocPermission()
                 } else {
                     enableStartTrackingFab()
@@ -385,5 +390,6 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
             text
         }
     }
+
 }
 

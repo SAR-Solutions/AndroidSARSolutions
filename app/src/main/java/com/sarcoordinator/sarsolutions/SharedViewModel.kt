@@ -24,11 +24,13 @@ import timber.log.Timber
 // Viewmodel is shared between all fragments and parent activity
 class SharedViewModel(application: Application) : AndroidViewModel(application) {
 
-    var isShiftReportSubmitted = true
     var vehicleList = ArrayList<VehicleCardContent>()
 
     lateinit var lastUpdatedText: String
     private val binder = MutableLiveData<LocationService.LocalBinder>()
+
+    private val mIsShiftActive = MutableLiveData<Boolean>()
+    val isShiftActive: LiveData<Boolean> = mIsShiftActive
 
     private val cacheRepo: LocalCacheRepository =
         LocalCacheRepository(CasesRoomDatabase.getDatabase(application).casesDao())
@@ -37,6 +39,7 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         override fun onServiceConnected(p0: ComponentName?, iBinder: IBinder?) {
             Timber.d("Connected to service")
             binder.postValue(iBinder as LocationService.LocalBinder)
+            mIsShiftActive.value = true
         }
 
         override fun onServiceDisconnected(p0: ComponentName?) {
@@ -130,8 +133,6 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         searchDuration: String,
         vehicleTypeArray: List<String>
     ): Job {
-        isShiftReportSubmitted = true
-
         val report = ShiftReport(
             searchDuration = searchDuration,
             vehicles = vehicleListToObjects(vehicleTypeArray)
@@ -144,6 +145,10 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
                 netWorkExceptionText.postValue(e.toString())
             }
         }
+    }
+
+    fun completeShiftReportSubmission() {
+        mIsShiftActive.value = false
     }
 
     fun addLocationsToCache(locations: List<LocationPoint>) {

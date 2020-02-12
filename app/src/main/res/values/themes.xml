@@ -7,6 +7,8 @@
         <item name="colorSecondary">@color/newBlue</item>
         <item name="colorPrimaryDark">@android:color/white</item>
         <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
+        <item name="android:navigationBarColor" tools:targetApi="o_mr1">@android:color/white</item>
     </style>
 
     <style name="SplashTheme" parent="AppTheme">
@@ -45,6 +47,11 @@
         <item name="android:elevation">6dp</item>
         <item name="borderWidth">0dp</item>
         <item name="android:layout_gravity">bottom|end</item>
+    </style>
+
+    <style name="Toolbar" parent="Widget.MaterialComponents.Toolbar">
+        <item name="android:background">@android:color/white</item>
+        <item name="android:elevation">4dp</item>
     </style>
 
 </resources>
