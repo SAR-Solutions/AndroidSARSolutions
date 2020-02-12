@@ -45,6 +45,7 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
 
         NavigationUI.setupWithNavController(toolbar, findNavController())
 
+        // Main activity handles back navigation
         toolbar.setNavigationOnClickListener {
             requireActivity().onBackPressed()
         }

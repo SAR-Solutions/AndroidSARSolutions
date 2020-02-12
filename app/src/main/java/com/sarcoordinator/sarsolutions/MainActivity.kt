@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.forEach
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
@@ -34,10 +35,12 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         loadUserPreferences()
         super.onCreate(savedInstanceState)
 
-        // Disable navigating to settings fragment is a shift is active
+        // Disable navbar while shift is active
         viewModel.isShiftActive.observe(this, Observer {
             it?.let {
-                bottom_nav_bar.menu.findItem(R.id.settingsFragment).isEnabled = !it
+                bottom_nav_bar.menu.forEach { menuItem ->
+                    menuItem.isEnabled = !it
+                }
             }
         })
 

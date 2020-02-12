@@ -64,4 +64,9 @@
             android:name="shiftId"
             app:argType="string" />
     </fragment>
+    <fragment
+        android:id="@+id/failedShiftsFragment"
+        android:name="com.sarcoordinator.sarsolutions.FailedShiftsFragment"
+        android:label="@string/failed_shfits"
+        tools:layout="@layout/fragment_failed_shifts" />
 </navigation>

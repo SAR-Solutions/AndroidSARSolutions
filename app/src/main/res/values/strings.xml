@@ -71,4 +71,6 @@
     <string name="shift_information">Shift Information</string>
     <string name="search">Search</string>
     <string name="account">Account</string>
+    <string name="failed_shfits">Failed Shifts</string>
+    <string name="sync_failure_desc">Shifts will appear here if they fail to sync</string>
 </resources>

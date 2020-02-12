@@ -7,6 +7,11 @@
         android:title="@string/home" />
 
     <item
+        android:id="@+id/failedShiftsFragment"
+        android:icon="@drawable/ic_baseline_sync_problem_24"
+        android:title="@string/failed_shfits" />
+
+    <item
         android:id="@+id/settingsFragment"
         android:icon="@drawable/ic_baseline_account_circle_24"
         android:title="@string/account" />

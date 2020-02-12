@@ -61,6 +61,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
 
         NavigationUI.setupWithNavController(toolbar, findNavController())
 
+        // Main activity handles back navigation
         toolbar.setNavigationOnClickListener {
             requireActivity().onBackPressed()
         }
