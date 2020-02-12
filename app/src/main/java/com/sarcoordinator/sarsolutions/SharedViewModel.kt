@@ -164,8 +164,8 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    fun getAllLocationsFromCache(): LiveData<List<RoomLocation>> {
-        return cacheRepo.allLocations
+    fun getAllLocationCaseIdsFromCache(): LiveData<List<String>> {
+        return cacheRepo.allLocationsCaseIds
     }
 
     // Convert vehicleList to list of Vehicle objects

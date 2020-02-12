@@ -15,6 +15,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.navigation.ui.NavigationUI
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.karumi.dexter.Dexter
@@ -58,9 +59,35 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         super.onViewCreated(view, savedInstanceState)
         sharedPrefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
 
+        NavigationUI.setupWithNavController(toolbar, findNavController())
+
         location_service_fab.hide()
         initFabClickListener()
         validateNetworkConnectivity()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Rebind service if an instance of a service exists
+        if (viewModel.getBinder().value != null)
+            bindService()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel.lastUpdatedText = location_desc.text.toString()
+        // Keep service running but detach from viewmodel
+        unbindService()
+    }
+
+    // Restore view state on configuration change
+    private fun restoreState() {
+        if (viewModel.getBinder().value != null) {
+            // Service is alive and running but needs to be bound back to activity
+            bindService()
+            enableStopTrackingFab()
+            location_desc.text = viewModel.lastUpdatedText
+        }
     }
 
     private fun validateNetworkConnectivity() {
@@ -99,6 +126,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
             // Restore state depending on view model
             restoreState()
         }
+
 
         viewModel.getBinder().observe(viewLifecycleOwner, Observer { binder ->
             // Either service was bound or unbound
@@ -157,6 +185,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         }
     }
 
+    // Disable shimmer, show case info layout; vice-versa
     private fun enableLoadingState(enable: Boolean) {
         if (enable) {
             track_fragment_shimmer.visibility = View.VISIBLE
@@ -168,7 +197,6 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
     }
 
     private fun enableStartTrackingFab() {
-
         location_service_fab.show()
 
         location_service_fab.setImageDrawable(
@@ -206,14 +234,14 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         location_desc.text = getString(R.string.no_network_desc)
     }
 
-
     // Set case information
     private fun populateViewWithCase(case: Case) {
         (requireActivity() as MainActivity).supportActionBar?.title = case.id
         id_value_tv.text = case.id
         reporter_value_tv.text = case.reporterName
-        missing_person_value_tv.text = listToOrderedList(case.missingPersonName)
-        equipment_value_tv.text = listToOrderedList(case.equipmentUsed)
+        missing_person_value_tv.text = listToOrderedListString(case.missingPersonName)
+        equipment_value_tv.text = listToOrderedListString(case.equipmentUsed)
+        toolbar.title = case.caseName
     }
 
     private fun requestLocPermission() {
@@ -296,6 +324,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         }
     }
 
+    // Starts service, calls bindService and enableStopTrackingFab
     private fun startLocationService() {
         location_desc.text = getString(R.string.starting_location_service)
         // Pass required extras and start location service
@@ -313,6 +342,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         enableStopTrackingFab()
     }
 
+    // Stops service and calls unbindService
     private fun stopLocationService() {
         val serviceIntent = Intent(context, LocationService::class.java)
         unbindService()
@@ -323,6 +353,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         viewModel.removeService()
     }
 
+    // Attach viewmodel to running service
     private fun bindService() {
         val serviceIntent = Intent(context, LocationService::class.java)
         activity?.bindService(
@@ -332,36 +363,14 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         )
     }
 
+    // Detach viewmodel from running service
     private fun unbindService() {
         if (viewModel.getBinder().value != null)
             activity?.unbindService(viewModel.getServiceConnection())
     }
 
-    override fun onResume() {
-        super.onResume()
-        // Rebind service if an instance of a service exists
-        if (viewModel.getBinder().value != null)
-            bindService()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        viewModel.lastUpdatedText = location_desc.text.toString()
-        unbindService()
-    }
-
-    // Restore view state on configuration change
-    private fun restoreState() {
-        if (viewModel.getBinder().value != null) {
-            // Service is alive and running but needs to be bound back to activity
-            bindService()
-            enableStopTrackingFab()
-            location_desc.text = viewModel.lastUpdatedText
-        }
-    }
-
     // Convert list of string to a ordered string
-    private fun listToOrderedList(list: List<String>): String {
+    private fun listToOrderedListString(list: List<String>): String {
         if (list.count() <= 0)
             return "None"
         return if (list.count() == 1) {

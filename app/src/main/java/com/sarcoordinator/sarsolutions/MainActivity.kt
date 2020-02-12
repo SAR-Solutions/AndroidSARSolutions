@@ -6,13 +6,12 @@ import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.view.Menu
-import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
@@ -39,29 +38,33 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
             window.statusBarColor = Color.BLACK
 
-        setSupportActionBar(toolbar)
-
         navController = findNavController(R.id.nav_host_fragment)
 
         if (savedInstanceState == null) {
-            if (auth.currentUser != null) {
-                navController.navigate(LoginFragmentDirections.actionLoginFragmentToCasesFragment())
-//                navController.navigate(R.id.shiftReportFragment)
+            if (auth.currentUser == null) {
+                navController.navigate(
+                    R.id.loginFragment,
+                    null,
+                    NavOptions.Builder().setPopUpTo(R.id.nav_graph, true).build()
+                )
             }
         }
 
-        // Set loginFragment and caseFragment as top-level destinations to prevent showing back
-        //  on these screens
-        val appBarConfiguration = AppBarConfiguration(setOf(R.id.loginFragment, R.id.casesFragment))
+        NavigationUI.setupWithNavController(bottom_nav_bar, navController)
 
-        // Don't use the following:
-        // toolbar.setupWithNavController(navController, appBarConfiguration)
-        // Reason : https://stackoverflow.com/questions/55904485/custom-navigate-up-behavior-for-certain-fragment-using-navigation-component
-        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration)
+        navController.addOnDestinationChangedListener { controller, destination, arguments ->
+            // Avoid showing bottom navigation view on login and reset password screens
+            if (destination.id == R.id.loginFragment
+                || destination.id == R.id.resetPasswordFragment
+            )
+                bottom_nav_bar.visibility = View.GONE
+            else
+                bottom_nav_bar.visibility = View.VISIBLE
 
-        // Set toolbar title depending on current destination
-        supportActionBar?.title = navController.currentDestination?.label
-
+            // If user is logged in, navigate to cases screen
+            if (destination.id == R.id.loginFragment && auth.currentUser != null)
+                controller.navigate(LoginFragmentDirections.actionLoginFragmentToCasesFragment())
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -69,39 +72,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.sign_out -> {
-                if (viewModel.getBinder().value == null && viewModel.isShiftReportSubmitted) {
-                    auth.signOut()
-                    navController.navigate(
-                        R.id.loginFragment,
-                        null,
-                        NavOptions.Builder().setPopUpTo(R.id.nav_graph, true).build()
-                    )
-                } else {
-                    Snackbar.make(parent_layout, "Stop tracking to sign out", Snackbar.LENGTH_LONG)
-                        .show()
-                }
-                true
-            }
-
-            R.id.settings -> {
-                if (viewModel.getBinder().value == null && viewModel.isShiftReportSubmitted) {
-                    navController.navigate(R.id.settingFragment)
-                } else {
-                    Snackbar.make(
-                        parent_layout,
-                        "Click the 'stop' button to go to settings",
-                        Snackbar.LENGTH_LONG
-                    )
-                        .show()
-                }
-                return true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
 
     override fun onSupportNavigateUp(): Boolean {
         // Don't allow navigating back if LocationService is running

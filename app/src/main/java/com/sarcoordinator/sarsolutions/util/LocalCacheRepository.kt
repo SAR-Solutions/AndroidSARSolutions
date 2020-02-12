@@ -6,7 +6,7 @@ import com.sarcoordinator.sarsolutions.models.RoomLocation
 
 class LocalCacheRepository(private val caseDao: CaseDao) {
 
-    val allLocations: LiveData<List<RoomLocation>> = caseDao.getAllLocations()
+    val allLocationsCaseIds: LiveData<List<String>> = caseDao.getAllLocationCaseIds()
 
     suspend fun insertLocationList(locationList: List<RoomLocation>) =
         caseDao.insertLocationList(locationList)

@@ -8,8 +8,9 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sarcoordinator.sarsolutions.models.Case
@@ -30,16 +31,27 @@ class CasesFragment : Fragment(R.layout.fragment_cases) {
         super.onCreate(savedInstanceState)
 
         viewModel = activity?.run {
-            ViewModelProviders.of(this)[SharedViewModel::class.java]
+            ViewModelProvider(this)[SharedViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // If service is ongoing, restore state
+        if (viewModel.getBinder().value != null) {
+            findNavController().navigate(
+                CasesFragmentDirections.actionCasesFragmentToTrackFragment(
+                    viewModel.currentCase.value!!.id
+                )
+            )
+        }
+
         observeNetworkErrors()
         setupRecyclerView()
         observeCases()
+
+        toolbar.title = findNavController().currentDestination?.label
 
         if (viewModel.getCases().value.isNullOrEmpty()) {
             refreshCaseList()

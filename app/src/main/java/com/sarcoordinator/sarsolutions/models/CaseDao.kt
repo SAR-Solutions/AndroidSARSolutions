@@ -25,6 +25,9 @@ interface CaseDao {
     @Query("SELECT * FROM RoomLocation")
     fun getAllLocations(): LiveData<List<RoomLocation>>
 
+    @Query("SELECT DISTINCT caseId FROM RoomLocation")
+    fun getAllLocationCaseIds(): LiveData<List<String>>
+
 //    @Query("SELECT * FROM roomcase WHERE caseId IN (:caseId)")
 //    fun getByCaseId(caseId: String): RoomCase
 }

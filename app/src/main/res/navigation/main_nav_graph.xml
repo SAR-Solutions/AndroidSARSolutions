@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/loginFragment">
+    app:startDestination="@id/casesFragment">
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.sarcoordinator.sarsolutions.LoginFragment"
@@ -11,9 +11,7 @@
         tools:layout="@layout/fragment_login">
         <action
             android:id="@+id/action_loginFragment_to_resetPasswordFragment"
-            app:destination="@id/resetPasswordFragment"
-            app:enterAnim="@android:anim/fade_in"
-            app:popEnterAnim="@android:anim/fade_in" />
+            app:destination="@id/resetPasswordFragment" />
         <action
             android:id="@+id/action_loginFragment_to_casesFragment"
             app:destination="@id/casesFragment"
@@ -48,7 +46,7 @@
             app:destination="@id/trackFragment" />
     </fragment>
     <fragment
-        android:id="@+id/settingFragment"
+        android:id="@+id/settingsFragment"
         android:name="com.sarcoordinator.sarsolutions.SettingsFragment"
         android:label="@string/settings"
         tools:layout="@layout/fragment_settings" />

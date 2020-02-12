@@ -62,7 +62,9 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                 return@setOnClickListener
             }
 
-            it.isEnabled = false // Disable button
+            // Disable buttons
+            it.isEnabled = false
+            forgot_password_button.isEnabled = false
 
             // Hide keyboard
             activity?.window?.decorView?.rootView?.let {
@@ -112,6 +114,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                                 "Invalid credentials. Try again.",
                                 Toast.LENGTH_LONG
                             ).show()
+                            forgot_password_button.isEnabled = true
                         }
                     }
             } catch (e: Exception) {
