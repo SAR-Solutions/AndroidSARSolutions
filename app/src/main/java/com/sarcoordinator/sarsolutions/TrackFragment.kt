@@ -305,6 +305,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
             it.getShiftId().observe(viewLifecycleOwner, Observer { shiftId ->
                 currentShiftId = shiftId
             })
+
             // Handle shift errors
             it.hasShiftEndedWithError().observe(viewLifecycleOwner, Observer { error ->
                 error?.let {
@@ -318,11 +319,11 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
                         }
                         LocationService.ShiftErrors.PUT_LOCATIONS -> {
                             Timber.e("All locations could not posted")
-
-                            viewModel.addLocationsToCache(service!!.getSyncList())
+                            viewModel.addLocationsToCache(service!!.getSyncList(), currentShiftId)
                         }
                         LocationService.ShiftErrors.PUT_END_TIME -> {
                             Timber.e("Posting end time failed")
+                            viewModel.addEndTimeToCache(service!!.getEndTime()!!, currentShiftId)
                         }
                         else -> Timber.e("Unhandled shift error")
                     }

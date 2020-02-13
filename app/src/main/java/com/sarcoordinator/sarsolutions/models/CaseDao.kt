@@ -5,15 +5,15 @@ import androidx.room.*
 
 @Entity
 data class RoomEndTime(
-    @PrimaryKey val caseId: String,
+    @PrimaryKey val shiftId: String,
     val caseName: String,
     val endTime: String,
     val cacheTime: String
 )
 
-@Entity(primaryKeys = ["caseId", "latitude", "longitude"])
+@Entity(primaryKeys = ["shiftId", "latitude", "longitude"])
 data class RoomLocation(
-    val caseId: String,
+    val shiftId: String,
     val caseName: String,
     val latitude: Double,
     val longitude: Double,
@@ -24,20 +24,24 @@ data class RoomLocation(
 interface CaseDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insertLocationList(locationList: List<RoomLocation>)
+    suspend fun insertLocationList(locationList: List<RoomLocation>)
 
-    @Query("SELECT * FROM RoomLocation")
-    fun getAllLocations(): LiveData<List<RoomLocation>>
-
-    @Query("SELECT * FROM RoomLocation GROUP BY caseId")
-    fun getAllLocationCaseIds(): LiveData<List<RoomLocation>>
-
-    @Query("SELECT * FROM RoomLocation WHERE caseId = :caseId")
-    fun getAllLocationsForCase(caseId: String): LiveData<List<RoomLocation>>
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertEndTime(endTime: RoomEndTime)
 
     @Delete
-    fun deleteLocations(locations: List<RoomLocation>)
+    suspend fun deleteLocations(locations: List<RoomLocation>)
 
-//    @Query("SELECT * FROM roomcase WHERE caseId IN (:caseId)")
-//    fun getByCaseId(caseId: String): RoomCase
+    @Query("SELECT * FROM RoomLocation GROUP BY shiftId")
+    fun getAllLocationShiftIds(): LiveData<List<RoomLocation>>
+
+    @Query("SELECT * FROM RoomLocation WHERE shiftId = :shiftId")
+    suspend fun getAllLocationsForShift(shiftId: String): List<RoomLocation>
+
+    @Query("SELECT * FROM RoomEndTime WHERE shiftId = :shiftId")
+    suspend fun getEndTimeForShift(shiftId: String): RoomEndTime?
+
+    @Query("SELECT * FROM RoomLocation WHERE shiftId = :shiftId")
+    fun testLocationList(shiftId: String): List<RoomLocation>
+
 }

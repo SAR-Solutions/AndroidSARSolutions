@@ -69,6 +69,9 @@ class LocationService : Service() {
     private val pendingSyncList: ArrayList<LocationPoint> = ArrayList()
     fun getSyncList(): ArrayList<LocationPoint> = pendingSyncList
 
+    private var mEndTime: String? = null
+    fun getEndTime(): String? = mEndTime
+
     init {
         isServiceSyncRunning.value = true
     }
@@ -256,6 +259,7 @@ class LocationService : Service() {
                 )
             } catch (exception: Exception) {
                 Timber.e("Error with network call putting end time\n$exception")
+                mEndTime = endTime
                 shiftEndedWithError.postValue(ShiftErrors.PUT_END_TIME)
             }
             isServiceSyncRunning.postValue(false)

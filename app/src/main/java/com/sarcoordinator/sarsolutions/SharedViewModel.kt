@@ -153,13 +153,13 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         mIsShiftActive.value = false
     }
 
-    fun addLocationsToCache(locations: List<LocationPoint>) {
+    fun addLocationsToCache(locations: List<LocationPoint>, shiftId: String) {
         viewModelScope.launch(Default) {
             val list = ArrayList<RoomLocation>()
             locations.forEach { location ->
                 list.add(
                     RoomLocation(
-                        currentCase.value!!.id,
+                        shiftId,
                         currentCase.value!!.caseName,
                         location.latitude,
                         location.longitude,
@@ -173,28 +173,43 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    fun addEndTimeToCache(endTime: String, shiftId: String) {
+        viewModelScope.launch(IO) {
+            cacheRepo.insertEndTime(
+                RoomEndTime(
+                    shiftId,
+                    currentCase.value!!.caseName,
+                    endTime,
+                    Calendar.getInstance().time.toString()
+                )
+            )
+        }
+    }
+
+
     fun getAllLocationCaseIdsFromCache(): LiveData<List<RoomLocation>> =
         cacheRepo.allLocationsCaseIds
 
-
-    fun getAllLocationsForCase(caseId: String): LiveData<List<RoomLocation>> =
-        cacheRepo.getAllLocationsForCase(caseId)
-
-    fun postLocations(caseId: String, locationList: List<RoomLocation>): Job {
-        return viewModelScope.launch(Default) {
+    // Post locations to backend and clear form cache
+    fun postLocations(shiftId: String): Job {
+        return viewModelScope.launch(IO) {
+            val locationList = cacheRepo.getAllLocationsForShift(shiftId)
             val list = cacheLocListToAPILocList(locationList)
-            withContext(IO) {
-                try {
-                    Repository.putLocations(caseId, false, list)
-                    cacheRepo.deleteLocations(locationList)
-                } catch (exception: Exception) {
-                    Timber.e("Failed to add locations to $caseId")
+            val endTime: RoomEndTime? = cacheRepo.getEndTimeForShift(shiftId)
+            try {
+                Repository.putLocations(shiftId, false, list)
+                endTime?.let {
+                    Repository.putEndTime(shiftId, false, endTime.endTime)
                 }
+                cacheRepo.deleteLocations(locationList)
+            } catch (exception: Exception) {
+                Timber.e("Failed to add locations to $shiftId")
             }
-        }.apply {
-            start()
-        }
+        }.apply { start() }
     }
+
+
+    /******************* Helpers *****************************/
 
     // Convert vehicleList to list of Vehicle objects
     private fun vehicleListToObjects(vehicleTypeArray: List<String>): List<Vehicle> {
