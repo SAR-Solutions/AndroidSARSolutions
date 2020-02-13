@@ -3,7 +3,7 @@
     <!-- Day/Light application theme. -->
     <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">@color/newRed</item>
-        <item name="colorAccent">@color/newBlue</item>
+        <item name="colorAccent">@color/newRed</item>
         <item name="colorSecondary">@color/newBlue</item>
         <item name="colorPrimaryDark">@android:color/white</item>
         <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
@@ -31,7 +31,7 @@
     </style>
 
     <style name="Base.Widget.AppCompat.TextView.SubHeading.Color" parent="Base.Widget.AppCompat.TextView.SubHeading">
-        <item name="android:textColor">?colorAccent</item>
+        <item name="android:textColor">?colorPrimary</item>
     </style>
 
     <style name="Widget.MaterialComponents.CardView.Standard">

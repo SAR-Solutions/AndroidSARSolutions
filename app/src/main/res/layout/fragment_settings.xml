@@ -77,7 +77,7 @@
                     app:layout_constraintBottom_toBottomOf="@+id/testing_mode_text"
                     app:layout_constraintStart_toStartOf="@+id/theme_spinner"
                     app:layout_constraintTop_toTopOf="@+id/testing_mode_text"
-                    app:useMaterialThemeColors="true" />
+                     />
 
                 <androidx.constraintlayout.widget.Guideline
                     android:id="@+id/guideline5"
@@ -152,12 +152,13 @@
                     app:layout_constraintStart_toEndOf="@+id/appCompatTextView"
                     app:layout_constraintTop_toTopOf="@+id/appCompatTextView" />
 
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/license_text_view"
-                    style="@style/Base.Widget.AppCompat.TextView.SubHeading.Color"
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/license_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/view_licenses"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_marginStart="8dp"
                     app:layout_constraintBottom_toBottomOf="@+id/appCompatImageView2"
                     app:layout_constraintStart_toStartOf="@+id/guideline6"
                     app:layout_constraintTop_toTopOf="@+id/appCompatImageView2" />
@@ -176,7 +177,15 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.card.MaterialCardView>
 
-
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/sign_out_button"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="16dp"
+            android:text="@string/sign_out"
+            android:textStyle="bold" />
     </LinearLayout>
 </ScrollView>
 

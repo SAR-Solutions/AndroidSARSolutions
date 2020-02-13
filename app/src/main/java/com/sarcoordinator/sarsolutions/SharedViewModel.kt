@@ -20,6 +20,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import java.util.*
+import kotlin.collections.ArrayList
 
 // Viewmodel is shared between all fragments and parent activity
 class SharedViewModel(application: Application) : AndroidViewModel(application) {
@@ -158,8 +160,10 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
                 list.add(
                     RoomLocation(
                         currentCase.value!!.id,
+                        currentCase.value!!.caseName,
                         location.latitude,
-                        location.longitude
+                        location.longitude,
+                        Calendar.getInstance().time.toString()
                     )
                 )
             }
@@ -169,7 +173,7 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    fun getAllLocationCaseIdsFromCache(): LiveData<List<String>> {
+    fun getAllLocationCaseIdsFromCache(): LiveData<List<RoomLocation>> {
         return cacheRepo.allLocationsCaseIds
     }
 

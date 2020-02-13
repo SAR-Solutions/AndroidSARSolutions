@@ -51,6 +51,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         navController = findNavController(R.id.nav_host_fragment)
 
         if (savedInstanceState == null) {
+            // Navigate to login screen if user isn't logged in
             if (auth.currentUser == null) {
                 navController.navigate(
                     R.id.loginFragment,

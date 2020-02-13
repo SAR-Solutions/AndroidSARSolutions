@@ -9,7 +9,7 @@ import com.sarcoordinator.sarsolutions.models.RoomEndTime
 import com.sarcoordinator.sarsolutions.models.RoomLocation
 
 
-@Database(entities = arrayOf(RoomLocation::class, RoomEndTime::class), version = 1)
+@Database(entities = [RoomLocation::class, RoomEndTime::class], version = 1)
 abstract class CasesRoomDatabase : RoomDatabase() {
     abstract fun casesDao(): CaseDao
 
@@ -33,5 +33,4 @@ abstract class CasesRoomDatabase : RoomDatabase() {
             }
         }
     }
-
 }

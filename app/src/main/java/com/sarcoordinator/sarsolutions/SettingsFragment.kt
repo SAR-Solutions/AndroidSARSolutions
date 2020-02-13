@@ -8,8 +8,11 @@ import android.view.*
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavOptions
+import androidx.navigation.fragment.findNavController
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.google.android.material.switchmaterial.SwitchMaterial
+import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import kotlinx.android.synthetic.main.fragment_settings.*
 import timber.log.Timber
@@ -20,6 +23,7 @@ class SettingsFragment : Fragment() {
         const val TESTING_MODE_PREFS = "TESTING_MODE"
     }
 
+    private val auth = FirebaseAuth.getInstance()
     private lateinit var sharedPrefs: SharedPreferences
 
     override fun onCreateView(
@@ -66,9 +70,19 @@ class SettingsFragment : Fragment() {
             }
         }
 
-        license_text_view.setOnClickListener {
+        license_button.setOnClickListener {
             OssLicensesMenuActivity.setActivityTitle(getString(R.string.licenses))
             startActivity(Intent(requireContext(), OssLicensesMenuActivity::class.java))
+        }
+
+        sign_out_button.setOnClickListener {
+            auth.signOut()
+            findNavController().navigate(
+                R.id.loginFragment,
+                null,
+                NavOptions.Builder().setPopUpTo(R.id.nav_graph, true).build()
+            )
+
         }
     }
 

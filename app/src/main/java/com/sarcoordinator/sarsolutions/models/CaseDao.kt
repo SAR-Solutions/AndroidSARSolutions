@@ -6,14 +6,18 @@ import androidx.room.*
 @Entity
 data class RoomEndTime(
     @PrimaryKey val caseId: String,
-    @ColumnInfo val endTime: String?
+    val caseName: String,
+    val endTime: String,
+    val cacheTime: String
 )
 
-@Entity(primaryKeys = ["latitude", "longitude"])
+@Entity(primaryKeys = ["caseId", "latitude", "longitude"])
 data class RoomLocation(
     val caseId: String,
-    @ColumnInfo val latitude: Double,
-    @ColumnInfo val longitude: Double
+    val caseName: String,
+    val latitude: Double,
+    val longitude: Double,
+    val cacheTime: String
 )
 
 @Dao
@@ -25,8 +29,8 @@ interface CaseDao {
     @Query("SELECT * FROM RoomLocation")
     fun getAllLocations(): LiveData<List<RoomLocation>>
 
-    @Query("SELECT DISTINCT caseId FROM RoomLocation")
-    fun getAllLocationCaseIds(): LiveData<List<String>>
+    @Query("SELECT * FROM RoomLocation GROUP BY caseId")
+    fun getAllLocationCaseIds(): LiveData<List<RoomLocation>>
 
 //    @Query("SELECT * FROM roomcase WHERE caseId IN (:caseId)")
 //    fun getByCaseId(caseId: String): RoomCase
