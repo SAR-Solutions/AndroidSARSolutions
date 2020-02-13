@@ -313,6 +313,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
                         LocationService.ShiftErrors.START_SHIFT -> {
                             Timber.e("Shift failed to start")
                             stopLocationService()
+                            viewModel.completeShiftReportSubmission()
                             validateNetworkConnectivity()
                         }
                         LocationService.ShiftErrors.PUT_LOCATIONS -> {

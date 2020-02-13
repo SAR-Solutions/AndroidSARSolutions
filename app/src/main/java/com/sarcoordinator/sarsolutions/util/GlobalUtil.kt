@@ -62,7 +62,7 @@ object GlobalUtil {
             if (cm.activeNetworkInfo.isConnected) {
                 true
             } else {
-                Timber.e("Not network connectivity")
+                Timber.e("No network connectivity")
                 if (view != null && showSnackbar)
                     Snackbar.make(
                         view,

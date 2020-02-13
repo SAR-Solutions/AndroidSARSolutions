@@ -28,7 +28,7 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
 
     var vehicleList = ArrayList<VehicleCardContent>()
 
-    lateinit var lastUpdatedText: String
+    var lastUpdatedText: String? = null
     private val binder = MutableLiveData<LocationService.LocalBinder>()
 
     private val mIsShiftActive = MutableLiveData<Boolean>()
@@ -173,8 +173,27 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    fun getAllLocationCaseIdsFromCache(): LiveData<List<RoomLocation>> {
-        return cacheRepo.allLocationsCaseIds
+    fun getAllLocationCaseIdsFromCache(): LiveData<List<RoomLocation>> =
+        cacheRepo.allLocationsCaseIds
+
+
+    fun getAllLocationsForCase(caseId: String): LiveData<List<RoomLocation>> =
+        cacheRepo.getAllLocationsForCase(caseId)
+
+    fun postLocations(caseId: String, locationList: List<RoomLocation>): Job {
+        return viewModelScope.launch(Default) {
+            val list = cacheLocListToAPILocList(locationList)
+            withContext(IO) {
+                try {
+                    Repository.putLocations(caseId, false, list)
+                    cacheRepo.deleteLocations(locationList)
+                } catch (exception: Exception) {
+                    Timber.e("Failed to add locations to $caseId")
+                }
+            }
+        }.apply {
+            start()
+        }
     }
 
     // Convert vehicleList to list of Vehicle objects
@@ -191,6 +210,14 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
             )
         }
         return list
+    }
+
+    private fun cacheLocListToAPILocList(list: List<RoomLocation>): List<LocationPoint> {
+        val apiList = ArrayList<LocationPoint>()
+        list.forEach {
+            apiList.add(LocationPoint(it.latitude, it.longitude))
+        }
+        return apiList
     }
 
     data class VehicleCardContent(

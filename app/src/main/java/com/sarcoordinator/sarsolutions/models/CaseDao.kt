@@ -32,6 +32,12 @@ interface CaseDao {
     @Query("SELECT * FROM RoomLocation GROUP BY caseId")
     fun getAllLocationCaseIds(): LiveData<List<RoomLocation>>
 
+    @Query("SELECT * FROM RoomLocation WHERE caseId = :caseId")
+    fun getAllLocationsForCase(caseId: String): LiveData<List<RoomLocation>>
+
+    @Delete
+    fun deleteLocations(locations: List<RoomLocation>)
+
 //    @Query("SELECT * FROM roomcase WHERE caseId IN (:caseId)")
 //    fun getByCaseId(caseId: String): RoomCase
 }
