@@ -13,6 +13,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.sarcoordinator.sarsolutions.models.RoomLocation
 import kotlinx.android.synthetic.main.fragment_failed_shifts.*
 import kotlinx.android.synthetic.main.loc_cache_list_item.view.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.launch
 
 class FailedShiftsFragment : Fragment(R.layout.fragment_failed_shifts) {
 
@@ -34,7 +37,7 @@ class FailedShiftsFragment : Fragment(R.layout.fragment_failed_shifts) {
 
         setUpRecyclerView()
 
-        viewModel.getAllLocationCaseIdsFromCache().observe(viewLifecycleOwner, Observer {
+        viewModel.getAllLocationShiftIdsFromCache().observe(viewLifecycleOwner, Observer {
             if (it.isEmpty()) {
                 no_shifts_to_sync_view.visibility = View.VISIBLE
                 failed_shifts_recycler_view.visibility = View.GONE
@@ -73,9 +76,14 @@ class FailedShiftsFragment : Fragment(R.layout.fragment_failed_shifts) {
                 itemView.cache_time.text = cachedObj.cacheTime
 
                 itemView.setOnClickListener {
+                    progressBar.visibility = View.VISIBLE
+                    progressBar.isIndeterminate = true
                     viewModel.postLocations(cachedObj.shiftId)
                         .invokeOnCompletion {
-                            progressBar.visibility = View.GONE
+                            CoroutineScope(Main).launch {
+                                if (viewModel.numberOfSyncsInProgress == 0)
+                                    progressBar.visibility = View.GONE
+                            }
                         }
                 }
             }

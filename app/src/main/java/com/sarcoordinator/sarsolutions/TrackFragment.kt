@@ -98,7 +98,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
 
     private fun validateNetworkConnectivity() {
         // If service is already running, disregard network state
-        if (viewModel.isShiftActive.value == true) {
+        if (viewModel.isShiftActive.value == null || viewModel.isShiftActive.value == false) {
             if (!GlobalUtil.isNetworkConnectivityAvailable(requireActivity(), requireView())) {
                 enableRetryNetworkState()
                 return

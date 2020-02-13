@@ -37,6 +37,9 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     private val cacheRepo: LocalCacheRepository =
         LocalCacheRepository(CasesRoomDatabase.getDatabase(application).casesDao())
 
+    // Number of failed shift syncs in progress
+    var numberOfSyncsInProgress: Int = 0
+
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(p0: ComponentName?, iBinder: IBinder?) {
             Timber.d("Connected to service")
@@ -187,11 +190,12 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     }
 
 
-    fun getAllLocationCaseIdsFromCache(): LiveData<List<RoomLocation>> =
-        cacheRepo.allLocationsCaseIds
+    fun getAllLocationShiftIdsFromCache(): LiveData<List<RoomLocation>> =
+        cacheRepo.allLocationsShiftIds
 
     // Post locations to backend and clear form cache
     fun postLocations(shiftId: String): Job {
+        numberOfSyncsInProgress++
         return viewModelScope.launch(IO) {
             val locationList = cacheRepo.getAllLocationsForShift(shiftId)
             val list = cacheLocListToAPILocList(locationList)
@@ -205,7 +209,13 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
             } catch (exception: Exception) {
                 Timber.e("Failed to add locations to $shiftId")
             }
-        }.apply { start() }
+        }.apply {
+            start()
+            invokeOnCompletion {
+                numberOfSyncsInProgress--
+            }
+        }
+
     }
 
 
