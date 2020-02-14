@@ -10,7 +10,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.sarcoordinator.sarsolutions.models.RoomLocation
+import com.sarcoordinator.sarsolutions.models.CacheLocation
 import kotlinx.android.synthetic.main.fragment_failed_shifts.*
 import kotlinx.android.synthetic.main.loc_cache_list_item.view.*
 import kotlinx.coroutines.CoroutineScope
@@ -64,20 +64,19 @@ class FailedShiftsFragment : Fragment(R.layout.fragment_failed_shifts) {
         private val viewModel: SharedViewModel,
         private val progressBar: ProgressBar
     ) : RecyclerView.Adapter<LocationAdapter.LocationViewHolder>() {
-        private var data = ArrayList<RoomLocation>()
+        private var data = ArrayList<CacheLocation>()
 
         class LocationViewHolder(
             itemView: View,
             private val viewModel: SharedViewModel,
             private val progressBar: ProgressBar
         ) : RecyclerView.ViewHolder(itemView) {
-            fun bindView(cachedObj: RoomLocation) {
+            fun bindView(cachedObj: CacheLocation) {
                 itemView.case_name.text = cachedObj.caseName
                 itemView.cache_time.text = cachedObj.cacheTime
 
                 itemView.setOnClickListener {
                     progressBar.visibility = View.VISIBLE
-                    progressBar.isIndeterminate = true
                     viewModel.postLocations(cachedObj.shiftId)
                         .invokeOnCompletion {
                             CoroutineScope(Main).launch {
@@ -102,7 +101,7 @@ class FailedShiftsFragment : Fragment(R.layout.fragment_failed_shifts) {
             holder.bindView(data[position])
         }
 
-        fun setList(list: List<RoomLocation>) {
+        fun setList(list: List<CacheLocation>) {
             data = ArrayList(list)
             notifyDataSetChanged()
         }

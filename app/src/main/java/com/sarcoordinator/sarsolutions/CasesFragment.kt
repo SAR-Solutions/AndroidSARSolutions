@@ -120,7 +120,7 @@ class CasesFragment : Fragment(R.layout.fragment_cases) {
 
     private fun observeNetworkErrors() {
         viewModel.getNetworkExceptionObservable().observe(viewLifecycleOwner, Observer { error ->
-            if (!error.isNullOrEmpty()) {
+            if (error != null && error.isNotEmpty()) {
                 viewModel.clearNetworkExceptions()
                 Toast.makeText(requireContext(), "Internet connection error", Toast.LENGTH_LONG)
                     .show()

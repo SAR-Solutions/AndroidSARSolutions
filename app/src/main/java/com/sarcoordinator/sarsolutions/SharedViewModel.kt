@@ -10,7 +10,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.sarcoordinator.sarsolutions.api.Repository
 import com.sarcoordinator.sarsolutions.models.*
-import com.sarcoordinator.sarsolutions.util.CasesRoomDatabase
+import com.sarcoordinator.sarsolutions.util.CacheDatabase
 import com.sarcoordinator.sarsolutions.util.LocalCacheRepository
 import com.sarcoordinator.sarsolutions.util.LocationService
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -35,7 +35,7 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     val isShiftActive: LiveData<Boolean> = mIsShiftActive
 
     private val cacheRepo: LocalCacheRepository =
-        LocalCacheRepository(CasesRoomDatabase.getDatabase(application).casesDao())
+        LocalCacheRepository(CacheDatabase.getDatabase(application).casesDao())
 
     // Number of failed shift syncs in progress
     var numberOfSyncsInProgress: Int = 0
@@ -134,7 +134,7 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun submitShiftReport(
-        caseId: String,
+        shiftId: String,
         searchDuration: String,
         vehicleTypeArray: List<String>
     ): Job {
@@ -144,24 +144,27 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         )
         return viewModelScope.launch(IO + networkException) {
             try {
-                Repository.postShiftReport(caseId, report)
+                Repository.postShiftReport(shiftId, report)
                 vehicleList.clear()
             } catch (e: Exception) {
                 netWorkExceptionText.postValue(e.toString())
             }
-        }
+        }.apply { start() }
     }
 
     fun completeShiftReportSubmission() {
         mIsShiftActive.value = false
     }
 
+
+    /************************************************ Cache database **********************************************************/
+
     fun addLocationsToCache(locations: List<LocationPoint>, shiftId: String) {
         viewModelScope.launch(Default) {
-            val list = ArrayList<RoomLocation>()
+            val list = ArrayList<CacheLocation>()
             locations.forEach { location ->
                 list.add(
-                    RoomLocation(
+                    CacheLocation(
                         shiftId,
                         currentCase.value!!.caseName,
                         location.latitude,
@@ -179,7 +182,7 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     fun addEndTimeToCache(endTime: String, shiftId: String) {
         viewModelScope.launch(IO) {
             cacheRepo.insertEndTime(
-                RoomEndTime(
+                CacheEndTime(
                     shiftId,
                     currentCase.value!!.caseName,
                     endTime,
@@ -189,8 +192,20 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    fun addShiftReportToCache(searchDuration: String, shiftId: String): Job {
+        Timber.i("Adding shift report to cache with id $shiftId")
+        return viewModelScope.launch(IO) {
+            cacheRepo.insertShiftReport(
+                CacheShiftReport(
+                    shiftId,
+                    searchDuration
+                ),
+                vehicleListToCacheObjects(shiftId)
+            )
+        }.apply { start() }
+    }
 
-    fun getAllLocationShiftIdsFromCache(): LiveData<List<RoomLocation>> =
+    fun getAllLocationShiftIdsFromCache(): LiveData<List<CacheLocation>> =
         cacheRepo.allLocationsShiftIds
 
     // Post locations to backend and clear form cache
@@ -199,7 +214,7 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         return viewModelScope.launch(IO) {
             val locationList = cacheRepo.getAllLocationsForShift(shiftId)
             val list = cacheLocListToAPILocList(locationList)
-            val endTime: RoomEndTime? = cacheRepo.getEndTimeForShift(shiftId)
+            val endTime: CacheEndTime? = cacheRepo.getEndTimeForShift(shiftId)
             try {
                 Repository.putLocations(shiftId, false, list)
                 endTime?.let {
@@ -215,11 +230,9 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
                 numberOfSyncsInProgress--
             }
         }
-
     }
 
-
-    /******************* Helpers *****************************/
+    /************************************************ Helpers **********************************************************/
 
     // Convert vehicleList to list of Vehicle objects
     private fun vehicleListToObjects(vehicleTypeArray: List<String>): List<Vehicle> {
@@ -237,7 +250,24 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         return list
     }
 
-    private fun cacheLocListToAPILocList(list: List<RoomLocation>): List<LocationPoint> {
+    private fun vehicleListToCacheObjects(shiftId: String): List<CacheVehicle> {
+        val list = ArrayList<CacheVehicle>()
+        vehicleList.forEachIndexed { index, vehicleCardContent ->
+            list.add(
+                CacheVehicle(
+                    shiftId,
+                    index,
+                    vehicleCardContent.isCountyVehicle,
+                    vehicleCardContent.isPersonalVehicle,
+                    vehicleCardContent.vehicleType,
+                    vehicleCardContent.milesTraveled!!
+                )
+            )
+        }
+        return list
+    }
+
+    private fun cacheLocListToAPILocList(list: List<CacheLocation>): List<LocationPoint> {
         val apiList = ArrayList<LocationPoint>()
         list.forEach {
             apiList.add(LocationPoint(it.latitude, it.longitude))
