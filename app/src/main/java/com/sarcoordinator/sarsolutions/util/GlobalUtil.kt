@@ -133,6 +133,6 @@ object GlobalUtil {
 
     fun setCurrentTheme(sharedPrefs: SharedPreferences, resources: Resources) {
         val def = getTheme(sharedPrefs, resources)
-        setTheme(null, def)
+        setTheme(sharedPrefs, def)
     }
 }

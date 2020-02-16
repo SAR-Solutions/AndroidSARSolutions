@@ -159,34 +159,36 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
 
     /************************************************ Cache database **********************************************************/
 
+    fun getAllShiftReports(): LiveData<List<LocationsInShiftReport>> =
+        cacheRepo.allShiftReports
+
     fun addLocationsToCache(locations: List<LocationPoint>, shiftId: String) {
         viewModelScope.launch(Default) {
             val list = ArrayList<CacheLocation>()
             locations.forEach { location ->
                 list.add(
                     CacheLocation(
+                        0,
                         shiftId,
-                        currentCase.value!!.caseName,
                         location.latitude,
-                        location.longitude,
-                        Calendar.getInstance().time.toString()
+                        location.longitude
                     )
                 )
             }
             withContext(IO) {
-                cacheRepo.insertLocationList(list)
+                cacheRepo.insertLocationList(shiftId, list)
             }
         }
     }
 
     fun addEndTimeToCache(endTime: String, shiftId: String) {
         viewModelScope.launch(IO) {
-            cacheRepo.insertEndTime(
-                CacheEndTime(
-                    shiftId,
-                    currentCase.value!!.caseName,
-                    endTime,
-                    Calendar.getInstance().time.toString()
+            cacheRepo.insertShiftReport(
+                CacheShiftReport(
+                    shiftId = shiftId,
+                    caseName = currentCase.value!!.caseName,
+                    endTime = endTime,
+                    cacheTime = Calendar.getInstance().time.toString()
                 )
             )
         }
@@ -195,37 +197,54 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     fun addShiftReportToCache(searchDuration: String, shiftId: String): Job {
         Timber.i("Adding shift report to cache with id $shiftId")
         return viewModelScope.launch(IO) {
+
+            // Insert shift Reports
             cacheRepo.insertShiftReport(
                 CacheShiftReport(
-                    shiftId,
-                    searchDuration
-                ),
-                vehicleListToCacheObjects(shiftId)
+                    shiftId = shiftId,
+                    caseName = currentCase.value!!.caseName,
+                    searchDuration = searchDuration,
+                    cacheTime = Calendar.getInstance().time.toString()
+                )
             )
-        }.apply { start() }
+
+            // Insert vehicles
+            cacheRepo.insertVehicleList(vehicleListToCacheObjects(shiftId), shiftId)
+        }
     }
 
-    fun getAllLocationShiftIdsFromCache(): LiveData<List<CacheLocation>> =
-        cacheRepo.allLocationsShiftIds
-
     // Post locations to backend and clear form cache
-    fun postLocations(shiftId: String): Job {
+    fun submitShiftReportFromCache(
+        cachedShiftReport: LocationsInShiftReport,
+        vehicleTypeArray: List<String>
+    ): Job {
         numberOfSyncsInProgress++
         return viewModelScope.launch(IO) {
-            val locationList = cacheRepo.getAllLocationsForShift(shiftId)
-            val list = cacheLocListToAPILocList(locationList)
-            val endTime: CacheEndTime? = cacheRepo.getEndTimeForShift(shiftId)
+            val shiftId = cachedShiftReport.shiftReport.shiftId
             try {
-                Repository.putLocations(shiftId, false, list)
-                endTime?.let {
-                    Repository.putEndTime(shiftId, false, endTime.endTime)
+                // Api calls to submit shift reports
+                cachedShiftReport.locationList?.let {
+                    Repository.putLocations(shiftId, false, cacheLocListToAPILocList(it))
                 }
-                cacheRepo.deleteLocations(locationList)
+                cachedShiftReport.shiftReport.endTime?.let {
+                    Repository.putEndTime(shiftId, false, it)
+                }
+                cachedShiftReport.vehicleList?.let {
+                    Repository.postShiftReport(
+                        shiftId,
+                        ShiftReport(
+                            cachedShiftReport.shiftReport.searchDuration!!,
+                            cacheVehicleToVehicleObjects(it, vehicleTypeArray)
+                        )
+                    )
+                }
+
+                // Delete posted cached objects
+                cacheRepo.deleteCachedReport(cachedShiftReport)
             } catch (exception: Exception) {
                 Timber.e("Failed to add locations to $shiftId")
             }
         }.apply {
-            start()
             invokeOnCompletion {
                 numberOfSyncsInProgress--
             }
@@ -255,12 +274,31 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         vehicleList.forEachIndexed { index, vehicleCardContent ->
             list.add(
                 CacheVehicle(
+                    0,
                     shiftId,
                     index,
                     vehicleCardContent.isCountyVehicle,
                     vehicleCardContent.isPersonalVehicle,
                     vehicleCardContent.vehicleType,
                     vehicleCardContent.milesTraveled!!
+                )
+            )
+        }
+        return list
+    }
+
+    private fun cacheVehicleToVehicleObjects(
+        cachedList: List<CacheVehicle>,
+        vehicleTypeArray: List<String>
+    ): List<Vehicle> {
+        val list = ArrayList<Vehicle>()
+        cachedList.forEach {
+            list.add(
+                Vehicle(
+                    isCountyVehicle = it.isCountyVehicle,
+                    isPersonalVehicle = it.isPersonalVehicle,
+                    type = vehicleTypeArray[it.type],
+                    milesTraveled = it.milesTraveled
                 )
             )
         }

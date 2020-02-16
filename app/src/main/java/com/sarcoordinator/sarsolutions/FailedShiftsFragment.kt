@@ -10,7 +10,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.sarcoordinator.sarsolutions.models.CacheLocation
+import com.sarcoordinator.sarsolutions.models.LocationsInShiftReport
 import kotlinx.android.synthetic.main.fragment_failed_shifts.*
 import kotlinx.android.synthetic.main.loc_cache_list_item.view.*
 import kotlinx.coroutines.CoroutineScope
@@ -37,7 +37,7 @@ class FailedShiftsFragment : Fragment(R.layout.fragment_failed_shifts) {
 
         setUpRecyclerView()
 
-        viewModel.getAllLocationShiftIdsFromCache().observe(viewLifecycleOwner, Observer {
+        viewModel.getAllShiftReports().observe(viewLifecycleOwner, Observer {
             if (it.isEmpty()) {
                 no_shifts_to_sync_view.visibility = View.VISIBLE
                 failed_shifts_recycler_view.visibility = View.GONE
@@ -52,7 +52,12 @@ class FailedShiftsFragment : Fragment(R.layout.fragment_failed_shifts) {
 
     private fun setUpRecyclerView() {
         viewManager = LinearLayoutManager(context)
-        viewAdapter = LocationAdapter(viewModel, progress_bar)
+        viewAdapter = LocationAdapter(
+            viewModel,
+            progress_bar,
+            resources.getStringArray(R.array.vehicle_array).toList()
+        )
+
         failed_shifts_recycler_view.apply {
             setHasFixedSize(true)
             layoutManager = viewManager
@@ -62,22 +67,24 @@ class FailedShiftsFragment : Fragment(R.layout.fragment_failed_shifts) {
 
     class LocationAdapter(
         private val viewModel: SharedViewModel,
-        private val progressBar: ProgressBar
+        private val progressBar: ProgressBar,
+        private val vehicleTypeArray: List<String>
     ) : RecyclerView.Adapter<LocationAdapter.LocationViewHolder>() {
-        private var data = ArrayList<CacheLocation>()
+        private var data = ArrayList<LocationsInShiftReport>()
 
         class LocationViewHolder(
             itemView: View,
             private val viewModel: SharedViewModel,
-            private val progressBar: ProgressBar
+            private val progressBar: ProgressBar,
+            private val vehicleTypeArray: List<String>
         ) : RecyclerView.ViewHolder(itemView) {
-            fun bindView(cachedObj: CacheLocation) {
-                itemView.case_name.text = cachedObj.caseName
-                itemView.cache_time.text = cachedObj.cacheTime
+            fun bindView(cachedObj: LocationsInShiftReport) {
+                itemView.case_name.text = cachedObj.shiftReport.caseName
+                itemView.cache_time.text = cachedObj.shiftReport.cacheTime
 
                 itemView.setOnClickListener {
                     progressBar.visibility = View.VISIBLE
-                    viewModel.postLocations(cachedObj.shiftId)
+                    viewModel.submitShiftReportFromCache(cachedObj, vehicleTypeArray)
                         .invokeOnCompletion {
                             CoroutineScope(Main).launch {
                                 if (viewModel.numberOfSyncsInProgress == 0)
@@ -91,7 +98,7 @@ class FailedShiftsFragment : Fragment(R.layout.fragment_failed_shifts) {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LocationViewHolder {
             val holder = LayoutInflater.from(parent.context)
                 .inflate(R.layout.loc_cache_list_item, parent, false)
-            return LocationViewHolder(holder, viewModel, progressBar)
+            return LocationViewHolder(holder, viewModel, progressBar, vehicleTypeArray)
         }
 
         override fun getItemCount(): Int = data.size
@@ -101,7 +108,7 @@ class FailedShiftsFragment : Fragment(R.layout.fragment_failed_shifts) {
             holder.bindView(data[position])
         }
 
-        fun setList(list: List<CacheLocation>) {
+        fun setList(list: List<LocationsInShiftReport>) {
             data = ArrayList(list)
             notifyDataSetChanged()
         }

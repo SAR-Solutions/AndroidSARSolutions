@@ -5,28 +5,36 @@ import com.sarcoordinator.sarsolutions.models.*
 
 class LocalCacheRepository(private val caseDao: CaseDao) {
 
-    val allLocationsShiftIds: LiveData<List<CacheLocation>> = caseDao.getAllLocationShiftIds()
+    val allShiftReports: LiveData<List<LocationsInShiftReport>> = caseDao.getShiftReports()
 
-    suspend fun insertLocationList(locationList: List<CacheLocation>) =
+    suspend fun insertLocationList(shiftId: String, locationList: List<CacheLocation>) {
+        // Only make new case if one doesn't exist
+        val case = caseDao.getShiftReportById(shiftId)
+        if (case == null)
+            caseDao.insertShiftReport(CacheShiftReport(shiftId))
         caseDao.insertLocationList(locationList)
-
-    suspend fun getAllLocationsForShift(shiftId: String) =
-        caseDao.getAllLocationsForShift(shiftId)
-
-    suspend fun deleteLocations(locationList: List<CacheLocation>) =
-        caseDao.deleteLocations(locationList)
-
-    suspend fun getEndTimeForShift(shiftId: String) =
-        caseDao.getEndTimeForShift(shiftId)
-
-    suspend fun insertEndTime(endTime: CacheEndTime) =
-        caseDao.insertEndTime(endTime)
-
-    suspend fun insertShiftReport(
-        shiftReport: CacheShiftReport,
-        vehicles: List<CacheVehicle>?
-    ) {
-        caseDao.insertShiftReport(shiftReport)
-        caseDao.insertAllVehicles(vehicles)
     }
+
+    suspend fun insertShiftReport(shiftReport: CacheShiftReport) {
+        // Make new case if it doesn't exist
+        val case = caseDao.getShiftReportById(shiftReport.shiftId)
+        // Update current case
+        if (case?.endTime != null)
+            shiftReport.endTime = case.endTime
+        caseDao.insertShiftReport(shiftReport)
+    }
+
+    suspend fun insertVehicleList(vehicles: List<CacheVehicle>, shiftId: String) {
+        val case = caseDao.getShiftReportById(shiftId)
+        if (case == null)
+            caseDao.insertShiftReport(CacheShiftReport(shiftId))
+        caseDao.insertVehicles(vehicles)
+    }
+
+    suspend fun deleteCachedReport(report: LocationsInShiftReport) {
+        caseDao.deleteLocations(report.locationList)
+        caseDao.deleteVehicles(report.vehicleList)
+        caseDao.deleteShiftReport(report.shiftReport)
+    }
+
 }

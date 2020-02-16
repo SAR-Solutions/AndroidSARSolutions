@@ -16,7 +16,9 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.NavigationUI
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
+import com.sarcoordinator.sarsolutions.util.CacheDatabase
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
+import com.sarcoordinator.sarsolutions.util.LocalCacheRepository
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
@@ -35,6 +37,13 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         loadUserPreferences()
         super.onCreate(savedInstanceState)
 
+        val repo = LocalCacheRepository(CacheDatabase.getDatabase(application).casesDao())
+        repo.allShiftReports.observeForever {
+            it.forEach { obj ->
+                obj.locationList
+            }
+        }
+
         // Disable navbar while shift is active
         viewModel.isShiftActive.observe(this, Observer {
             it?.let {
@@ -44,7 +53,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             }
         })
 
-        // Black status bar for old android version
+//         Black status bar for old android version
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
             window.statusBarColor = Color.BLACK
 
