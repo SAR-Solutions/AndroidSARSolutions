@@ -20,13 +20,13 @@ android {
         applicationId "com.sarcoordinator.sarsolutions"
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 17
-        versionName "1.1"
+        versionCode 20
+        versionName "1.1.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -60,7 +60,7 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.7.1'
     implementation 'com.squareup.retrofit2:converter-moshi:2.7.1'
     // Avoid updating logging interceptor
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.3.1'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.4.0'
 
     // Firebase
     implementation 'com.google.firebase:firebase-analytics:17.2.2'
@@ -96,14 +96,14 @@ dependencies {
     implementation 'com.redmadrobot:acronym-avatar:2.0'
 
     // Room
-    implementation "androidx.room:room-runtime:2.2.3"
-    implementation "androidx.room:room-ktx:2.2.3"
-    kapt "androidx.room:room-compiler:2.2.3"
+    implementation "androidx.room:room-runtime:2.2.4"
+    implementation "androidx.room:room-ktx:2.2.4"
+    kapt "androidx.room:room-compiler:2.2.4"
 
     // Insets library
     // The base library. If you're using either the dbx and/or ktx libraries, you don't need this
-    implementation "dev.chrisbanes:insetter:0.2.0"
-    implementation "dev.chrisbanes:insetter-ktx:0.2.0"
+    implementation 'dev.chrisbanes:insetter:0.2.1'
+    implementation 'dev.chrisbanes:insetter-ktx:0.2.1'
 
 }
 
