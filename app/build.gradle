@@ -99,8 +99,5 @@ dependencies {
     implementation "androidx.room:room-runtime:2.2.4"
     implementation "androidx.room:room-ktx:2.2.4"
     kapt "androidx.room:room-compiler:2.2.4"
-
-    // Insetter
-    implementation "dev.chrisbanes:insetter-ktx:0.2.1"
 }
 

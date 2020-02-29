@@ -37,9 +37,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         loadUserPreferences()
         super.onCreate(savedInstanceState)
 
-        parent_layout.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_LAYOUT_STABLE)
-
         val repo = LocalCacheRepository(CacheDatabase.getDatabase(application).casesDao())
         repo.allShiftReports.observeForever {
             it.forEach { obj ->
@@ -113,6 +110,12 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         sharedPrefs = getPreferences(Context.MODE_PRIVATE)
         // Get system default theme
         GlobalUtil.setCurrentTheme(sharedPrefs, resources)
+        if (GlobalUtil.getTheme(sharedPrefs, resources) == GlobalUtil.THEME_DARK) {
+            // Set navigationBarColor to elevated gray
+            window.navigationBarColor = Color.parseColor("#2D2D2D")
+            window.statusBarColor = Color.parseColor("#282828")
+
+        }
     }
 }
 

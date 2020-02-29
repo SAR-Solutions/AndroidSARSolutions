@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.view.*
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
@@ -15,7 +14,6 @@ import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
-import dev.chrisbanes.insetter.doOnApplyWindowInsets
 import kotlinx.android.synthetic.main.fragment_settings.*
 import timber.log.Timber
 
@@ -27,6 +25,7 @@ class SettingsFragment : Fragment() {
 
     private val auth = FirebaseAuth.getInstance()
     private lateinit var sharedPrefs: SharedPreferences
+    private var isThemeSelected: Boolean = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -38,13 +37,6 @@ class SettingsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        toolbar.doOnApplyWindowInsets { view, insets, initialState ->
-            view.updatePadding(
-                top = initialState.paddings.top + insets.systemWindowInsetTop,
-                bottom = initialState.paddings.bottom
-            )
-        }
 
         sharedPrefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
 
@@ -76,7 +68,10 @@ class SettingsFragment : Fragment() {
 
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, pos: Int, d: Long) {
                 Timber.d("$pos selected in theme spinner")
-                GlobalUtil.setTheme(sharedPrefs, pos)
+                if (!isThemeSelected)
+                    isThemeSelected = true
+                else
+                    GlobalUtil.setTheme(sharedPrefs, pos)
             }
         }
 

@@ -5,14 +5,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
-import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sarcoordinator.sarsolutions.models.LocationsInShiftReport
-import dev.chrisbanes.insetter.doOnApplyWindowInsets
 import kotlinx.android.synthetic.main.fragment_failed_shifts.*
 import kotlinx.android.synthetic.main.loc_cache_list_item.view.*
 import kotlinx.coroutines.CoroutineScope
@@ -34,13 +32,6 @@ class FailedShiftsFragment : Fragment(R.layout.fragment_failed_shifts) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        toolbar.doOnApplyWindowInsets { view, insets, initialState ->
-            view.updatePadding(
-                top = initialState.paddings.top + insets.systemWindowInsetTop,
-                bottom = initialState.paddings.bottom
-            )
-        }
 
         toolbar.title = getString(R.string.failed_shfits)
 

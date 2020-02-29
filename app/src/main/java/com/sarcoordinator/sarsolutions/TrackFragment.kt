@@ -12,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.ContextCompat
-import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -30,7 +29,6 @@ import com.karumi.dexter.listener.single.PermissionListener
 import com.sarcoordinator.sarsolutions.models.Case
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.LocationService
-import dev.chrisbanes.insetter.doOnApplyWindowInsets
 import kotlinx.android.synthetic.main.fragment_track.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
@@ -61,13 +59,6 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        toolbar.doOnApplyWindowInsets { view, insets, initialState ->
-            view.updatePadding(
-                top = initialState.paddings.top + insets.systemWindowInsetTop,
-                bottom = initialState.paddings.bottom
-            )
-        }
 
         sharedPrefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
 
