@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.core.view.isVisible
+import androidx.core.view.updatePadding
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -18,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
+import dev.chrisbanes.insetter.doOnApplyWindowInsets
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_shift_report.*
 import kotlinx.android.synthetic.main.vehicle_material_card.view.*
@@ -46,6 +48,13 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        toolbar.doOnApplyWindowInsets { view, insets, initialState ->
+            view.updatePadding(
+                top = initialState.paddings.top + insets.systemWindowInsetTop,
+                bottom = initialState.paddings.bottom
+            )
+        }
 
         observeNetworkExceptions()
 

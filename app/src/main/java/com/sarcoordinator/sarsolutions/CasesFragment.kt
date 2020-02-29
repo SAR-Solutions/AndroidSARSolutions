@@ -12,6 +12,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.NavigationUI
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sarcoordinator.sarsolutions.models.Case
@@ -40,6 +41,13 @@ class CasesFragment : Fragment(R.layout.fragment_cases) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        toolbar.doOnApplyWindowInsets { view, insets, initialState ->
+            view.updatePadding(
+                top = initialState.paddings.top + insets.systemWindowInsetTop,
+                bottom = initialState.paddings.bottom
+            )
+        }
+
         // If service is ongoing, restore state
         if (viewModel.isShiftActive.value == true) {
             findNavController().navigate(
@@ -49,11 +57,7 @@ class CasesFragment : Fragment(R.layout.fragment_cases) {
             )
         }
 
-        toolbar.doOnApplyWindowInsets { view, insets, initialState ->
-            view.updatePadding(
-                bottom = initialState.paddings.bottom + insets.systemWindowInsetTop
-            )
-        }
+        NavigationUI.setupWithNavController(toolbar, findNavController())
 
         observeNetworkErrors()
         setupRecyclerView()

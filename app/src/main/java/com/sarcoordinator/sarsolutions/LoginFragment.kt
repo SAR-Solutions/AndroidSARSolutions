@@ -94,11 +94,6 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                 )
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-                            Toast.makeText(
-                                context,
-                                "${auth.currentUser!!.email} signed in",
-                                Toast.LENGTH_LONG
-                            ).show()
 
                             // Prompt auto fill service to save password
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

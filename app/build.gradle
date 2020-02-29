@@ -57,13 +57,13 @@ dependencies {
     implementation 'com.karumi:dexter:6.0.2'
 
     // Retrofit
-    implementation 'com.squareup.retrofit2:retrofit:2.7.1'
-    implementation 'com.squareup.retrofit2:converter-moshi:2.7.1'
+    implementation 'com.squareup.retrofit2:retrofit:2.7.2'
+    implementation 'com.squareup.retrofit2:converter-moshi:2.7.2'
     // Avoid updating logging interceptor
     implementation 'com.squareup.okhttp3:logging-interceptor:4.4.0'
 
     // Firebase
-    implementation 'com.google.firebase:firebase-analytics:17.2.2'
+    implementation 'com.google.firebase:firebase-analytics:17.2.3'
     implementation 'com.google.firebase:firebase-auth:19.2.0'
 
     // Lifecycle
@@ -100,10 +100,7 @@ dependencies {
     implementation "androidx.room:room-ktx:2.2.4"
     kapt "androidx.room:room-compiler:2.2.4"
 
-    // Insets library
-    // The base library. If you're using either the dbx and/or ktx libraries, you don't need this
-    implementation 'dev.chrisbanes:insetter:0.2.1'
-    implementation 'dev.chrisbanes:insetter-ktx:0.2.1'
-
+    // Insetter
+    implementation "dev.chrisbanes:insetter-ktx:0.2.1"
 }
 

@@ -37,6 +37,9 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         loadUserPreferences()
         super.onCreate(savedInstanceState)
 
+        parent_layout.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_LAYOUT_STABLE)
+
         val repo = LocalCacheRepository(CacheDatabase.getDatabase(application).casesDao())
         repo.allShiftReports.observeForever {
             it.forEach { obj ->
