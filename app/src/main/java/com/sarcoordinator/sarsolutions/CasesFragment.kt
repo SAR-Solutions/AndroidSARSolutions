@@ -11,7 +11,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.ui.NavigationUI
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sarcoordinator.sarsolutions.models.Case
@@ -48,13 +47,9 @@ class CasesFragment : Fragment(R.layout.fragment_cases) {
             )
         }
 
-        NavigationUI.setupWithNavController(toolbar, findNavController())
-
         observeNetworkErrors()
         setupRecyclerView()
         observeCases()
-
-        toolbar.title = findNavController().currentDestination?.label
 
         if (viewModel.getCases().value.isNullOrEmpty()) {
             refreshCaseList()

@@ -21,6 +21,7 @@ import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.LocalCacheRepository
 import kotlinx.android.synthetic.main.activity_main.*
 
+
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     private val auth = FirebaseAuth.getInstance()
@@ -110,12 +111,12 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         sharedPrefs = getPreferences(Context.MODE_PRIVATE)
         // Get system default theme
         GlobalUtil.setCurrentTheme(sharedPrefs, resources)
-        if (GlobalUtil.getTheme(sharedPrefs, resources) == GlobalUtil.THEME_DARK) {
-            // Set navigationBarColor to elevated gray
-            window.navigationBarColor = Color.parseColor("#2D2D2D")
-            window.statusBarColor = Color.parseColor("#282828")
-
-        }
+//        if (GlobalUtil.getTheme(sharedPrefs, resources) == GlobalUtil.THEME_DARK) {
+//            // Set navigationBarColor to elevated gray
+        window.navigationBarColor = Color.parseColor("#2D2D2D")
+//            window.statusBarColor = resources.getColor(R.color.gray)
+//
+//        }
     }
 }
 
