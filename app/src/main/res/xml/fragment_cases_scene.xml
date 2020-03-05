@@ -5,11 +5,11 @@
     <Transition
         motion:constraintSetEnd="@+id/end"
         motion:constraintSetStart="@id/start"
-        motion:duration="1000">
+        motion:duration="100">
         <OnSwipe
             motion:dragDirection="dragUp"
-            motion:onTouchUp="stop"
-            motion:touchAnchorId="@+id/toolbar" />
+            motion:touchAnchorId="@+id/swipe_refresh_layout"
+            motion:touchAnchorSide="top" />
     </Transition>
 
     <ConstraintSet android:id="@+id/start">
@@ -26,14 +26,14 @@
             motion:layout_constraintBottom_toBottomOf="parent"
             motion:layout_constraintEnd_toEndOf="parent"
             motion:layout_constraintStart_toStartOf="parent"
-            motion:layout_constraintTop_toBottomOf="@+id/toolbar"
+            motion:layout_constraintTop_toTopOf="parent"
             motion:visibilityMode="ignore" />
         <Constraint
             android:id="@+id/swipe_refresh_layout"
             motion:layout_constraintBottom_toBottomOf="parent"
             motion:layout_constraintEnd_toEndOf="parent"
             motion:layout_constraintStart_toStartOf="parent"
-            motion:layout_constraintTop_toBottomOf="@+id/toolbar"
+            motion:layout_constraintTop_toTopOf="@id/toolbar"
             motion:visibilityMode="ignore" />
     </ConstraintSet>
 
@@ -45,6 +45,13 @@
             motion:layout_constraintBottom_toTopOf="parent"
             motion:layout_constraintEnd_toEndOf="parent"
             motion:layout_constraintStart_toStartOf="parent"
+            motion:visibilityMode="ignore" />
+        <Constraint
+            android:id="@+id/swipe_refresh_layout"
+            motion:layout_constraintBottom_toBottomOf="parent"
+            motion:layout_constraintEnd_toEndOf="parent"
+            motion:layout_constraintStart_toStartOf="parent"
+            motion:layout_constraintTop_toTopOf="@id/toolbar"
             motion:visibilityMode="ignore" />
     </ConstraintSet>
 </MotionScene>

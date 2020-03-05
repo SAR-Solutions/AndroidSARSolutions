@@ -100,7 +100,6 @@ class CasesFragment : Fragment(R.layout.fragment_cases) {
         viewManager = LinearLayoutManager(context)
         viewAdapter = Adapter()
         cases_recycler_view.apply {
-            setHasFixedSize(true)
             layoutManager = viewManager
             adapter = viewAdapter
         }
@@ -157,16 +156,34 @@ class CasesFragment : Fragment(R.layout.fragment_cases) {
             }
         }
 
+        override fun getItemViewType(position: Int): Int {
+            if (position == 0) {
+                return 0
+            }
+//            return super.getItemViewType(position)
+            return 1
+        }
+
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val holder =
-                LayoutInflater.from(parent.context).inflate(R.layout.list_view_item, parent, false)
+
+            var holder: View = View(parent.context)
+
+            if (viewType == 0) {
+                holder =
+                    LayoutInflater.from(parent.context).inflate(R.layout.rv_header, parent, false)
+            } else if (viewType == 1) {
+                holder =
+                    LayoutInflater.from(parent.context)
+                        .inflate(R.layout.list_view_item, parent, false)
+            }
             return ViewHolder(holder)
         }
 
         override fun getItemCount(): Int = data.size
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            holder.bindView(data[position])
+            if (position != 0)
+                holder.bindView(data[position])
         }
 
         fun setCaseList(list: ArrayList<Case>) {
