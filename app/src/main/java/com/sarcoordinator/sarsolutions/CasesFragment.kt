@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -37,6 +38,15 @@ class CasesFragment : Fragment(R.layout.fragment_cases) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Adjust refresh layout progress view offset depending on toolbar height
+        toolbar.viewTreeObserver.addOnGlobalLayoutListener(object:
+            ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                toolbar.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                swipe_refresh_layout.setProgressViewOffset(false, toolbar.height - 150, toolbar.height + 100)
+            }
+        })
 
         // If service is ongoing, restore state
         if (viewModel.isShiftActive.value == true) {

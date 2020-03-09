@@ -4,8 +4,7 @@
 
     <Transition
         motion:constraintSetEnd="@+id/end"
-        motion:constraintSetStart="@id/start"
-        motion:duration="100">
+        motion:constraintSetStart="@id/start">
         <OnSwipe
             motion:dragDirection="dragUp"
             motion:touchAnchorId="@+id/swipe_refresh_layout"
@@ -22,11 +21,14 @@
             motion:layout_constraintTop_toTopOf="parent"
             motion:visibilityMode="ignore" />
         <Constraint
+            android:id="@+id/try_again_network_button"
+            motion:visibilityMode="ignore" />
+        <Constraint
             android:id="@+id/list_shimmer_layout"
             motion:layout_constraintBottom_toBottomOf="parent"
             motion:layout_constraintEnd_toEndOf="parent"
             motion:layout_constraintStart_toStartOf="parent"
-            motion:layout_constraintTop_toTopOf="parent"
+            motion:layout_constraintTop_toTopOf="@+id/toolbar"
             motion:visibilityMode="ignore" />
         <Constraint
             android:id="@+id/swipe_refresh_layout"

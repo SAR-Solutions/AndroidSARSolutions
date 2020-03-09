@@ -15,7 +15,7 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     compileSdkVersion 29
-    buildToolsVersion "29.0.2"
+    buildToolsVersion "29.0.3"
     defaultConfig {
         applicationId "com.sarcoordinator.sarsolutions"
         minSdkVersion 21
@@ -60,7 +60,7 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.7.2'
     implementation 'com.squareup.retrofit2:converter-moshi:2.7.2'
     // Avoid updating logging interceptor
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.4.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.4.1'
 
     // Firebase
     implementation 'com.google.firebase:firebase-analytics:17.2.3'
