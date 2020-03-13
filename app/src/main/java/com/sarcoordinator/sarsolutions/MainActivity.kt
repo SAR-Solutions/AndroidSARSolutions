@@ -8,6 +8,8 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.forEach
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
@@ -25,7 +27,6 @@ import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     private val auth = FirebaseAuth.getInstance()
-    private lateinit var navController: NavController
     private lateinit var sharedPrefs: SharedPreferences
 
     private val viewModel: SharedViewModel by lazy {
@@ -61,15 +62,9 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         if (savedInstanceState == null) {
             // Navigate to login screen if user isn't logged in
             if (auth.currentUser == null) {
-                val loginFragment = LoginFragment()
-                supportFragmentManager.beginTransaction()
-                    .add(R.id.fragment_container, loginFragment).commit()
-                bottom_nav_bar.visibility = View.GONE
+                navigateToLoginScreen()
             } else {
-                val casesFragment = CasesFragment()
-                supportFragmentManager.beginTransaction()
-                    .add(R.id.fragment_container, casesFragment).commit()
-                bottom_nav_bar.visibility = View.VISIBLE
+                navigateToCasesScreen()
             }
         }
 
@@ -77,41 +72,40 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             when (it.itemId) {
                 R.id.home_dest -> {
                     val casesFragment = CasesFragment()
-                    supportFragmentManager.beginTransaction().apply {
-                            replace(R.id.fragment_container, casesFragment)
-                        }.commit()
+                    navigateToFragment(casesFragment, true)
                 }
                 R.id.failed_shifts_dest -> {
                     val failedShiftsFragment = FailedShiftsFragment()
-                    supportFragmentManager.beginTransaction().apply {
-                        replace(R.id.fragment_container, failedShiftsFragment)
-                    }.commit()
+                    navigateToFragment(failedShiftsFragment, true)
                 }
                 R.id.settings_dest -> {
                     val settingsFragment = SettingsFragment()
-                    supportFragmentManager.beginTransaction().apply {
-                        replace(R.id.fragment_container, settingsFragment)
-                    }.commit()
+                    navigateToFragment(settingsFragment, true)
                 }
             }
             return@setOnNavigationItemSelectedListener true
         }
+    }
 
-//        NavigationUI.setupWithNavController(bottom_nav_bar, navController)
-//
-//        navController.addOnDestinationChangedListener { controller, destination, arguments ->
-//            // Avoid showing bottom navigation view on login and reset password screens
-//            if (destination.id == R.id.loginFragment
-//                || destination.id == R.id.resetPasswordFragment
-//            )
-//                bottom_nav_bar.visibility = View.GONE
-//            else
-//                bottom_nav_bar.visibility = View.VISIBLE
-//
-//            // If user is logged in, navigate to cases screen
-//            if (destination.id == R.id.loginFragment && auth.currentUser != null)
-//                controller.navigate(LoginFragmentDirections.actionLoginFragmentToCasesFragment())
-//        }
+
+    private fun navigateToFragment(fragment: Fragment, addToBackStack: Boolean) {
+        supportFragmentManager.beginTransaction().apply {
+            replace(R.id.fragment_container, fragment)
+            if(addToBackStack)
+                addToBackStack(null)
+        }.commit()
+    }
+
+    fun navigateToLoginScreen() {
+        val loginFragment = LoginFragment()
+        navigateToFragment(loginFragment, false)
+        bottom_nav_bar.visibility = View.GONE
+    }
+
+    fun navigateToCasesScreen() {
+        val casesFragment = CasesFragment()
+        navigateToFragment(casesFragment, false)
+        bottom_nav_bar.visibility = View.VISIBLE
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -120,10 +114,11 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             Snackbar.make(parent_layout, "Complete shift to go back", Snackbar.LENGTH_LONG)
                 .show()
             return true
-        } else if (!navController.popBackStack()) {
-            return navController.navigateUp()
+        } else if(supportFragmentManager.backStackEntryCount > 0){
+            supportFragmentManager.popBackStack()
+            return true
         }
-        return true
+        return false
     }
 
     override fun onBackPressed() {
@@ -137,12 +132,12 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         sharedPrefs = getPreferences(Context.MODE_PRIVATE)
         // Get system default theme
         GlobalUtil.setCurrentTheme(sharedPrefs, resources)
-//        if (GlobalUtil.getTheme(sharedPrefs, resources) == GlobalUtil.THEME_DARK) {
-//            // Set navigationBarColor to elevated gray
-        window.navigationBarColor = Color.parseColor("#2D2D2D")
-//            window.statusBarColor = resources.getColor(R.color.gray)
-//
-//        }
+        if (GlobalUtil.getTheme(sharedPrefs, resources) == GlobalUtil.THEME_DARK) {
+            // Set navigationBarColor to elevated gray
+            window.navigationBarColor = Color.parseColor("#2D2D2D")
+            window.statusBarColor = resources.getColor(R.color.gray)
+
+        }
     }
 }
 

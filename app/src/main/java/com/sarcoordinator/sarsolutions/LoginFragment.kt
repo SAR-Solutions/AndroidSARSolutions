@@ -11,9 +11,7 @@ import android.view.autofill.AutofillManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.FragmentNavigatorExtras
-import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import kotlinx.android.synthetic.main.fragment_login.*
@@ -100,7 +98,8 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                                 afm?.commit()
                             }
 
-                            Toast.makeText(it.context, "TODO:Implement navigation to cases fragment", Toast.LENGTH_LONG).show()
+                            (requireActivity() as MainActivity).navigateToCasesScreen()
+
                         } else {
                             it.isEnabled = true
                             Toast.makeText(
@@ -124,7 +123,14 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                 imageView to "appImage",
                 signin_button to "button"
             )
-            Toast.makeText(it.context, "TODO:Implement navigation to reset password frag", Toast.LENGTH_LONG).show()
+            requireActivity().supportFragmentManager
+                .beginTransaction()
+                .replace(R.id.fragment_container, ResetPasswordFragment())
+                .addSharedElement(email_text_layout, email_text_layout.transitionName)
+                .addSharedElement(imageView, imageView.transitionName)
+                .addSharedElement(signin_button, signin_button.transitionName)
+                .addToBackStack(null)
+                .commit()
         }
     }
 
