@@ -28,7 +28,7 @@
             motion:layout_constraintBottom_toBottomOf="parent"
             motion:layout_constraintEnd_toEndOf="parent"
             motion:layout_constraintStart_toStartOf="parent"
-            motion:layout_constraintTop_toTopOf="@+id/toolbar"
+            motion:layout_constraintTop_toBottomOf="@+id/toolbar"
             motion:visibilityMode="ignore" />
         <Constraint
             android:id="@+id/swipe_refresh_layout"
@@ -47,6 +47,13 @@
             motion:layout_constraintBottom_toTopOf="parent"
             motion:layout_constraintEnd_toEndOf="parent"
             motion:layout_constraintStart_toStartOf="parent"
+            motion:visibilityMode="ignore" />
+        <Constraint
+            android:id="@+id/list_shimmer_layout"
+            motion:layout_constraintBottom_toBottomOf="parent"
+            motion:layout_constraintEnd_toEndOf="parent"
+            motion:layout_constraintStart_toStartOf="parent"
+            motion:layout_constraintTop_toBottomOf="@+id/toolbar"
             motion:visibilityMode="ignore" />
         <Constraint
             android:id="@+id/swipe_refresh_layout"

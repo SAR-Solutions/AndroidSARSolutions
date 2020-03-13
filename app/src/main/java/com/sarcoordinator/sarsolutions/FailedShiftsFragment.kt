@@ -33,8 +33,6 @@ class FailedShiftsFragment : Fragment(R.layout.fragment_failed_shifts) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        toolbar.title = getString(R.string.failed_shfits)
-
         setUpRecyclerView()
 
         viewModel.getAllShiftReports().observe(viewLifecycleOwner, Observer {

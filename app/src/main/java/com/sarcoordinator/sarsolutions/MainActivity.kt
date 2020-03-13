@@ -58,34 +58,60 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
             window.statusBarColor = Color.BLACK
 
-        navController = findNavController(R.id.nav_host_fragment)
-
         if (savedInstanceState == null) {
             // Navigate to login screen if user isn't logged in
             if (auth.currentUser == null) {
-                navController.navigate(
-                    R.id.loginFragment,
-                    null,
-                    NavOptions.Builder().setPopUpTo(R.id.nav_graph, true).build()
-                )
+                val loginFragment = LoginFragment()
+                supportFragmentManager.beginTransaction()
+                    .add(R.id.fragment_container, loginFragment).commit()
+                bottom_nav_bar.visibility = View.GONE
+            } else {
+                val casesFragment = CasesFragment()
+                supportFragmentManager.beginTransaction()
+                    .add(R.id.fragment_container, casesFragment).commit()
+                bottom_nav_bar.visibility = View.VISIBLE
             }
         }
 
-        NavigationUI.setupWithNavController(bottom_nav_bar, navController)
-
-        navController.addOnDestinationChangedListener { controller, destination, arguments ->
-            // Avoid showing bottom navigation view on login and reset password screens
-            if (destination.id == R.id.loginFragment
-                || destination.id == R.id.resetPasswordFragment
-            )
-                bottom_nav_bar.visibility = View.GONE
-            else
-                bottom_nav_bar.visibility = View.VISIBLE
-
-            // If user is logged in, navigate to cases screen
-            if (destination.id == R.id.loginFragment && auth.currentUser != null)
-                controller.navigate(LoginFragmentDirections.actionLoginFragmentToCasesFragment())
+        bottom_nav_bar.setOnNavigationItemSelectedListener {
+            when (it.itemId) {
+                R.id.home_dest -> {
+                    val casesFragment = CasesFragment()
+                    supportFragmentManager.beginTransaction().apply {
+                            replace(R.id.fragment_container, casesFragment)
+                        }.commit()
+                }
+                R.id.failed_shifts_dest -> {
+                    val failedShiftsFragment = FailedShiftsFragment()
+                    supportFragmentManager.beginTransaction().apply {
+                        replace(R.id.fragment_container, failedShiftsFragment)
+                    }.commit()
+                }
+                R.id.settings_dest -> {
+                    val settingsFragment = SettingsFragment()
+                    supportFragmentManager.beginTransaction().apply {
+                        replace(R.id.fragment_container, settingsFragment)
+                    }.commit()
+                }
+            }
+            return@setOnNavigationItemSelectedListener true
         }
+
+//        NavigationUI.setupWithNavController(bottom_nav_bar, navController)
+//
+//        navController.addOnDestinationChangedListener { controller, destination, arguments ->
+//            // Avoid showing bottom navigation view on login and reset password screens
+//            if (destination.id == R.id.loginFragment
+//                || destination.id == R.id.resetPasswordFragment
+//            )
+//                bottom_nav_bar.visibility = View.GONE
+//            else
+//                bottom_nav_bar.visibility = View.VISIBLE
+//
+//            // If user is logged in, navigate to cases screen
+//            if (destination.id == R.id.loginFragment && auth.currentUser != null)
+//                controller.navigate(LoginFragmentDirections.actionLoginFragmentToCasesFragment())
+//        }
     }
 
     override fun onSupportNavigateUp(): Boolean {

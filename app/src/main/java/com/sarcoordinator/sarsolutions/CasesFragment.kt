@@ -49,12 +49,9 @@ class CasesFragment : Fragment(R.layout.fragment_cases) {
         })
 
         // If service is ongoing, restore state
+        //TODO:NAV
         if (viewModel.isShiftActive.value == true) {
-            findNavController().navigate(
-                CasesFragmentDirections.actionCasesFragmentToTrackFragment(
-                    viewModel.currentCase.value!!.id
-                )
-            )
+            Toast.makeText(context, "TODO:Implement restore state", Toast.LENGTH_LONG).show()
         }
 
         observeNetworkErrors()
@@ -160,8 +157,7 @@ class CasesFragment : Fragment(R.layout.fragment_cases) {
                 itemView.person_avatar_view.setText(case.missingPersonName[0])
                 itemView.date.text = GlobalUtil.convertEpochToDate(case.date)
                 itemView.setOnClickListener {
-                    itemView.findNavController()
-                        .navigate(CasesFragmentDirections.actionCasesFragmentToTrackFragment(case.id))
+                    Toast.makeText(it.context, "TODO:Implement navigation", Toast.LENGTH_LONG).show()
                 }
             }
         }

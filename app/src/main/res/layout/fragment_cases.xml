@@ -72,8 +72,9 @@
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    <com.sarcoordinator.sarsolutions.custom_views.CustomView
+    <com.sarcoordinator.sarsolutions.custom_views.CustomToolbar
         android:id="@+id/toolbar"
+        app:Title="@string/app_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"

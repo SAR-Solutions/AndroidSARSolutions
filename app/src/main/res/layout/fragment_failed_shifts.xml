@@ -6,9 +6,9 @@
     android:layout_height="match_parent"
     tools:context=".FailedShiftsFragment">
 
-    <com.google.android.material.appbar.MaterialToolbar
+    <com.sarcoordinator.sarsolutions.custom_views.CustomToolbar
         android:id="@+id/toolbar"
-        style="@style/Toolbar"
+        app:Title="@string/failed_shfits"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"

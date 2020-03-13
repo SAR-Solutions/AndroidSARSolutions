@@ -100,8 +100,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                                 afm?.commit()
                             }
 
-                            view?.findNavController()
-                                ?.navigate(LoginFragmentDirections.actionLoginFragmentToCasesFragment())
+                            Toast.makeText(it.context, "TODO:Implement navigation to cases fragment", Toast.LENGTH_LONG).show()
                         } else {
                             it.isEnabled = true
                             Toast.makeText(
@@ -125,11 +124,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                 imageView to "appImage",
                 signin_button to "button"
             )
-            findNavController()
-                .navigate(
-                    LoginFragmentDirections.actionLoginFragmentToResetPasswordFragment(),
-                    extras
-                )
+            Toast.makeText(it.context, "TODO:Implement navigation to reset password frag", Toast.LENGTH_LONG).show()
         }
     }
 

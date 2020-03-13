@@ -31,7 +31,7 @@ import timber.log.Timber
  */
 class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
 
-    private val args by navArgs<ShiftReportFragmentArgs>()
+//    private val args by navArgs<ShiftReportFragmentArgs>()
 
     private lateinit var viewModel: SharedViewModel
     private lateinit var viewManager: RecyclerView.LayoutManager
@@ -83,54 +83,54 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
     }
 
     private fun initViewListeners() {
-        endShiftButton.setOnClickListener {
-
-            GlobalUtil.hideKeyboard(requireActivity())
-
-            // Validate form input
-            if (shiftHoursEditText.text.isNullOrEmpty() || !areVehicleFormsValid()) {
-                Snackbar.make(
-                    requireView(),
-                    "Complete shift report to proceed",
-                    Snackbar.LENGTH_LONG
-                ).show()
-            } else {
-                progress_bar.visibility = View.VISIBLE
-                shift_report_fab.hide()
-                // Only submit shift if internet connectivity is available
-                if (GlobalUtil.isNetworkConnectivityAvailable(
-                        requireActivity(),
-                        requireView(),
-                        false
-                    )
-                ) {
-                    viewModel.submitShiftReport(
-                        args.shiftId,
-                        shiftHoursEditText.text.toString(),
-                        resources.getStringArray(R.array.vehicle_array).toList()
-                    ).invokeOnCompletion {
-                        CoroutineScope(Main).launch {
-                            viewModel.completeShiftReportSubmission()
-                            findNavController().navigate(ShiftReportFragmentDirections.actionShiftReportFragmentToCasesFragment())
-                        }
-                    }
-                } else {
-                    viewModel.addShiftReportToCache(
-                        shiftHoursEditText.text.toString(),
-                        args.shiftId
-                    ).invokeOnCompletion {
-                        CoroutineScope(Main).launch {
-                            viewModel.completeShiftReportSubmission()
-                            findNavController().navigate(ShiftReportFragmentDirections.actionShiftReportFragmentToCasesFragment())
-                        }
-                    }
-                }
-            }
-        }
-
-        shift_report_fab.setOnClickListener {
-            addVehicle()
-        }
+//        endShiftButton.setOnClickListener {
+//
+//            GlobalUtil.hideKeyboard(requireActivity())
+//
+//            // Validate form input
+//            if (shiftHoursEditText.text.isNullOrEmpty() || !areVehicleFormsValid()) {
+//                Snackbar.make(
+//                    requireView(),
+//                    "Complete shift report to proceed",
+//                    Snackbar.LENGTH_LONG
+//                ).show()
+//            } else {
+//                progress_bar.visibility = View.VISIBLE
+//                shift_report_fab.hide()
+//                // Only submit shift if internet connectivity is available
+//                if (GlobalUtil.isNetworkConnectivityAvailable(
+//                        requireActivity(),
+//                        requireView(),
+//                        false
+//                    )
+//                ) {
+//                    viewModel.submitShiftReport(
+//                        args.shiftId,
+//                        shiftHoursEditText.text.toString(),
+//                        resources.getStringArray(R.array.vehicle_array).toList()
+//                    ).invokeOnCompletion {
+//                        CoroutineScope(Main).launch {
+//                            viewModel.completeShiftReportSubmission()
+//                            findNavController().navigate(ShiftReportFragmentDirections.actionShiftReportFragmentToCasesFragment())
+//                        }
+//                    }
+//                } else {
+//                    viewModel.addShiftReportToCache(
+//                        shiftHoursEditText.text.toString(),
+//                        args.shiftId
+//                    ).invokeOnCompletion {
+//                        CoroutineScope(Main).launch {
+//                            viewModel.completeShiftReportSubmission()
+//                            findNavController().navigate(ShiftReportFragmentDirections.actionShiftReportFragmentToCasesFragment())
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//
+//        shift_report_fab.setOnClickListener {
+//            addVehicle()
+//        }
     }
 
     // True if all vehicles have required data set, false otherwise
@@ -161,15 +161,15 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
                 Snackbar.LENGTH_LONG
             ).show()
 
-            viewModel.addShiftReportToCache(
-                shiftHoursEditText.text.toString(),
-                args.shiftId
-            ).invokeOnCompletion {
-                CoroutineScope(Main).launch {
-                    viewModel.completeShiftReportSubmission()
-                    findNavController().navigate(ShiftReportFragmentDirections.actionShiftReportFragmentToCasesFragment())
-                }
-            }
+//            viewModel.addShiftReportToCache(
+//                shiftHoursEditText.text.toString(),
+//                args.shiftId
+//            ).invokeOnCompletion {
+//                CoroutineScope(Main).launch {
+//                    viewModel.completeShiftReportSubmission()
+//                    findNavController().navigate(ShiftReportFragmentDirections.actionShiftReportFragmentToCasesFragment())
+//                }
+//            }
         })
     }
 }

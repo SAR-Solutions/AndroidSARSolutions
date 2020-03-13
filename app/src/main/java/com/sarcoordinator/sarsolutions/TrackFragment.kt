@@ -48,7 +48,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
     private lateinit var currentShiftId: String
     private var isRetryNetworkFab = false
 
-    private val args by navArgs<TrackFragmentArgs>()
+//    private val args by navArgs<TrackFragmentArgs>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -117,31 +117,31 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
     private fun setupInterface() {
 
         // Only fetch data if detailed case isn't in cache
-        if (!viewModel.currentCase.value?.id.equals(args.caseId)) {
-            enableLoadingState(true)
-            viewModel.currentCase.value = null
-            viewModel.getCaseDetails(args.caseId).observe(viewLifecycleOwner, Observer { case ->
-                if (case != null) {
-                    populateViewWithCase(case)
-                    enableLoadingState(false)
-                    enableStartTrackingFab()
-                }
-            })
-        } else {
-            // Fetch from cache
-            populateViewWithCase(viewModel.currentCase.value!!)
-            enableStartTrackingFab()
-
-            // Restore state depending on view model
-            restoreState()
-        }
-
-
-        viewModel.getBinder().observe(viewLifecycleOwner, Observer { binder ->
-            // Either service was bound or unbound
-            service = binder?.getService()
-            observeService()
-        })
+//        if (!viewModel.currentCase.value?.id.equals(args.caseId)) {
+//            enableLoadingState(true)
+//            viewModel.currentCase.value = null
+//            viewModel.getCaseDetails(args.caseId).observe(viewLifecycleOwner, Observer { case ->
+//                if (case != null) {
+//                    populateViewWithCase(case)
+//                    enableLoadingState(false)
+//                    enableStartTrackingFab()
+//                }
+//            })
+//        } else {
+//            // Fetch from cache
+//            populateViewWithCase(viewModel.currentCase.value!!)
+//            enableStartTrackingFab()
+//
+//            // Restore state depending on view model
+//            restoreState()
+//        }
+//
+//
+//        viewModel.getBinder().observe(viewLifecycleOwner, Observer { binder ->
+//            // Either service was bound or unbound
+//            service = binder?.getService()
+//            observeService()
+//        })
     }
 
     private fun initFabClickListener() {
@@ -180,11 +180,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
                                     // Stop ongoing service
                                     stopLocationService()
 
-                                    findNavController().navigate(
-                                        TrackFragmentDirections.actionTrackFragmentToShiftReportFragment(
-                                            currentShiftId
-                                        )
-                                    )
+                                    Toast.makeText(context, "TODO:Implement navigation to shift report frag", Toast.LENGTH_LONG).show()
                                 }
                             })
                         }

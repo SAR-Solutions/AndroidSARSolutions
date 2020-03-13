@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.*
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
@@ -82,12 +83,7 @@ class SettingsFragment : Fragment() {
 
         sign_out_button.setOnClickListener {
             auth.signOut()
-            findNavController().navigate(
-                R.id.loginFragment,
-                null,
-                NavOptions.Builder().setPopUpTo(R.id.nav_graph, true).build()
-            )
-
+            Toast.makeText(it.context, "TODO:Implement signing out", Toast.LENGTH_LONG).show()
         }
     }
 
