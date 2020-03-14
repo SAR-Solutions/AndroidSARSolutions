@@ -23,9 +23,9 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     private var navBarSelectedProgrammatically = false
 
-    private val tabBackStacks = Stack<BackStackIdentifiers>()
+    private var tabBackStacks = Stack<BackStackIdentifiers>()
 
-    private val backStacks = HashMap<BackStackIdentifiers, Stack<Fragment>>().apply {
+    private var backStacks = HashMap<BackStackIdentifiers, Stack<Fragment>>().apply {
         this[BackStackIdentifiers.HOME] = Stack<Fragment>()
         this[BackStackIdentifiers.FAILED_SHIFTS] = Stack<Fragment>()
         this[BackStackIdentifiers.SETTINGS] = Stack<Fragment>()
@@ -209,6 +209,20 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             window.navigationBarColor = Color.parseColor("#2D2D2D")
             window.statusBarColor = resources.getColor(R.color.gray)
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putSerializable("backStack", backStacks)
+        outState.putSerializable("tabsBackStack", tabBackStacks)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        backStacks =
+            savedInstanceState.getSerializable("backStack") as HashMap<BackStackIdentifiers, Stack<Fragment>>
+        tabBackStacks =
+            savedInstanceState.getSerializable("tabsBackStack") as Stack<BackStackIdentifiers>
     }
 }
 
