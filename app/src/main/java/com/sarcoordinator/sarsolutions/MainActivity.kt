@@ -21,6 +21,10 @@ import kotlin.collections.HashMap
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
+    private var navBarSelectedProgrammatically = false
+
+    private val tabBackStacks = Stack<BackStackIdentifiers>()
+
     private val backStacks = HashMap<BackStackIdentifiers, Stack<Fragment>>().apply {
         this[BackStackIdentifiers.HOME] = Stack<Fragment>()
         this[BackStackIdentifiers.FAILED_SHIFTS] = Stack<Fragment>()
@@ -84,11 +88,20 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         }
 
         bottom_nav_bar.setOnNavigationItemSelectedListener {
-            when (it.itemId) {
-                R.id.home_dest -> {setSelectedTab(BackStackIdentifiers.HOME)}
-                R.id.failed_shifts_dest -> { setSelectedTab(BackStackIdentifiers.FAILED_SHIFTS) }
-                R.id.settings_dest -> { setSelectedTab(BackStackIdentifiers.SETTINGS)}
-            }
+            if (!navBarSelectedProgrammatically) {
+                when (it.itemId) {
+                    R.id.home_dest -> {
+                        setSelectedTab(BackStackIdentifiers.HOME)
+                    }
+                    R.id.failed_shifts_dest -> {
+                        setSelectedTab(BackStackIdentifiers.FAILED_SHIFTS)
+                    }
+                    R.id.settings_dest -> {
+                        setSelectedTab(BackStackIdentifiers.SETTINGS)
+                    }
+                }
+            } else
+                navBarSelectedProgrammatically = false
             return@setOnNavigationItemSelectedListener true
         }
     }
@@ -100,11 +113,18 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     private fun setSelectedTab(identifier: BackStackIdentifiers) {
         currentTab = identifier
+        if (tabBackStacks.isEmpty())
+            tabBackStacks.push(currentTab)
+        else if (tabBackStacks.peek() != currentTab)
+            tabBackStacks.push(currentTab)
 
-        if(backStacks[identifier]!!.size == 0) {
-            when(identifier) {
+        if (backStacks[identifier]!!.size == 0) {
+            when (identifier) {
                 BackStackIdentifiers.HOME -> pushFragment(identifier, CasesFragment())
-                BackStackIdentifiers.FAILED_SHIFTS -> pushFragment(identifier, FailedShiftsFragment())
+                BackStackIdentifiers.FAILED_SHIFTS -> pushFragment(
+                    identifier,
+                    FailedShiftsFragment()
+                )
                 BackStackIdentifiers.SETTINGS -> pushFragment(identifier, SettingsFragment())
             }
         } else {
@@ -136,9 +156,29 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             .commit()
     }
 
+    // Set last tab as active/current tab and change bottom_nav_bar selection
+    private fun popTabFragmentStack() {
+        tabBackStacks.pop()
+        supportFragmentManager.beginTransaction()
+            .replace(
+                R.id.fragment_container,
+                backStacks[tabBackStacks.lastElement()]!!.lastElement()
+            )
+            .commit()
+        navBarSelectedProgrammatically = true
+        currentTab = tabBackStacks.lastElement()
+        when (currentTab) {
+            BackStackIdentifiers.HOME -> bottom_nav_bar.selectedItemId = R.id.home_dest
+            BackStackIdentifiers.FAILED_SHIFTS -> bottom_nav_bar.selectedItemId =
+                R.id.failed_shifts_dest
+            BackStackIdentifiers.SETTINGS -> bottom_nav_bar.selectedItemId = R.id.settings_dest
+        }
+    }
+
+    // Clear backstack and place given fragment on stack
     fun popFragmentClearBackStack(fragment: Fragment) {
         backStacks[currentTab]!!.clear()
-        pushFragment(null,fragment)
+        pushFragment(null, fragment)
     }
 
     override fun onBackPressed() {
@@ -147,7 +187,10 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 super.onBackPressed()
             }
             backStacks[currentTab]!!.size <= 1 -> {
-                finishAffinity()
+                if (tabBackStacks.size <= 1)
+                    finishAffinity()
+                else
+                    popTabFragmentStack()
             }
             else -> {
                 popFragment()
@@ -165,7 +208,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             // Set navigationBarColor to elevated gray
             window.navigationBarColor = Color.parseColor("#2D2D2D")
             window.statusBarColor = resources.getColor(R.color.gray)
-
         }
     }
 }
