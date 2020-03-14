@@ -9,25 +9,35 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.forEach
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.NavController
-import androidx.navigation.NavOptions
-import androidx.navigation.findNavController
-import androidx.navigation.ui.NavigationUI
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.util.CacheDatabase
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.LocalCacheRepository
 import kotlinx.android.synthetic.main.activity_main.*
-
+import java.util.*
+import kotlin.collections.HashMap
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
+    private val backStacks = HashMap<BackStackIdentifiers, Stack<Fragment>>().apply {
+        this[BackStackIdentifiers.HOME] = Stack<Fragment>()
+        this[BackStackIdentifiers.FAILED_SHIFTS] = Stack<Fragment>()
+        this[BackStackIdentifiers.SETTINGS] = Stack<Fragment>()
+    }
+
+    private var currentTab = BackStackIdentifiers.HOME
+
+    enum class BackStackIdentifiers {
+        HOME, FAILED_SHIFTS, SETTINGS
+    }
+
     private val auth = FirebaseAuth.getInstance()
     private lateinit var sharedPrefs: SharedPreferences
+
+    private var bottomBarSelectedProgrammatically = false
 
     private val viewModel: SharedViewModel by lazy {
         ViewModelProvider(this)[SharedViewModel::class.java]
@@ -38,6 +48,8 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         // Otherwise a new instance of this activity will be created
         loadUserPreferences()
         super.onCreate(savedInstanceState)
+
+        bottom_nav_bar.selectedItemId = R.id.home_dest
 
         val repo = LocalCacheRepository(CacheDatabase.getDatabase(application).casesDao())
         repo.allShiftReports.observeForever {
@@ -62,68 +74,69 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         if (savedInstanceState == null) {
             // Navigate to login screen if user isn't logged in
             if (auth.currentUser == null) {
-                navigateToLoginScreen()
+                supportFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, LoginFragment())
+                    .commit()
+                bottom_nav_bar.visibility = View.GONE
             } else {
-                navigateToCasesScreen()
+                setSelectedTab(BackStackIdentifiers.HOME)
+                bottom_nav_bar.visibility = View.VISIBLE
             }
         }
 
         bottom_nav_bar.setOnNavigationItemSelectedListener {
             when (it.itemId) {
-                R.id.home_dest -> {
-                    val casesFragment = CasesFragment()
-                    navigateToFragment(casesFragment, true)
-                }
-                R.id.failed_shifts_dest -> {
-                    val failedShiftsFragment = FailedShiftsFragment()
-                    navigateToFragment(failedShiftsFragment, true)
-                }
-                R.id.settings_dest -> {
-                    val settingsFragment = SettingsFragment()
-                    navigateToFragment(settingsFragment, true)
-                }
+                R.id.home_dest -> {setSelectedTab(BackStackIdentifiers.HOME)}
+                R.id.failed_shifts_dest -> { setSelectedTab(BackStackIdentifiers.FAILED_SHIFTS) }
+                R.id.settings_dest -> { setSelectedTab(BackStackIdentifiers.SETTINGS)}
             }
             return@setOnNavigationItemSelectedListener true
         }
     }
 
-
-    private fun navigateToFragment(fragment: Fragment, addToBackStack: Boolean) {
-        supportFragmentManager.beginTransaction().apply {
-            replace(R.id.fragment_container, fragment)
-            if(addToBackStack)
-                addToBackStack(null)
-        }.commit()
-    }
-
-    fun navigateToLoginScreen() {
-        val loginFragment = LoginFragment()
-        navigateToFragment(loginFragment, false)
-        bottom_nav_bar.visibility = View.GONE
-    }
-
-    fun navigateToCasesScreen() {
-        val casesFragment = CasesFragment()
-        navigateToFragment(casesFragment, false)
+    public fun loginSuccessNavigation() {
         bottom_nav_bar.visibility = View.VISIBLE
+        setSelectedTab(BackStackIdentifiers.HOME)
     }
 
-    override fun onSupportNavigateUp(): Boolean {
-        // Don't allow navigating back if LocationService is running
-        if (viewModel.isShiftActive.value == true) {
-            Snackbar.make(parent_layout, "Complete shift to go back", Snackbar.LENGTH_LONG)
-                .show()
-            return true
-        } else if(supportFragmentManager.backStackEntryCount > 0){
-            supportFragmentManager.popBackStack()
-            return true
+    private fun setSelectedTab(identifier: BackStackIdentifiers) {
+        currentTab = identifier
+
+        if(backStacks[identifier]!!.size == 0) {
+            when(identifier) {
+                BackStackIdentifiers.HOME -> pushFragment(identifier, CasesFragment())
+                BackStackIdentifiers.FAILED_SHIFTS -> pushFragment(identifier, FailedShiftsFragment())
+                BackStackIdentifiers.SETTINGS -> pushFragment(identifier, SettingsFragment())
+            }
+        } else {
+            pushFragment(identifier, backStacks[identifier]!!.lastElement())
         }
-        return false
+    }
+
+    private fun pushFragment(identifier: BackStackIdentifiers?, fragment: Fragment) {
+        backStacks[identifier]!!.add(fragment)
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .commit()
+    }
+
+    private fun popFragment() {
+        backStacks[currentTab]!!.pop()
+        pushFragment(currentTab, backStacks[currentTab]!!.lastElement())
     }
 
     override fun onBackPressed() {
-        if (!onSupportNavigateUp())
-            super.onBackPressed()
+        when {
+            auth.currentUser == null -> {
+                super.onBackPressed()
+            }
+            backStacks[currentTab]!!.size <= 1 -> {
+                finishAffinity()
+            }
+            else -> {
+                popFragment()
+            }
+        }
     }
 
     // Load user preferences using shared preferences

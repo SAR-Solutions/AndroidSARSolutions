@@ -15,9 +15,6 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
-import androidx.navigation.ui.NavigationUI
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.karumi.dexter.Dexter
@@ -40,6 +37,10 @@ import timber.log.Timber
 
 class TrackFragment : Fragment(R.layout.fragment_track) {
 
+    companion object ArgsTags {
+        const val CASE_ID = "CASE_ID"
+    }
+
     private var service: LocationService? = null
     private lateinit var sharedPrefs: SharedPreferences
 
@@ -48,21 +49,21 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
     private lateinit var currentShiftId: String
     private var isRetryNetworkFab = false
 
-//    private val args by navArgs<TrackFragmentArgs>()
+    private lateinit var caseId: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = activity?.run {
             ViewModelProvider(this)[SharedViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
+
+        caseId = arguments?.getString(CASE_ID)!!
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         sharedPrefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
-
-        NavigationUI.setupWithNavController(toolbar, findNavController())
 
 //         Main activity handles back navigation
         toolbar.setNavigationOnClickListener {
@@ -117,31 +118,31 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
     private fun setupInterface() {
 
         // Only fetch data if detailed case isn't in cache
-//        if (!viewModel.currentCase.value?.id.equals(args.caseId)) {
-//            enableLoadingState(true)
-//            viewModel.currentCase.value = null
-//            viewModel.getCaseDetails(args.caseId).observe(viewLifecycleOwner, Observer { case ->
-//                if (case != null) {
-//                    populateViewWithCase(case)
-//                    enableLoadingState(false)
-//                    enableStartTrackingFab()
-//                }
-//            })
-//        } else {
-//            // Fetch from cache
-//            populateViewWithCase(viewModel.currentCase.value!!)
-//            enableStartTrackingFab()
-//
-//            // Restore state depending on view model
-//            restoreState()
-//        }
-//
-//
-//        viewModel.getBinder().observe(viewLifecycleOwner, Observer { binder ->
-//            // Either service was bound or unbound
-//            service = binder?.getService()
-//            observeService()
-//        })
+        if (!viewModel.currentCase.value?.id.equals(caseId)) {
+            enableLoadingState(true)
+            viewModel.currentCase.value = null
+            viewModel.getCaseDetails(caseId).observe(viewLifecycleOwner, Observer { case ->
+                if (case != null) {
+                    populateViewWithCase(case)
+                    enableLoadingState(false)
+                    enableStartTrackingFab()
+                }
+            })
+        } else {
+            // Fetch from cach
+            populateViewWithCase(viewModel.currentCase.value!!)
+            enableStartTrackingFab()
+
+            // Restore state depending on view model
+            restoreState()
+        }
+
+
+        viewModel.getBinder().observe(viewLifecycleOwner, Observer { binder ->
+            // Either service was bound or unbound
+            service = binder?.getService()
+            observeService()
+        })
     }
 
     private fun initFabClickListener() {

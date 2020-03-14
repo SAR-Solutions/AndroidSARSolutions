@@ -98,7 +98,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                                 afm?.commit()
                             }
 
-                            (requireActivity() as MainActivity).navigateToCasesScreen()
+                            (requireActivity() as MainActivity).loginSuccessNavigation()
 
                         } else {
                             it.isEnabled = true
@@ -118,11 +118,6 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         }
 
         forgot_password_button.setOnClickListener {
-            val extras = FragmentNavigatorExtras(
-                email_text_layout to "email",
-                imageView to "appImage",
-                signin_button to "button"
-            )
             requireActivity().supportFragmentManager
                 .beginTransaction()
                 .replace(R.id.fragment_container, ResetPasswordFragment())

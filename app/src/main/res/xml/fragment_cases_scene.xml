@@ -6,6 +6,7 @@
         motion:constraintSetEnd="@+id/end"
         motion:constraintSetStart="@id/start">
         <OnSwipe
+            motion:onTouchUp="autoComplete"
             motion:dragDirection="dragUp"
             motion:touchAnchorId="@+id/swipe_refresh_layout"
             motion:touchAnchorSide="top" />

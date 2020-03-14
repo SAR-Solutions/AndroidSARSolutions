@@ -1,5 +1,6 @@
 package com.sarcoordinator.sarsolutions
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -43,7 +44,7 @@ class CasesFragment : Fragment(R.layout.fragment_cases) {
         toolbar.viewTreeObserver.addOnGlobalLayoutListener(object:
             ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
-                toolbar.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                toolbar?.viewTreeObserver?.removeOnGlobalLayoutListener(this)
                 swipe_refresh_layout.setProgressViewOffset(false, toolbar.height - 150, toolbar.height + 100)
             }
         })
@@ -150,14 +151,23 @@ class CasesFragment : Fragment(R.layout.fragment_cases) {
     class Adapter : RecyclerView.Adapter<Adapter.ViewHolder>() {
         private var data = ArrayList<Case>()
 
-        class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        class ViewHolder(itemView: View, val context: Context) : RecyclerView.ViewHolder(itemView) {
             fun bindView(case: Case) {
                 itemView.missing_person_text.text =
                     case.missingPersonName.toString().removeSurrounding("[", "]")
                 itemView.person_avatar_view.setText(case.missingPersonName[0])
                 itemView.date.text = GlobalUtil.convertEpochToDate(case.date)
                 itemView.setOnClickListener {
-                    Toast.makeText(it.context, "TODO:Implement navigation", Toast.LENGTH_LONG).show()
+                    val trackFragment = TrackFragment()
+                    trackFragment.arguments = Bundle().apply {
+                        putString(TrackFragment.CASE_ID, case.id)
+                    }
+
+                    (context as MainActivity).supportFragmentManager
+                        .beginTransaction()
+                        .replace(R.id.fragment_container, trackFragment)
+                        .addToBackStack(null)
+                        .commit()
                 }
             }
         }
@@ -182,7 +192,7 @@ class CasesFragment : Fragment(R.layout.fragment_cases) {
                     LayoutInflater.from(parent.context)
                         .inflate(R.layout.list_view_item, parent, false)
             }
-            return ViewHolder(holder)
+            return ViewHolder(holder, parent.context)
         }
 
         override fun getItemCount(): Int = data.size
