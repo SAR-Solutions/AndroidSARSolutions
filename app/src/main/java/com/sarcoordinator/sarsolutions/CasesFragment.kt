@@ -163,11 +163,7 @@ class CasesFragment : Fragment(R.layout.fragment_cases) {
                         putString(TrackFragment.CASE_ID, case.id)
                     }
 
-                    (context as MainActivity).supportFragmentManager
-                        .beginTransaction()
-                        .replace(R.id.fragment_container, trackFragment)
-                        .addToBackStack(null)
-                        .commit()
+                    (context as MainActivity).pushFragment(null, trackFragment)
                 }
             }
         }

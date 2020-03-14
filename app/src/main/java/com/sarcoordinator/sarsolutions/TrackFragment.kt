@@ -181,7 +181,13 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
                                     // Stop ongoing service
                                     stopLocationService()
 
-                                    Toast.makeText(context, "TODO:Implement navigation to shift report frag", Toast.LENGTH_LONG).show()
+                                    val shiftReportFragment = ShiftReportFragment().apply {
+                                        arguments = Bundle().apply {
+                                            putString(ShiftReportFragment.SHIFT_ID, currentShiftId)
+                                        }
+                                    }
+
+                                    (activity as MainActivity).pushFragment(null, shiftReportFragment)
                                 }
                             })
                         }

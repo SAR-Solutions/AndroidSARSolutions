@@ -11,7 +11,6 @@ import androidx.core.view.forEach
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.util.CacheDatabase
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
@@ -94,7 +93,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         }
     }
 
-    public fun loginSuccessNavigation() {
+    fun loginSuccessNavigation() {
         bottom_nav_bar.visibility = View.VISIBLE
         setSelectedTab(BackStackIdentifiers.HOME)
     }
@@ -109,20 +108,37 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 BackStackIdentifiers.SETTINGS -> pushFragment(identifier, SettingsFragment())
             }
         } else {
-            pushFragment(identifier, backStacks[identifier]!!.lastElement())
+            loadTab(identifier)
         }
     }
 
-    private fun pushFragment(identifier: BackStackIdentifiers?, fragment: Fragment) {
-        backStacks[identifier]!!.add(fragment)
+    // If identifier is null, adds fragment to currentTab backstack
+    fun pushFragment(identifier: BackStackIdentifiers?, fragment: Fragment) {
+        if(identifier == null)
+            backStacks[currentTab]!!.add(fragment)
+        else
+            backStacks[identifier]!!.add(fragment)
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragment)
             .commit()
     }
 
+    private fun loadTab(identifier: BackStackIdentifiers) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, backStacks[identifier]!!.lastElement())
+            .commit()
+    }
+
     private fun popFragment() {
         backStacks[currentTab]!!.pop()
-        pushFragment(currentTab, backStacks[currentTab]!!.lastElement())
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, backStacks[currentTab]!!.lastElement())
+            .commit()
+    }
+
+    fun popFragmentClearBackStack(fragment: Fragment) {
+        backStacks[currentTab]!!.clear()
+        pushFragment(null,fragment)
     }
 
     override fun onBackPressed() {

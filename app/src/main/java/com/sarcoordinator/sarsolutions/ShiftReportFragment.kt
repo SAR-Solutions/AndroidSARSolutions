@@ -11,9 +11,6 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
-import androidx.navigation.ui.NavigationUI
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
@@ -31,8 +28,11 @@ import timber.log.Timber
  */
 class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
 
-//    private val args by navArgs<ShiftReportFragmentArgs>()
+    companion object ArgsTags {
+        const val SHIFT_ID = "SHIFT_ID"
+    }
 
+    private lateinit var shiftId: String
     private lateinit var viewModel: SharedViewModel
     private lateinit var viewManager: RecyclerView.LayoutManager
     private lateinit var viewAdapter: Adapter
@@ -42,19 +42,14 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
         viewModel = activity?.run {
             ViewModelProvider(this)[SharedViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
+
+        shiftId = arguments?.getString(SHIFT_ID)!!
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         observeNetworkExceptions()
-
-        NavigationUI.setupWithNavController(toolbar, findNavController())
-
-        // Main activity handles back navigation
-        toolbar.setNavigationOnClickListener {
-            requireActivity().onBackPressed()
-        }
 
         setupRecyclerView()
         initViewListeners()
@@ -83,54 +78,59 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
     }
 
     private fun initViewListeners() {
-//        endShiftButton.setOnClickListener {
-//
-//            GlobalUtil.hideKeyboard(requireActivity())
-//
-//            // Validate form input
-//            if (shiftHoursEditText.text.isNullOrEmpty() || !areVehicleFormsValid()) {
-//                Snackbar.make(
-//                    requireView(),
-//                    "Complete shift report to proceed",
-//                    Snackbar.LENGTH_LONG
-//                ).show()
-//            } else {
-//                progress_bar.visibility = View.VISIBLE
-//                shift_report_fab.hide()
-//                // Only submit shift if internet connectivity is available
-//                if (GlobalUtil.isNetworkConnectivityAvailable(
-//                        requireActivity(),
-//                        requireView(),
-//                        false
-//                    )
-//                ) {
-//                    viewModel.submitShiftReport(
-//                        args.shiftId,
-//                        shiftHoursEditText.text.toString(),
-//                        resources.getStringArray(R.array.vehicle_array).toList()
-//                    ).invokeOnCompletion {
-//                        CoroutineScope(Main).launch {
-//                            viewModel.completeShiftReportSubmission()
-//                            findNavController().navigate(ShiftReportFragmentDirections.actionShiftReportFragmentToCasesFragment())
-//                        }
-//                    }
-//                } else {
-//                    viewModel.addShiftReportToCache(
-//                        shiftHoursEditText.text.toString(),
-//                        args.shiftId
-//                    ).invokeOnCompletion {
-//                        CoroutineScope(Main).launch {
-//                            viewModel.completeShiftReportSubmission()
-//                            findNavController().navigate(ShiftReportFragmentDirections.actionShiftReportFragmentToCasesFragment())
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//
-//        shift_report_fab.setOnClickListener {
-//            addVehicle()
-//        }
+        endShiftButton.setOnClickListener {
+            endShiftButton.isEnabled = false
+
+            GlobalUtil.hideKeyboard(requireActivity())
+
+            // Validate form input
+            if (shiftHoursEditText.text.isNullOrEmpty() || !areVehicleFormsValid()) {
+                endShiftButton.isEnabled = true
+                Snackbar.make(
+                    requireView(),
+                    "Complete shift report to proceed",
+                    Snackbar.LENGTH_LONG
+                ).show()
+            } else {
+                progress_bar.visibility = View.VISIBLE
+                shift_report_fab.hide()
+                // Only submit shift if internet connectivity is available
+                if (GlobalUtil.isNetworkConnectivityAvailable(
+                        requireActivity(),
+                        requireView(),
+                        false
+                    )
+                ) {
+                    viewModel.submitShiftReport(
+                        shiftId,
+                        shiftHoursEditText.text.toString(),
+                        resources.getStringArray(R.array.vehicle_array).toList()
+                    ).invokeOnCompletion {
+                        CoroutineScope(Main).launch {
+                            viewModel.completeShiftReportSubmission()
+                            (activity as MainActivity).popFragmentClearBackStack(CasesFragment())
+                        }
+                    }
+                } else {
+                    viewModel.addShiftReportToCache(
+                        shiftHoursEditText.text.toString(),
+                        shiftId
+                    ).invokeOnCompletion {
+                        CoroutineScope(Main).launch {
+                            viewModel.completeShiftReportSubmission()
+                            (activity as MainActivity).popFragmentClearBackStack(CasesFragment())
+                            Snackbar.make(requireView(),
+                                "No internet connection, cached shift report",
+                                Snackbar.LENGTH_LONG).show()
+                        }
+                    }
+                }
+            }
+        }
+
+        shift_report_fab.setOnClickListener {
+            addVehicle()
+        }
     }
 
     // True if all vehicles have required data set, false otherwise
@@ -161,15 +161,15 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
                 Snackbar.LENGTH_LONG
             ).show()
 
-//            viewModel.addShiftReportToCache(
-//                shiftHoursEditText.text.toString(),
-//                args.shiftId
-//            ).invokeOnCompletion {
-//                CoroutineScope(Main).launch {
-//                    viewModel.completeShiftReportSubmission()
-//                    findNavController().navigate(ShiftReportFragmentDirections.actionShiftReportFragmentToCasesFragment())
-//                }
-//            }
+            viewModel.addShiftReportToCache(
+                shiftHoursEditText.text.toString(),
+                shiftId
+            ).invokeOnCompletion {
+                CoroutineScope(Main).launch {
+                    viewModel.completeShiftReportSubmission()
+                    (activity as MainActivity).popFragmentClearBackStack(CasesFragment())
+                }
+            }
         })
     }
 }
