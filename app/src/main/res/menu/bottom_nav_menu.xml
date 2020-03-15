@@ -9,7 +9,7 @@
     <item
         android:id="@+id/failed_shifts_dest"
         android:icon="@drawable/ic_baseline_sync_problem_24"
-        android:title="@string/failed_shfits" />
+        android:title="@string/failed_shifts" />
 
     <item
         android:id="@+id/settings_dest"

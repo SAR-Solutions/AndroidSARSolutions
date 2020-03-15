@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layoutDescription="@xml/fragment_cases_scene"
-    tools:context=".CasesFragment">
+    tools:context=".CasesTabFragment">
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/try_again_network_button"
@@ -25,7 +25,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintTop_toBottomOf="@id/toolbar_cases"
         app:shimmer_auto_start="true">
 
         <LinearLayout
@@ -73,10 +73,11 @@
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <com.sarcoordinator.sarsolutions.custom_views.CustomToolbar
-        android:id="@+id/toolbar"
+        android:id="@+id/toolbar_cases"
         app:Title="@string/app_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:transitionName="toolbar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

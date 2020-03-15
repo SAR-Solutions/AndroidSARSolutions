@@ -108,7 +108,7 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
                     ).invokeOnCompletion {
                         CoroutineScope(Main).launch {
                             viewModel.completeShiftReportSubmission()
-                            (activity as MainActivity).popFragmentClearBackStack(CasesFragment())
+                            (activity as MainActivity).popFragmentClearBackStack(CasesTabFragment())
                         }
                     }
                 } else {
@@ -118,10 +118,12 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
                     ).invokeOnCompletion {
                         CoroutineScope(Main).launch {
                             viewModel.completeShiftReportSubmission()
-                            (activity as MainActivity).popFragmentClearBackStack(CasesFragment())
-                            Snackbar.make(requireView(),
+                            (activity as MainActivity).popFragmentClearBackStack(CasesTabFragment())
+                            Snackbar.make(
+                                requireView(),
                                 "No internet connection, cached shift report",
-                                Snackbar.LENGTH_LONG).show()
+                                Snackbar.LENGTH_LONG
+                            ).show()
                         }
                     }
                 }
@@ -167,7 +169,7 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
             ).invokeOnCompletion {
                 CoroutineScope(Main).launch {
                     viewModel.completeShiftReportSubmission()
-                    (activity as MainActivity).popFragmentClearBackStack(CasesFragment())
+                    (activity as MainActivity).popFragmentClearBackStack(CasesTabFragment())
                 }
             }
         })

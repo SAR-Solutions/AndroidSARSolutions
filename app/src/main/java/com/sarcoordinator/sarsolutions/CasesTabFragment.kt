@@ -2,6 +2,7 @@ package com.sarcoordinator.sarsolutions
 
 import android.content.Context
 import android.os.Bundle
+import android.transition.TransitionInflater
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,19 +12,18 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.findNavController
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sarcoordinator.sarsolutions.models.Case
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
+import com.sarcoordinator.sarsolutions.util.ITabFragment
 import kotlinx.android.synthetic.main.fragment_cases.*
 import kotlinx.android.synthetic.main.list_view_item.view.*
 
 /**
  * This fragment displays the list of cases for the user
  */
-class CasesFragment : Fragment(R.layout.fragment_cases) {
+class CasesTabFragment : Fragment(R.layout.fragment_cases), ITabFragment {
 
     private lateinit var viewModel: SharedViewModel
     private lateinit var viewManager: RecyclerView.LayoutManager
@@ -35,17 +35,25 @@ class CasesFragment : Fragment(R.layout.fragment_cases) {
         viewModel = activity?.run {
             ViewModelProvider(this)[SharedViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
+
+        // Set shared element transition
+        sharedElementEnterTransition = TransitionInflater.from(context)
+            .inflateTransition(android.R.transition.move)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         // Adjust refresh layout progress view offset depending on toolbar height
-        toolbar.viewTreeObserver.addOnGlobalLayoutListener(object:
+        toolbar_cases.viewTreeObserver.addOnGlobalLayoutListener(object :
             ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
-                toolbar?.viewTreeObserver?.removeOnGlobalLayoutListener(this)
-                swipe_refresh_layout.setProgressViewOffset(false, toolbar.height - 150, toolbar.height + 100)
+                toolbar_cases?.viewTreeObserver?.removeOnGlobalLayoutListener(this)
+                swipe_refresh_layout.setProgressViewOffset(
+                    false,
+                    toolbar_cases.height - 150,
+                    toolbar_cases.height + 100
+                )
             }
         })
 
@@ -202,5 +210,9 @@ class CasesFragment : Fragment(R.layout.fragment_cases) {
             data = list
             notifyDataSetChanged()
         }
+    }
+
+    override fun getToolbar(): View {
+        return toolbar_cases
     }
 }

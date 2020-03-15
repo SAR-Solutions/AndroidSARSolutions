@@ -14,36 +14,25 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.util.CacheDatabase
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
+import com.sarcoordinator.sarsolutions.util.ITabFragment
 import com.sarcoordinator.sarsolutions.util.LocalCacheRepository
 import kotlinx.android.synthetic.main.activity_main.*
-import java.util.*
-import kotlin.collections.HashMap
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     private var navBarSelectedProgrammatically = false
 
-    private var tabBackStacks = Stack<BackStackIdentifiers>()
-
-    private var backStacks = HashMap<BackStackIdentifiers, Stack<Fragment>>().apply {
-        this[BackStackIdentifiers.HOME] = Stack<Fragment>()
-        this[BackStackIdentifiers.FAILED_SHIFTS] = Stack<Fragment>()
-        this[BackStackIdentifiers.SETTINGS] = Stack<Fragment>()
-    }
-
-    private var currentTab = BackStackIdentifiers.HOME
-
-    enum class BackStackIdentifiers {
-        HOME, FAILED_SHIFTS, SETTINGS
-    }
+    private var currentTab = BackStackViewModel.BackStackIdentifiers.HOME
 
     private val auth = FirebaseAuth.getInstance()
     private lateinit var sharedPrefs: SharedPreferences
 
-    private var bottomBarSelectedProgrammatically = false
-
     private val viewModel: SharedViewModel by lazy {
         ViewModelProvider(this)[SharedViewModel::class.java]
+    }
+
+    private val backStackViewModel: BackStackViewModel by lazy {
+        ViewModelProvider(this)[BackStackViewModel::class.java]
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -82,7 +71,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                     .commit()
                 bottom_nav_bar.visibility = View.GONE
             } else {
-                setSelectedTab(BackStackIdentifiers.HOME)
+                setSelectedTab(BackStackViewModel.BackStackIdentifiers.HOME)
                 bottom_nav_bar.visibility = View.VISIBLE
             }
         }
@@ -91,13 +80,13 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             if (!navBarSelectedProgrammatically) {
                 when (it.itemId) {
                     R.id.home_dest -> {
-                        setSelectedTab(BackStackIdentifiers.HOME)
+                        setSelectedTab(BackStackViewModel.BackStackIdentifiers.HOME)
                     }
                     R.id.failed_shifts_dest -> {
-                        setSelectedTab(BackStackIdentifiers.FAILED_SHIFTS)
+                        setSelectedTab(BackStackViewModel.BackStackIdentifiers.FAILED_SHIFTS)
                     }
                     R.id.settings_dest -> {
-                        setSelectedTab(BackStackIdentifiers.SETTINGS)
+                        setSelectedTab(BackStackViewModel.BackStackIdentifiers.SETTINGS)
                     }
                 }
             } else
@@ -108,76 +97,128 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     fun loginSuccessNavigation() {
         bottom_nav_bar.visibility = View.VISIBLE
-        setSelectedTab(BackStackIdentifiers.HOME)
+        setSelectedTab(BackStackViewModel.BackStackIdentifiers.HOME)
     }
 
-    private fun setSelectedTab(identifier: BackStackIdentifiers) {
-        currentTab = identifier
-        if (tabBackStacks.isEmpty())
-            tabBackStacks.push(currentTab)
-        else if (tabBackStacks.peek() != currentTab)
-            tabBackStacks.push(currentTab)
+    private fun setSelectedTab(identifier: BackStackViewModel.BackStackIdentifiers) {
+        var comingFromFragment: Fragment? = null
+        if (backStackViewModel.backStacks[currentTab]!!.size != 0)
+            comingFromFragment = backStackViewModel.backStacks[currentTab]!!.lastElement()
 
-        if (backStacks[identifier]!!.size == 0) {
-            when (identifier) {
-                BackStackIdentifiers.HOME -> pushFragment(identifier, CasesFragment())
-                BackStackIdentifiers.FAILED_SHIFTS -> pushFragment(
-                    identifier,
-                    FailedShiftsFragment()
-                )
-                BackStackIdentifiers.SETTINGS -> pushFragment(identifier, SettingsFragment())
+        currentTab = identifier
+        if (backStackViewModel.tabBackStacks.isEmpty())
+            backStackViewModel.tabBackStacks.push(currentTab)
+        else if (backStackViewModel.tabBackStacks.peek() != currentTab)
+            backStackViewModel.tabBackStacks.push(currentTab)
+
+        if (backStackViewModel.backStacks[identifier]!!.size == 0) {
+            if (comingFromFragment != null && (comingFromFragment is ITabFragment)) {
+                val toolbar = (comingFromFragment as ITabFragment).getToolbar()
+                when (identifier) {
+                    BackStackViewModel.BackStackIdentifiers.HOME -> pushFragment(
+                        identifier,
+                        CasesTabFragment(),
+                        toolbar
+                    )
+                    BackStackViewModel.BackStackIdentifiers.FAILED_SHIFTS -> pushFragment(
+                        identifier,
+                        FailedShiftsTabFragment(),
+                        toolbar
+                    )
+                    BackStackViewModel.BackStackIdentifiers.SETTINGS -> pushFragment(
+                        identifier,
+                        SettingsTabFragment(),
+                        toolbar
+                    )
+                }
+            } else {
+                when (identifier) {
+                    BackStackViewModel.BackStackIdentifiers.HOME -> pushFragment(
+                        identifier,
+                        CasesTabFragment()
+                    )
+                    BackStackViewModel.BackStackIdentifiers.FAILED_SHIFTS -> pushFragment(
+                        identifier,
+                        FailedShiftsTabFragment()
+                    )
+                    BackStackViewModel.BackStackIdentifiers.SETTINGS -> pushFragment(
+                        identifier,
+                        SettingsTabFragment()
+                    )
+                }
             }
         } else {
-            loadTab(identifier)
+            loadTab(comingFromFragment, identifier)
         }
     }
 
     // If identifier is null, adds fragment to currentTab backstack
-    fun pushFragment(identifier: BackStackIdentifiers?, fragment: Fragment) {
-        if(identifier == null)
-            backStacks[currentTab]!!.add(fragment)
+    fun pushFragment(
+        identifier: BackStackViewModel.BackStackIdentifiers?,
+        fragment: Fragment,
+        vararg sharedTransitionViews: View
+    ) {
+        if (identifier == null)
+            backStackViewModel.backStacks[currentTab]!!.add(fragment)
         else
-            backStacks[identifier]!!.add(fragment)
+            backStackViewModel.backStacks[identifier]!!.add(fragment)
+
         supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, fragment)
+            .replace(R.id.fragment_container, fragment).apply {
+                for (element in sharedTransitionViews)
+                    this.addSharedElement(element, element.transitionName)
+            }
             .commit()
     }
 
-    private fun loadTab(identifier: BackStackIdentifiers) {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, backStacks[identifier]!!.lastElement())
-            .commit()
+    private fun loadTab(
+        comingFromFragment: Fragment?,
+        goingTo: BackStackViewModel.BackStackIdentifiers
+    ) {
+        val fragmentToLoad = backStackViewModel.backStacks[goingTo]!!.lastElement()
+        val transaction = supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragmentToLoad)
+        if (comingFromFragment is ITabFragment) {
+            val toolbar = (comingFromFragment as ITabFragment).getToolbar()
+            transaction.addSharedElement(toolbar, toolbar.transitionName)
+        }
+        transaction.commit()
     }
 
     private fun popFragment() {
-        backStacks[currentTab]!!.pop()
+        backStackViewModel.backStacks[currentTab]!!.pop()
         supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, backStacks[currentTab]!!.lastElement())
+            .replace(
+                R.id.fragment_container,
+                backStackViewModel.backStacks[currentTab]!!.lastElement()
+            )
             .commit()
     }
 
     // Set last tab as active/current tab and change bottom_nav_bar selection
     private fun popTabFragmentStack() {
-        tabBackStacks.pop()
+        backStackViewModel.tabBackStacks.pop()
         supportFragmentManager.beginTransaction()
             .replace(
                 R.id.fragment_container,
-                backStacks[tabBackStacks.lastElement()]!!.lastElement()
+                backStackViewModel.backStacks[backStackViewModel.tabBackStacks.lastElement()]!!.lastElement()
             )
             .commit()
         navBarSelectedProgrammatically = true
-        currentTab = tabBackStacks.lastElement()
+        currentTab = backStackViewModel.tabBackStacks.lastElement()
         when (currentTab) {
-            BackStackIdentifiers.HOME -> bottom_nav_bar.selectedItemId = R.id.home_dest
-            BackStackIdentifiers.FAILED_SHIFTS -> bottom_nav_bar.selectedItemId =
+            BackStackViewModel.BackStackIdentifiers.HOME -> bottom_nav_bar.selectedItemId =
+                R.id.home_dest
+            BackStackViewModel.BackStackIdentifiers.FAILED_SHIFTS -> bottom_nav_bar.selectedItemId =
                 R.id.failed_shifts_dest
-            BackStackIdentifiers.SETTINGS -> bottom_nav_bar.selectedItemId = R.id.settings_dest
+            BackStackViewModel.BackStackIdentifiers.SETTINGS -> bottom_nav_bar.selectedItemId =
+                R.id.settings_dest
         }
     }
 
     // Clear backstack and place given fragment on stack
     fun popFragmentClearBackStack(fragment: Fragment) {
-        backStacks[currentTab]!!.clear()
+        backStackViewModel.backStacks[currentTab]!!.clear()
         pushFragment(null, fragment)
     }
 
@@ -186,8 +227,8 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             auth.currentUser == null -> {
                 super.onBackPressed()
             }
-            backStacks[currentTab]!!.size <= 1 -> {
-                if (tabBackStacks.size <= 1)
+            backStackViewModel.backStacks[currentTab]!!.size <= 1 -> {
+                if (backStackViewModel.tabBackStacks.size <= 1)
                     finishAffinity()
                 else
                     popTabFragmentStack()
@@ -209,20 +250,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             window.navigationBarColor = Color.parseColor("#2D2D2D")
             window.statusBarColor = resources.getColor(R.color.gray)
         }
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putSerializable("backStack", backStacks)
-        outState.putSerializable("tabsBackStack", tabBackStacks)
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-        backStacks =
-            savedInstanceState.getSerializable("backStack") as HashMap<BackStackIdentifiers, Stack<Fragment>>
-        tabBackStacks =
-            savedInstanceState.getSerializable("tabsBackStack") as Stack<BackStackIdentifiers>
     }
 }
 

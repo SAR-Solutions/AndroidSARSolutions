@@ -66,7 +66,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         sharedPrefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
 
 //         Main activity handles back navigation
-        toolbar.setNavigationOnClickListener {
+        toolbar_settings.setNavigationOnClickListener {
             requireActivity().onBackPressed()
         }
 
@@ -253,7 +253,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         reporter_value_tv.text = case.reporterName
         missing_person_value_tv.text = listToOrderedListString(case.missingPersonName)
         equipment_value_tv.text = listToOrderedListString(case.equipmentUsed)
-        toolbar.title = case.caseName
+        toolbar_settings.title = case.caseName
     }
 
     private fun requestLocPermission() {
@@ -345,7 +345,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         val serviceIntent = Intent(context, LocationService::class.java)
         serviceIntent.putExtra(
             LocationService.isTestMode,
-            sharedPrefs.getBoolean(SettingsFragment.TESTING_MODE_PREFS, false)
+            sharedPrefs.getBoolean(SettingsTabFragment.TESTING_MODE_PREFS, false)
         )
         serviceIntent.putExtra(
             LocationService.case,

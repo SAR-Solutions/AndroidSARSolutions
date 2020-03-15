@@ -4,21 +4,21 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.view.*
+import android.transition.TransitionInflater
+import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.navigation.NavOptions
-import androidx.navigation.fragment.findNavController
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
+import com.sarcoordinator.sarsolutions.util.ITabFragment
 import kotlinx.android.synthetic.main.fragment_settings.*
 import timber.log.Timber
 
-class SettingsFragment : Fragment() {
+class SettingsTabFragment : Fragment(R.layout.fragment_settings), ITabFragment {
 
     companion object {
         const val TESTING_MODE_PREFS = "TESTING_MODE"
@@ -28,12 +28,11 @@ class SettingsFragment : Fragment() {
     private lateinit var sharedPrefs: SharedPreferences
     private var isThemeSelected: Boolean = false
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        setHasOptionsMenu(true)
-        return inflater.inflate(R.layout.fragment_settings, container, false)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // Set shared element transition
+        sharedElementEnterTransition = TransitionInflater.from(context)
+            .inflateTransition(android.R.transition.move)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -41,7 +40,7 @@ class SettingsFragment : Fragment() {
 
         sharedPrefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
 
-        toolbar.title = getString(R.string.settings)
+        toolbar_settings.title = getString(R.string.settings)
 
         // Init and set adapter for theme spinner
         ArrayAdapter.createFromResource(
@@ -101,7 +100,7 @@ class SettingsFragment : Fragment() {
         app_version_value.text = BuildConfig.VERSION_NAME
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        menu.clear()
+    override fun getToolbar(): View {
+        return toolbar_settings
     }
 }

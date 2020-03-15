@@ -1,6 +1,7 @@
 package com.sarcoordinator.sarsolutions
 
 import android.os.Bundle
+import android.transition.TransitionInflater
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,13 +12,14 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sarcoordinator.sarsolutions.models.LocationsInShiftReport
+import com.sarcoordinator.sarsolutions.util.ITabFragment
 import kotlinx.android.synthetic.main.fragment_failed_shifts.*
 import kotlinx.android.synthetic.main.loc_cache_list_item.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 
-class FailedShiftsFragment : Fragment(R.layout.fragment_failed_shifts) {
+class FailedShiftsTabFragment : Fragment(R.layout.fragment_failed_shifts), ITabFragment {
 
     private lateinit var viewModel: SharedViewModel
     private lateinit var viewManager: RecyclerView.LayoutManager
@@ -28,6 +30,9 @@ class FailedShiftsFragment : Fragment(R.layout.fragment_failed_shifts) {
         viewModel = activity?.run {
             ViewModelProvider(this)[SharedViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
+
+        sharedElementEnterTransition = TransitionInflater.from(context)
+            .inflateTransition(android.R.transition.move)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -110,6 +115,9 @@ class FailedShiftsFragment : Fragment(R.layout.fragment_failed_shifts) {
             data = ArrayList(list)
             notifyDataSetChanged()
         }
+    }
 
+    override fun getToolbar(): View {
+        return toolbar_failed_shifts
     }
 }
