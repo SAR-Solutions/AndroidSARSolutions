@@ -26,6 +26,7 @@ import com.karumi.dexter.listener.single.PermissionListener
 import com.sarcoordinator.sarsolutions.models.Case
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.LocationService
+import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.fragment_track.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
@@ -36,6 +37,8 @@ import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 class TrackFragment : Fragment(R.layout.fragment_track) {
+
+    private lateinit var nav: Navigation
 
     companion object ArgsTags {
         const val CASE_ID = "CASE_ID"
@@ -187,7 +190,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
                                         }
                                     }
 
-                                    (activity as MainActivity).pushFragment(null, shiftReportFragment)
+                                    nav.pushFragment(null, shiftReportFragment)
                                 }
                             })
                         }

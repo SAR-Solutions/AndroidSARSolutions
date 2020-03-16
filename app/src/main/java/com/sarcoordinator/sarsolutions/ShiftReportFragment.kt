@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
+import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_shift_report.*
 import kotlinx.android.synthetic.main.vehicle_material_card.view.*
@@ -27,6 +28,8 @@ import timber.log.Timber
  * Fragment for volunteer shift report at the end of a shift
  */
 class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
+
+    private lateinit var nav: Navigation
 
     companion object ArgsTags {
         const val SHIFT_ID = "SHIFT_ID"
@@ -108,7 +111,8 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
                     ).invokeOnCompletion {
                         CoroutineScope(Main).launch {
                             viewModel.completeShiftReportSubmission()
-                            (activity as MainActivity).popFragmentClearBackStack(CasesTabFragment())
+
+                            nav.popFragmentClearBackStack(CasesTabFragment())
                         }
                     }
                 } else {
@@ -118,7 +122,9 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
                     ).invokeOnCompletion {
                         CoroutineScope(Main).launch {
                             viewModel.completeShiftReportSubmission()
-                            (activity as MainActivity).popFragmentClearBackStack(CasesTabFragment())
+
+                            nav.popFragmentClearBackStack(CasesTabFragment())
+
                             Snackbar.make(
                                 requireView(),
                                 "No internet connection, cached shift report",
@@ -169,7 +175,7 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
             ).invokeOnCompletion {
                 CoroutineScope(Main).launch {
                     viewModel.completeShiftReportSubmission()
-                    (activity as MainActivity).popFragmentClearBackStack(CasesTabFragment())
+                    nav.popFragmentClearBackStack(CasesTabFragment())
                 }
             }
         })

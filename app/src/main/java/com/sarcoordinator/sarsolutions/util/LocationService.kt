@@ -16,9 +16,9 @@ import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.location.*
+import com.sarcoordinator.sarsolutions.BaseApplication.Companion.CHANNEL_ID
 import com.sarcoordinator.sarsolutions.BuildConfig
 import com.sarcoordinator.sarsolutions.MainActivity
-import com.sarcoordinator.sarsolutions.MyApplication.Companion.CHANNEL_ID
 import com.sarcoordinator.sarsolutions.R
 import com.sarcoordinator.sarsolutions.api.Repository
 import com.sarcoordinator.sarsolutions.models.Case

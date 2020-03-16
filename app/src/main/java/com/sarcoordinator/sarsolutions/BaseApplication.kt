@@ -6,7 +6,7 @@ import android.app.NotificationManager
 import android.os.Build
 import timber.log.Timber
 
-class MyApplication : Application() {
+class BaseApplication : Application() {
 
     companion object {
         val CHANNEL_ID = "SARLocationServiceChannel"

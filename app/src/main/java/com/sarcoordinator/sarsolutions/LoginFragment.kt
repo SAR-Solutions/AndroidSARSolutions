@@ -11,9 +11,9 @@ import android.view.autofill.AutofillManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.FragmentNavigatorExtras
 import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
+import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.fragment_login.*
 
 class LoginFragment : Fragment(R.layout.fragment_login) {
@@ -21,6 +21,8 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
     private val auth = FirebaseAuth.getInstance()
 
     private var afm: AutofillManager? = null
+
+    private lateinit var nav: Navigation
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -97,9 +99,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                                 afm?.commit()
                             }
-
-                            (requireActivity() as MainActivity).loginSuccessNavigation()
-
+                            nav.loginSuccessNavigation()
                         } else {
                             it.isEnabled = true
                             Toast.makeText(

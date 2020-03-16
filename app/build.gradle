@@ -1,11 +1,11 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
-apply plugin: 'kotlin-kapt'
 apply plugin: "androidx.navigation.safeargs.kotlin"
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'io.fabric'
 apply plugin: 'com.google.android.gms.oss-licenses-plugin'
+apply plugin: 'kotlin-kapt'
 
 android {
     // Needed to avoid the following error:
@@ -100,4 +100,3 @@ dependencies {
     implementation "androidx.room:room-ktx:2.2.4"
     kapt "androidx.room:room-compiler:2.2.4"
 }
-
