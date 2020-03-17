@@ -8,17 +8,19 @@ import android.transition.TransitionInflater
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.ITabFragment
+import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.fragment_settings.*
 import timber.log.Timber
 
 class SettingsTabFragment : Fragment(R.layout.fragment_settings), ITabFragment {
+
+    private val nav: Navigation = Navigation.getInstance()
 
     companion object {
         const val TESTING_MODE_PREFS = "TESTING_MODE"
@@ -82,7 +84,7 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), ITabFragment {
 
         sign_out_button.setOnClickListener {
             auth.signOut()
-            Toast.makeText(it.context, "TODO:Implement signing out", Toast.LENGTH_LONG).show()
+            nav.logoutNavigation()
         }
     }
 

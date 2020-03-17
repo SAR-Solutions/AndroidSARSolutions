@@ -4,14 +4,12 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.sarcoordinator.sarsolutions.CasesTabFragment
-import com.sarcoordinator.sarsolutions.FailedShiftsTabFragment
-import com.sarcoordinator.sarsolutions.R
-import com.sarcoordinator.sarsolutions.SettingsTabFragment
+import com.sarcoordinator.sarsolutions.*
 import java.util.*
 import kotlin.collections.HashMap
 
 // Navigation class singleton
+// Responsible for handling backstacks for each tab and the tabs themselves
 object Navigation {
 
     private lateinit var fragmentManager: FragmentManager
@@ -157,7 +155,7 @@ object Navigation {
         }
     }
 
-    fun popFragment() {
+    private fun popFragment() {
         backStacks[currentTab]!!.pop()
         fragmentManager.beginTransaction()
             .replace(
@@ -174,9 +172,22 @@ object Navigation {
     }
 
     // Navigate to cases after successful login
-    fun loginSuccessNavigation() {
+    fun loginNavigation() {
         bottomNavigationView.visibility = View.VISIBLE
-        setSelectedTab(BackStackIdentifiers.HOME)
+        bottomNavigationView.selectedItemId = R.id.home_dest
+    }
+
+    fun logoutNavigation() {
+        // Clear back stacks
+        backStacks[BackStackIdentifiers.HOME]!!.clear()
+        backStacks[BackStackIdentifiers.FAILED_SHIFTS]!!.clear()
+        backStacks[BackStackIdentifiers.SETTINGS]!!.clear()
+        tabBackStacks.clear()
+
+        bottomNavigationView.visibility = View.GONE
+        fragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, LoginFragment())
+            .commitNow()
     }
 
     // Returns false if not handled
@@ -192,5 +203,4 @@ object Navigation {
         }
         return true
     }
-
 }
