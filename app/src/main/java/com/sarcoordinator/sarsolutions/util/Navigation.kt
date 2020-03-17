@@ -205,4 +205,6 @@ object Navigation {
         }
         return true
     }
+
+    fun getCurrentFragment(): Fragment = backStacks[currentTab]!!.lastElement()
 }

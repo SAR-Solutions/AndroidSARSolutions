@@ -59,12 +59,6 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), ITabFragment {
             }
         })
 
-        // If service is ongoing, restore state
-        //TODO:NAV
-        if (viewModel.isShiftActive.value == true) {
-            Toast.makeText(context, "TODO:Implement restore state", Toast.LENGTH_LONG).show()
-        }
-
         observeNetworkErrors()
         setupRecyclerView()
         observeCases()

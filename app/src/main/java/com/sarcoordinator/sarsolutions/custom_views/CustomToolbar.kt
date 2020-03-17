@@ -12,17 +12,22 @@ class CustomToolbar(context: Context, attrs: AttributeSet) : LinearLayout(contex
     init {
         View.inflate(context, R.layout.custom_toolbar, this)
 
-//        heading.text = attrs.getAttributeValue(R.attr.Title)
-
         context.theme.obtainStyledAttributes(
             attrs,
             R.styleable.CustomToolbar,
-        0, 0).apply {
+            0, 0
+        ).apply {
             try {
                 heading.text = getString(R.styleable.CustomToolbar_Title)
             } finally {
                 recycle()
             }
         }
+    }
+
+    fun setBackPressedListener(onClickListener: OnClickListener) {
+        back_button.visibility = View.VISIBLE
+        back_button.isClickable = true
+        back_button.setOnClickListener(onClickListener)
     }
 }

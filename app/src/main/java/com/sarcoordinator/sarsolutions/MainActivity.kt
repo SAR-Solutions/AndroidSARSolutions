@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 viewModel.isShiftActive.value == true
             ) {
                 Snackbar.make(
-                    findViewById(R.id.parent_layout),
+                    nav.getCurrentFragment().requireView(),
                     "Complete shift to go back",
                     Snackbar.LENGTH_LONG
                 ).show()
