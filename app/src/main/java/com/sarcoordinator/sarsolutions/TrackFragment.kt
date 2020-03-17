@@ -38,7 +38,7 @@ import timber.log.Timber
 
 class TrackFragment : Fragment(R.layout.fragment_track) {
 
-    private lateinit var nav: Navigation
+    private val nav: Navigation = Navigation.getInstance()
 
     companion object ArgsTags {
         const val CASE_ID = "CASE_ID"

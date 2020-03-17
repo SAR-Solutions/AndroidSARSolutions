@@ -26,12 +26,13 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     private lateinit var nav: Navigation
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         // Theme needs to be applied before calling super.onCreate
         // Otherwise a new instance of this activity will be created
         loadUserPreferences()
         super.onCreate(savedInstanceState)
+
+        nav = Navigation.getInstance(supportFragmentManager, bottom_nav_bar)
 
         val repo = LocalCacheRepository(CacheDatabase.getDatabase(application).casesDao())
         repo.allShiftReports.observeForever {

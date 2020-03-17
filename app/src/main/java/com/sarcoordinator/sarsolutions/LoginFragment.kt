@@ -22,7 +22,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
 
     private var afm: AutofillManager? = null
 
-    private lateinit var nav: Navigation
+    private val nav: Navigation = Navigation.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

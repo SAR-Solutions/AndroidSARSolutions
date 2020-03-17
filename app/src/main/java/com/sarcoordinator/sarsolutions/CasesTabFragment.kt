@@ -25,7 +25,7 @@ import kotlinx.android.synthetic.main.list_view_item.view.*
  */
 class CasesTabFragment : Fragment(R.layout.fragment_cases), ITabFragment {
 
-    private lateinit var nav: Navigation
+    private val nav: Navigation = Navigation.getInstance()
 
     private lateinit var viewModel: SharedViewModel
     private lateinit var viewManager: RecyclerView.LayoutManager
@@ -179,10 +179,10 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), ITabFragment {
         }
 
         override fun getItemViewType(position: Int): Int {
+            // Header to make space for toolbar
             if (position == 0) {
                 return 0
             }
-//            return super.getItemViewType(position)
             return 1
         }
 

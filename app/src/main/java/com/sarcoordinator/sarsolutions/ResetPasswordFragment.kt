@@ -9,7 +9,6 @@ import android.view.MenuInflater
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.navigation.findNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import kotlinx.android.synthetic.main.fragment_reset_password.*
@@ -52,7 +51,7 @@ class ResetPasswordFragment : Fragment(R.layout.fragment_reset_password) {
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         Toast.makeText(context, "Email Sent.", Toast.LENGTH_LONG).show()
-                        view.findNavController().popBackStack()
+                        requireActivity().supportFragmentManager.popBackStack()
                     } else {
                         Toast.makeText(
                             context,

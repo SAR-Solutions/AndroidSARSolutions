@@ -11,18 +11,36 @@ import com.sarcoordinator.sarsolutions.SettingsTabFragment
 import java.util.*
 import kotlin.collections.HashMap
 
-class Navigation(
-    private val fragmentManager: FragmentManager,
-    private val bottomNavigationView: BottomNavigationView
-) {
+// Navigation class singleton
+object Navigation {
+
+    private lateinit var fragmentManager: FragmentManager
+    private lateinit var bottomNavigationView: BottomNavigationView
+
+    @Volatile
+    private var instance: Navigation? = null
+
+    // Instance set in MainActivity and reused by fragments
+    fun getInstance(
+        fragmentManager: FragmentManager? = null,
+        bottomNavigationView: BottomNavigationView? = null
+    ): Navigation {
+        if (fragmentManager != null && bottomNavigationView != null) {
+            this.fragmentManager = fragmentManager
+            this.bottomNavigationView = bottomNavigationView
+            instance = this
+            setup()
+        }
+        return instance!!
+    }
 
     enum class BackStackIdentifiers {
         HOME, FAILED_SHIFTS, SETTINGS
     }
 
-    var tabBackStacks = Stack<BackStackIdentifiers>()
+    private var tabBackStacks = Stack<BackStackIdentifiers>()
 
-    var backStacks = HashMap<BackStackIdentifiers, Stack<Fragment>>().apply {
+    private var backStacks = HashMap<BackStackIdentifiers, Stack<Fragment>>().apply {
         this[BackStackIdentifiers.HOME] = Stack<Fragment>()
         this[BackStackIdentifiers.FAILED_SHIFTS] = Stack<Fragment>()
         this[BackStackIdentifiers.SETTINGS] = Stack<Fragment>()
@@ -33,10 +51,7 @@ class Navigation(
 
     private var navBarSelectedProgrammatically = false
 
-    init {
-        bottomNavigationView.selectedItemId =
-            R.id.home_dest
-
+    private fun setup() {
         bottomNavigationView.setOnNavigationItemSelectedListener {
             if (!navBarSelectedProgrammatically) {
                 when (it.itemId) {

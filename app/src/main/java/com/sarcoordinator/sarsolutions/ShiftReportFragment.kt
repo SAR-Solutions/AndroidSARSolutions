@@ -29,7 +29,7 @@ import timber.log.Timber
  */
 class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
 
-    private lateinit var nav: Navigation
+    private val nav: Navigation = Navigation.getInstance()
 
     companion object ArgsTags {
         const val SHIFT_ID = "SHIFT_ID"
