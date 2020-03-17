@@ -3,14 +3,22 @@ package com.sarcoordinator.sarsolutions.custom_views
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import com.sarcoordinator.sarsolutions.R
 import kotlinx.android.synthetic.main.custom_toolbar.view.*
+import kotlinx.android.synthetic.main.custom_toolbar_expanded.view.*
 
 class CustomToolbar(context: Context, attrs: AttributeSet) : LinearLayout(context, attrs) {
 
+    enum class Style {
+        Expanded, Shrunk
+    }
+
+    private lateinit var style: Style
+    private lateinit var backButton: ImageButton
+
     init {
-        View.inflate(context, R.layout.custom_toolbar, this)
 
         context.theme.obtainStyledAttributes(
             attrs,
@@ -18,7 +26,17 @@ class CustomToolbar(context: Context, attrs: AttributeSet) : LinearLayout(contex
             0, 0
         ).apply {
             try {
-                heading.text = getString(R.styleable.CustomToolbar_Title)
+                if (getInt(R.styleable.CustomToolbar_Style, 0) == 1) {
+                    inflate(context, R.layout.custom_toolbar_expanded, this@CustomToolbar)
+                    heading_expanded.text = getString(R.styleable.CustomToolbar_Title)
+                    style = Style.Expanded
+                    backButton = back_button_expanded
+                } else {
+                    inflate(context, R.layout.custom_toolbar, this@CustomToolbar)
+                    heading.text = getString(R.styleable.CustomToolbar_Title)
+                    style = Style.Shrunk
+                    backButton = back_button
+                }
             } finally {
                 recycle()
             }
@@ -26,8 +44,19 @@ class CustomToolbar(context: Context, attrs: AttributeSet) : LinearLayout(contex
     }
 
     fun setBackPressedListener(onClickListener: OnClickListener) {
-        back_button.visibility = View.VISIBLE
-        back_button.isClickable = true
-        back_button.setOnClickListener(onClickListener)
+        backButton.visibility = View.VISIBLE
+        backButton.isClickable = true
+        backButton.setOnClickListener(onClickListener)
+    }
+
+    fun setHeading(heading: String) {
+        when (style) {
+            Style.Shrunk -> {
+                this.heading.text = heading
+            }
+            Style.Expanded -> {
+                heading_expanded.text = heading
+            }
+        }
     }
 }

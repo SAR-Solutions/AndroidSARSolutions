@@ -68,16 +68,12 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
 
         sharedPrefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
 
-//         Main activity handles back navigation
-        toolbar_settings.setNavigationOnClickListener {
-            requireActivity().onBackPressed()
-        }
-
         location_service_fab.hide()
         initFabClickListener()
         validateNetworkConnectivity()
-    }
 
+        toolbar_track.setBackPressedListener(View.OnClickListener { requireActivity().onBackPressed() })
+    }
 
     override fun onResume() {
         super.onResume()
@@ -256,7 +252,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         reporter_value_tv.text = case.reporterName
         missing_person_value_tv.text = listToOrderedListString(case.missingPersonName)
         equipment_value_tv.text = listToOrderedListString(case.equipmentUsed)
-        toolbar_settings.title = case.caseName
+        toolbar_track.setHeading(case.caseName)
     }
 
     private fun requestLocPermission() {

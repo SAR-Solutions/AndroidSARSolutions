@@ -18,7 +18,7 @@
         android:layout_height="match_parent">
 
         <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar_settings"
+            android:id="@+id/toolbar_track"
             style="@style/Toolbar"
             android:padding="0dp"
             app:title="Shift Report"
@@ -35,13 +35,13 @@
             android:layout_height="wrap_content"
             android:indeterminate="true"
             android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/toolbar_settings" />
+            app:layout_constraintTop_toBottomOf="@id/toolbar_track" />
 
         <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:fillViewport="true"
-            app:layout_constraintTop_toBottomOf="@id/toolbar_settings">
+            app:layout_constraintTop_toBottomOf="@id/toolbar_track">
 
             <LinearLayout
                 android:id="@+id/shift_report_parent_layout"

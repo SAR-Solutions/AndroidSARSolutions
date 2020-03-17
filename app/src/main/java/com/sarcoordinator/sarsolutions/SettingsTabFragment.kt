@@ -42,7 +42,7 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), ITabFragment {
 
         sharedPrefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
 
-        toolbar_settings.title = getString(R.string.settings)
+        toolbar_track.title = getString(R.string.settings)
 
         // Init and set adapter for theme spinner
         ArrayAdapter.createFromResource(
@@ -103,6 +103,6 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), ITabFragment {
     }
 
     override fun getToolbar(): View? {
-        return toolbar_settings
+        return toolbar_track
     }
 }
