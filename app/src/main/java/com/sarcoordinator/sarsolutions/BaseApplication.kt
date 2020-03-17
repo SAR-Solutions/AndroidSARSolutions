@@ -9,7 +9,7 @@ import timber.log.Timber
 class BaseApplication : Application() {
 
     companion object {
-        val CHANNEL_ID = "SARLocationServiceChannel"
+        const val CHANNEL_ID = "SARLocationServiceChannel"
     }
 
     override fun onCreate() {
@@ -27,7 +27,7 @@ class BaseApplication : Application() {
             val serviceChannel = NotificationChannel(
                 CHANNEL_ID,
                 "Location Service Channel",
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_LOW
             )
 
             val manager = getSystemService(NotificationManager::class.java) as NotificationManager

@@ -44,7 +44,7 @@ object Navigation {
         this[BackStackIdentifiers.SETTINGS] = Stack<Fragment>()
     }
 
-    private var currentTab =
+    var currentTab =
         BackStackIdentifiers.HOME
 
     private var navBarSelectedProgrammatically = false
@@ -194,8 +194,10 @@ object Navigation {
     fun handleOnBackPressed(): Boolean {
         if (backStacks[currentTab]!!.size <= 1) {
             if (tabBackStacks.size <= 1) {
+                // Finish activity, nothing left to pop
                 return false
             } else {
+                // Nothing to pop from back stack, pop tab back stack
                 popTabFragmentStack()
             }
         } else {

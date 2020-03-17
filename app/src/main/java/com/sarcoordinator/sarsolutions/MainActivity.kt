@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.util.CacheDatabase
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
@@ -57,14 +58,22 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 bottom_nav_bar.visibility = View.VISIBLE
             }
         }
-
     }
 
     override fun onBackPressed() {
         if (auth.currentUser == null) {
             super.onBackPressed()
         } else {
-            if (!nav.handleOnBackPressed()) {
+            // If shift is active and current tab is 'home', prevent from going back
+            if (nav.currentTab == Navigation.BackStackIdentifiers.HOME &&
+                viewModel.isShiftActive.value == true
+            ) {
+                Snackbar.make(
+                    findViewById(R.id.parent_layout),
+                    "Complete shift to go back",
+                    Snackbar.LENGTH_LONG
+                ).show()
+            } else if (!nav.handleOnBackPressed()) {
                 finishAffinity()
             }
         }
