@@ -214,7 +214,7 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), ITabFragment {
         }
     }
 
-    override fun getToolbar(): View {
+    override fun getToolbar(): View? {
         return toolbar_cases
     }
 }

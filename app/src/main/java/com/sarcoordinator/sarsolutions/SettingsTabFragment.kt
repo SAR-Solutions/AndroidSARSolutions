@@ -100,7 +100,7 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), ITabFragment {
         app_version_value.text = BuildConfig.VERSION_NAME
     }
 
-    override fun getToolbar(): View {
+    override fun getToolbar(): View? {
         return toolbar_settings
     }
 }

@@ -30,6 +30,7 @@ class Navigation(
 
     private var currentTab =
         BackStackIdentifiers.HOME
+
     private var navBarSelectedProgrammatically = false
 
     init {
@@ -67,40 +68,19 @@ class Navigation(
             tabBackStacks.push(currentTab)
 
         if (backStacks[identifier]!!.size == 0) {
-            if (comingFromFragment != null && (comingFromFragment is ITabFragment)) {
-                val toolbar = (comingFromFragment as ITabFragment).getToolbar()
-                when (identifier) {
-                    BackStackIdentifiers.HOME -> pushFragment(
-                        identifier,
-                        CasesTabFragment(),
-                        toolbar
-                    )
-                    BackStackIdentifiers.FAILED_SHIFTS -> pushFragment(
-                        identifier,
-                        FailedShiftsTabFragment(),
-                        toolbar
-                    )
-                    BackStackIdentifiers.SETTINGS -> pushFragment(
-                        identifier,
-                        SettingsTabFragment(),
-                        toolbar
-                    )
-                }
-            } else {
-                when (identifier) {
-                    BackStackIdentifiers.HOME -> pushFragment(
-                        identifier,
-                        CasesTabFragment()
-                    )
-                    BackStackIdentifiers.FAILED_SHIFTS -> pushFragment(
-                        identifier,
-                        FailedShiftsTabFragment()
-                    )
-                    BackStackIdentifiers.SETTINGS -> pushFragment(
-                        identifier,
-                        SettingsTabFragment()
-                    )
-                }
+            when (identifier) {
+                BackStackIdentifiers.HOME -> pushFragment(
+                    identifier,
+                    CasesTabFragment()
+                )
+                BackStackIdentifiers.FAILED_SHIFTS -> pushFragment(
+                    identifier,
+                    FailedShiftsTabFragment()
+                )
+                BackStackIdentifiers.SETTINGS -> pushFragment(
+                    identifier,
+                    SettingsTabFragment()
+                )
             }
         } else {
             loadTab(comingFromFragment, identifier)
@@ -134,8 +114,9 @@ class Navigation(
         val transaction = fragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragmentToLoad)
         if (comingFromFragment is ITabFragment) {
-            val toolbar = (comingFromFragment as ITabFragment).getToolbar()
-            transaction.addSharedElement(toolbar, toolbar.transitionName)
+            (comingFromFragment as ITabFragment).getToolbar()?.let {
+                transaction.addSharedElement(it, it.transitionName)
+            }
         }
         transaction.commit()
     }

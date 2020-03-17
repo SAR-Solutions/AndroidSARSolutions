@@ -117,7 +117,7 @@ class FailedShiftsTabFragment : Fragment(R.layout.fragment_failed_shifts), ITabF
         }
     }
 
-    override fun getToolbar(): View {
+    override fun getToolbar(): View? {
         return toolbar_failed_shifts
     }
 }
