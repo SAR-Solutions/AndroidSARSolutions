@@ -7,9 +7,8 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
-import android.util.TypedValue
+import android.transition.TransitionInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -25,6 +24,7 @@ import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
 import com.sarcoordinator.sarsolutions.models.Case
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
+import com.sarcoordinator.sarsolutions.util.ICustomToolbarFragment
 import com.sarcoordinator.sarsolutions.util.LocationService
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.fragment_track.*
@@ -36,7 +36,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
-class TrackFragment : Fragment(R.layout.fragment_track) {
+class TrackFragment : Fragment(R.layout.fragment_track), ICustomToolbarFragment {
 
     private val nav: Navigation = Navigation.getInstance()
 
@@ -61,6 +61,10 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         } ?: throw Exception("Invalid Activity")
 
         caseId = arguments?.getString(CASE_ID)!!
+
+        // Set shared element transition
+        sharedElementEnterTransition = TransitionInflater.from(context)
+            .inflateTransition(android.R.transition.move)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -398,26 +402,9 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
             text
         }
     }
-}
 
-fun View.setMargins(
-    leftMarginDp: Int? = null,
-    topMarginDp: Int? = null,
-    rightMarginDp: Int? = null,
-    bottomMarginDp: Int? = null
-) {
-    if (layoutParams is ViewGroup.MarginLayoutParams) {
-        val params = layoutParams as ViewGroup.MarginLayoutParams
-        leftMarginDp?.run { params.leftMargin = this.dpToPx(context) }
-        topMarginDp?.run { params.topMargin = this.dpToPx(context) }
-        rightMarginDp?.run { params.rightMargin = this.dpToPx(context) }
-        bottomMarginDp?.run { params.bottomMargin = this.dpToPx(context) }
-        requestLayout()
+    override fun getToolbar(): View? {
+        return toolbar_track
     }
-}
-
-fun Int.dpToPx(context: Context): Int {
-    val metrics = context.resources.displayMetrics
-    return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, this.toFloat(), metrics).toInt()
 }
 

@@ -17,11 +17,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar_track"
+        <com.sarcoordinator.sarsolutions.custom_views.CustomToolbar
+            android:id="@+id/toolbar_shift_report"
             style="@style/Toolbar"
             android:padding="0dp"
-            app:title="Shift Report"
+            app:Style="EXPANDED"
+            app:Title="@string/shift_report"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
@@ -35,13 +36,13 @@
             android:layout_height="wrap_content"
             android:indeterminate="true"
             android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/toolbar_track" />
+            app:layout_constraintTop_toBottomOf="@id/toolbar_shift_report" />
 
         <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:fillViewport="true"
-            app:layout_constraintTop_toBottomOf="@id/toolbar_track">
+            app:layout_constraintTop_toBottomOf="@id/toolbar_shift_report">
 
             <LinearLayout
                 android:id="@+id/shift_report_parent_layout"

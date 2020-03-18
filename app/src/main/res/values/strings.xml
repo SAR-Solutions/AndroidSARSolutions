@@ -73,4 +73,5 @@
     <string name="account">Account</string>
     <string name="failed_shifts">Failed Shifts</string>
     <string name="sync_failure_desc">Shifts will appear here if they fail to sync</string>
+    <string name="shift_report">Shift Report</string>
 </resources>

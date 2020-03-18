@@ -126,8 +126,8 @@ object Navigation {
         val fragmentToLoad = backStacks[goingTo]!!.lastElement()
         val transaction = fragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragmentToLoad)
-        if (comingFromFragment is ITabFragment) {
-            (comingFromFragment as ITabFragment).getToolbar()?.let {
+        if (comingFromFragment is ICustomToolbarFragment) {
+            (comingFromFragment as ICustomToolbarFragment).getToolbar()?.let {
                 transaction.addSharedElement(it, it.transitionName)
             }
         }

@@ -91,5 +91,16 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             window.statusBarColor = resources.getColor(R.color.gray)
         }
     }
+
+    fun enableStatusBarColorForNestedFragment() {
+        //TODO: Compelte implementing this
+        if (GlobalUtil.getTheme(
+                getPreferences(Context.MODE_PRIVATE),
+                resources
+            ) == GlobalUtil.THEME_DARK
+        ) {
+            window.statusBarColor = Color.parseColor("#2D2D2D")
+        }
+    }
 }
 

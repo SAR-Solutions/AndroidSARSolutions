@@ -12,14 +12,14 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sarcoordinator.sarsolutions.models.LocationsInShiftReport
-import com.sarcoordinator.sarsolutions.util.ITabFragment
+import com.sarcoordinator.sarsolutions.util.ICustomToolbarFragment
 import kotlinx.android.synthetic.main.fragment_failed_shifts.*
 import kotlinx.android.synthetic.main.loc_cache_list_item.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 
-class FailedShiftsTabFragment : Fragment(R.layout.fragment_failed_shifts), ITabFragment {
+class FailedShiftsTabFragment : Fragment(R.layout.fragment_failed_shifts), ICustomToolbarFragment {
 
     private lateinit var viewModel: SharedViewModel
     private lateinit var viewManager: RecyclerView.LayoutManager

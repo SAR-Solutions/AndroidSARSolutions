@@ -13,12 +13,12 @@ import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
-import com.sarcoordinator.sarsolutions.util.ITabFragment
+import com.sarcoordinator.sarsolutions.util.ICustomToolbarFragment
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.fragment_settings.*
 import timber.log.Timber
 
-class SettingsTabFragment : Fragment(R.layout.fragment_settings), ITabFragment {
+class SettingsTabFragment : Fragment(R.layout.fragment_settings), ICustomToolbarFragment {
 
     private val nav: Navigation = Navigation.getInstance()
 
@@ -41,8 +41,6 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), ITabFragment {
         super.onViewCreated(view, savedInstanceState)
 
         sharedPrefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
-
-        toolbar_track.title = getString(R.string.settings)
 
         // Init and set adapter for theme spinner
         ArrayAdapter.createFromResource(
@@ -103,6 +101,6 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), ITabFragment {
     }
 
     override fun getToolbar(): View? {
-        return toolbar_track
+        return toolbar_settings
     }
 }

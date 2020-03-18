@@ -11,11 +11,10 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar_track"
-            style="@style/Toolbar"
+        <com.sarcoordinator.sarsolutions.custom_views.CustomToolbar
+            android:id="@+id/toolbar_settings"
             android:transitionName="toolbar"
-            app:title="Settings"
+            app:Title="@string/settings"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 

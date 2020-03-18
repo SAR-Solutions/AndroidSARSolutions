@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sarcoordinator.sarsolutions.models.Case
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
-import com.sarcoordinator.sarsolutions.util.ITabFragment
+import com.sarcoordinator.sarsolutions.util.ICustomToolbarFragment
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.fragment_cases.*
 import kotlinx.android.synthetic.main.list_view_item.view.*
@@ -23,7 +23,7 @@ import kotlinx.android.synthetic.main.list_view_item.view.*
 /**
  * This fragment displays the list of cases for the user
  */
-class CasesTabFragment : Fragment(R.layout.fragment_cases), ITabFragment {
+class CasesTabFragment : Fragment(R.layout.fragment_cases), ICustomToolbarFragment {
 
     private val nav: Navigation = Navigation.getInstance()
 
@@ -110,7 +110,7 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), ITabFragment {
     // Sets up recyclerview and refresh layout
     private fun setupRecyclerView() {
         viewManager = LinearLayoutManager(context)
-        viewAdapter = Adapter(nav)
+        viewAdapter = Adapter(nav, this)
         cases_recycler_view.apply {
             layoutManager = viewManager
             adapter = viewAdapter
@@ -140,7 +140,7 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), ITabFragment {
 
     private fun refreshCaseList() {
         if (validateNetworkConnectivity()) {
-            viewAdapter = Adapter(nav)
+            viewAdapter = Adapter(nav, this)
             cases_recycler_view.adapter = viewAdapter
             viewModel.refreshCases()
         }
@@ -152,10 +152,15 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), ITabFragment {
     }
 
     /** Recycler view item stuff **/
-    class Adapter(private val nav: Navigation) : RecyclerView.Adapter<Adapter.ViewHolder>() {
+    class Adapter(private val nav: Navigation, private val parent: CasesTabFragment) :
+        RecyclerView.Adapter<Adapter.ViewHolder>() {
         private var data = ArrayList<Case>()
 
-        class ViewHolder(itemView: View, val nav: Navigation) : RecyclerView.ViewHolder(itemView) {
+        class ViewHolder(
+            itemView: View,
+            private val nav: Navigation,
+            private val parent: CasesTabFragment
+        ) : RecyclerView.ViewHolder(itemView) {
             fun bindView(case: Case) {
                 itemView.missing_person_text.text =
                     case.missingPersonName.toString().removeSurrounding("[", "]")
@@ -167,7 +172,7 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), ITabFragment {
                         putString(TrackFragment.CASE_ID, case.id)
                     }
 
-                    nav.pushFragment(null, trackFragment)
+                    nav.pushFragment(null, trackFragment, parent.getToolbar()!!)
                 }
             }
         }
@@ -192,7 +197,7 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), ITabFragment {
                     LayoutInflater.from(parent.context)
                         .inflate(R.layout.list_view_item, parent, false)
             }
-            return ViewHolder(holder, nav)
+            return ViewHolder(holder, nav, this.parent)
         }
 
         override fun getItemCount(): Int = data.size
