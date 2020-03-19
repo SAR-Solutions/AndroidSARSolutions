@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
@@ -86,9 +87,10 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         // Get system default theme
         GlobalUtil.setCurrentTheme(sharedPrefs, resources)
         if (GlobalUtil.getTheme(sharedPrefs, resources) == GlobalUtil.THEME_DARK) {
+
             // Set navigationBarColor to elevated gray
-            window.navigationBarColor = Color.parseColor("#2D2D2D")
-            window.statusBarColor = resources.getColor(R.color.gray)
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+            window.navigationBarColor = resources.getColor(R.color.lightGray)
         }
     }
 
@@ -99,7 +101,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 resources
             ) == GlobalUtil.THEME_DARK
         ) {
-            window.statusBarColor = Color.parseColor("#2D2D2D")
+            window.statusBarColor = resources.getColor(R.color.lightGray)
         }
     }
 }

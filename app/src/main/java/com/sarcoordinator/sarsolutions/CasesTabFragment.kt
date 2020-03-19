@@ -114,6 +114,7 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), ICustomToolbarFragme
         cases_recycler_view.apply {
             layoutManager = viewManager
             adapter = viewAdapter
+            setHasFixedSize(true)
         }
 
         swipe_refresh_layout.setColorSchemeColors(

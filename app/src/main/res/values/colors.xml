@@ -10,6 +10,7 @@
     <color name="warning">#ffbb33</color>
     <color name="error">#b00020</color>
     <color name="gray">#121212</color>
+    <color name="lightGray">#2D2D2D</color>
     <color name="green">#2AD6B5</color>
     <color name="darkGreen">#357266</color>
     <color name="newRed">#fa163f</color>

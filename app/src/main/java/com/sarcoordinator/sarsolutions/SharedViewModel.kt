@@ -40,6 +40,9 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     // Number of failed shift syncs in progress
     var numberOfSyncsInProgress: Int = 0
 
+    // To keep track of vehicle names
+    var numberOfVehicles: Int = 0
+
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(p0: ComponentName?, iBinder: IBinder?) {
             Timber.d("Connected to service")
@@ -117,9 +120,10 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun addVehicle() {
+        numberOfVehicles++
         vehicleList.add(
             VehicleCardContent(
-                name = "Vehicle ${vehicleList.size + 1}",
+                name = "Vehicle $numberOfVehicles",
                 isCountyVehicle = false,
                 isPersonalVehicle = false,
                 milesTraveled = null,
