@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
 import com.sarcoordinator.sarsolutions.R
 import timber.log.Timber
+import java.io.File
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.*
@@ -134,5 +135,11 @@ object GlobalUtil {
     fun setCurrentTheme(sharedPrefs: SharedPreferences, resources: Resources) {
         val def = getTheme(sharedPrefs, resources)
         setTheme(sharedPrefs, def)
+    }
+
+    // Create file with unique name and returns File
+    fun createImageFile(shiftId: String, storageDir: File): File {
+        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HH:mm:ss").format(Date())
+        return File.createTempFile("${shiftId}_${timeStamp}", ".jpg", storageDir)
     }
 }

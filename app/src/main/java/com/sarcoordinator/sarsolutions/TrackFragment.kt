@@ -5,15 +5,17 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.provider.MediaStore
 import android.provider.Settings
 import android.transition.TransitionInflater
 import android.view.View
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -46,6 +48,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ICustomToolbarFragment 
     }
 
     private val REQUEST_IMAGE_CAPTURE = 1
+    private val imagePathList = ArrayList<String>()
 
     private val nav: Navigation = Navigation.getInstance()
 
@@ -89,7 +92,30 @@ class TrackFragment : Fragment(R.layout.fragment_track), ICustomToolbarFragment 
         capture_photo.setOnClickListener {
             Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { intent ->
                 intent.resolveActivity(requireActivity().packageManager)?.also {
-                    startActivityForResult(intent, REQUEST_IMAGE_CAPTURE)
+                    currentShiftId = "TestShift"
+                    if (!::currentShiftId.isInitialized) {
+                        Toast.makeText(
+                            requireContext(),
+                            "Shift hasn't started yet. Start one and try again.", Toast.LENGTH_LONG
+                        ).show()
+                        return@setOnClickListener
+                    }
+                    val photoFile = GlobalUtil.createImageFile(
+                        currentShiftId,
+                        requireActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
+                    )
+
+                    photoFile.also {
+                        val photoURI: Uri = FileProvider.getUriForFile(
+                            requireContext(),
+                            "sarcoordinator.sarsolutions.provider",
+                            it
+                        )
+
+                        imagePathList.add(photoFile.absolutePath)
+                        intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                        startActivityForResult(intent, REQUEST_IMAGE_CAPTURE)
+                    }
                 }
             }
         }
@@ -381,7 +407,8 @@ class TrackFragment : Fragment(R.layout.fragment_track), ICustomToolbarFragment 
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
             Toast.makeText(context, "Loading image...", Toast.LENGTH_LONG).show()
-            image_view.setImageBitmap(data?.extras?.get("data") as Bitmap)
+            val imagePath = imagePathList.last()
+            image_view.setImageBitmap(BitmapFactory.decodeFile(imagePath))
         }
     }
 
@@ -427,4 +454,3 @@ class TrackFragment : Fragment(R.layout.fragment_track), ICustomToolbarFragment 
     }
 
 }
-
