@@ -23,6 +23,7 @@
             android:padding="0dp"
             app:Style="EXPANDED"
             app:Title="@string/shift_report"
+            android:transitionName="toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"

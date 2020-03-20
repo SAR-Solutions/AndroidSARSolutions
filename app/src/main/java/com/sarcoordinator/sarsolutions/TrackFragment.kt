@@ -1,11 +1,14 @@
 package com.sarcoordinator.sarsolutions
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.provider.Settings
 import android.transition.TransitionInflater
 import android.view.View
@@ -38,11 +41,13 @@ import timber.log.Timber
 
 class TrackFragment : Fragment(R.layout.fragment_track), ICustomToolbarFragment {
 
-    private val nav: Navigation = Navigation.getInstance()
-
     companion object ArgsTags {
         const val CASE_ID = "CASE_ID"
     }
+
+    private val REQUEST_IMAGE_CAPTURE = 1
+
+    private val nav: Navigation = Navigation.getInstance()
 
     private var service: LocationService? = null
     private lateinit var sharedPrefs: SharedPreferences
@@ -53,6 +58,8 @@ class TrackFragment : Fragment(R.layout.fragment_track), ICustomToolbarFragment 
     private var isRetryNetworkFab = false
 
     private lateinit var caseId: String
+
+    override fun getToolbar(): View? = toolbar_track
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,29 +84,14 @@ class TrackFragment : Fragment(R.layout.fragment_track), ICustomToolbarFragment 
         validateNetworkConnectivity()
 
         toolbar_track.setBackPressedListener(View.OnClickListener { requireActivity().onBackPressed() })
-    }
 
-    override fun onResume() {
-        super.onResume()
-        // Rebind service if an instance of a service exists
-        if (viewModel.isShiftActive.value == true)
-            bindService()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        viewModel.lastUpdatedText = location_desc.text.toString()
-        // Keep service running but detach from viewmodel
-        unbindService()
-    }
-
-    // Restore view state on configuration change
-    private fun restoreState() {
-        if (viewModel.isShiftActive.value == true) {
-            // Service is alive and running but needs to be bound back to activity
-            bindService()
-            enableStopTrackingFab()
-            location_desc.text = viewModel.lastUpdatedText
+        // Capture image
+        capture_photo.setOnClickListener {
+            Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { intent ->
+                intent.resolveActivity(requireActivity().packageManager)?.also {
+                    startActivityForResult(intent, REQUEST_IMAGE_CAPTURE)
+                }
+            }
         }
     }
 
@@ -119,7 +111,6 @@ class TrackFragment : Fragment(R.layout.fragment_track), ICustomToolbarFragment 
     }
 
     private fun setupInterface() {
-
         // Only fetch data if detailed case isn't in cache
         if (!viewModel.currentCase.value?.id.equals(caseId)) {
             enableLoadingState(true)
@@ -386,6 +377,38 @@ class TrackFragment : Fragment(R.layout.fragment_track), ICustomToolbarFragment 
             activity?.unbindService(viewModel.getServiceConnection())
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
+            Toast.makeText(context, "Loading image...", Toast.LENGTH_LONG).show()
+            image_view.setImageBitmap(data?.extras?.get("data") as Bitmap)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Rebind service if an instance of a service exists
+        if (viewModel.isShiftActive.value == true)
+            bindService()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel.lastUpdatedText = location_desc.text.toString()
+        // Keep service running but detach from viewmodel
+        unbindService()
+    }
+
+    // Restore view state on configuration change
+    private fun restoreState() {
+        if (viewModel.isShiftActive.value == true) {
+            // Service is alive and running but needs to be bound back to activity
+            bindService()
+            enableStopTrackingFab()
+            location_desc.text = viewModel.lastUpdatedText
+        }
+    }
+
     // Convert list of string to a ordered string
     private fun listToOrderedListString(list: List<String>): String {
         if (list.count() <= 0)
@@ -403,8 +426,5 @@ class TrackFragment : Fragment(R.layout.fragment_track), ICustomToolbarFragment 
         }
     }
 
-    override fun getToolbar(): View? {
-        return toolbar_track
-    }
 }
 
