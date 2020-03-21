@@ -77,4 +77,5 @@
     <string name="image_information">Image Information</string>
     <string name="number_of_images_taken">Number of images taken:</string>
     <string name="images">Images:</string>
+    <string name="images_taken">Images Taken</string>
 </resources>

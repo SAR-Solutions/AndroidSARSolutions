@@ -94,7 +94,6 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                 )
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-
                             // Prompt auto fill service to save password
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                                 afm?.commit()

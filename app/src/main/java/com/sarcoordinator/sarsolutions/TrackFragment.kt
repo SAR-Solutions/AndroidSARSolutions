@@ -422,7 +422,6 @@ class TrackFragment : Fragment(R.layout.fragment_track), ICustomToolbarFragment 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
-            Toast.makeText(context, "Loading image...", Toast.LENGTH_LONG).show()
             val imagePath = currentImagePath
             viewModel.addImagePathToList(imagePath)
             viewAdapter.addImagePath(imagePath)
