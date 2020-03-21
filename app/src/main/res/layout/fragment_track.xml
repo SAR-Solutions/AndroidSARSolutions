@@ -210,6 +210,7 @@
                 </com.google.android.material.card.MaterialCardView>
 
                 <com.google.android.material.card.MaterialCardView
+                    style="@style/Widget.MaterialComponents.CardView.Standard"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
@@ -235,7 +236,6 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/number_of_images_taken"
-                            app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toBottomOf="@id/image_info_heading_text" />
 
@@ -250,14 +250,30 @@
                             app:layout_constraintStart_toEndOf="@id/image_sub_heading_text"
                             app:layout_constraintTop_toTopOf="@id/image_sub_heading_text" />
 
+                        <TextView
+                            android:id="@+id/images_sub_heading"
+                            style="@style/Base.Widget.AppCompat.TextView.SubHeading"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/images"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/image_sub_heading_text" />
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/image_recycler_view"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:background="@android:color/darker_gray"
+                            android:orientation="horizontal"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/images_sub_heading"
+                            tools:itemCount="1"
+                            tools:listitem="@layout/image_list_view_item" />
+
                     </androidx.constraintlayout.widget.ConstraintLayout>
                 </com.google.android.material.card.MaterialCardView>
-
-                <ImageView
-                    android:id="@+id/image_view"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center" />
 
                 <Button
                     android:id="@+id/capture_photo"

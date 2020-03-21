@@ -99,9 +99,9 @@ class FailedShiftsTabFragment : Fragment(R.layout.fragment_failed_shifts), ICust
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LocationViewHolder {
-            val holder = LayoutInflater.from(parent.context)
+            val view = LayoutInflater.from(parent.context)
                 .inflate(R.layout.loc_cache_list_item, parent, false)
-            return LocationViewHolder(holder, viewModel, progressBar, vehicleTypeArray)
+            return LocationViewHolder(view, viewModel, progressBar, vehicleTypeArray)
         }
 
         override fun getItemCount(): Int = data.size

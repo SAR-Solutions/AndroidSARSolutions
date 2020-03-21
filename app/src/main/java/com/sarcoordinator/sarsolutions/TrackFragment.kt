@@ -5,7 +5,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -19,6 +18,7 @@ import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.karumi.dexter.Dexter
@@ -49,18 +49,15 @@ class TrackFragment : Fragment(R.layout.fragment_track), ICustomToolbarFragment 
 
     private val REQUEST_IMAGE_CAPTURE = 1
     private lateinit var currentImagePath: String
-
     private val nav: Navigation = Navigation.getInstance()
-
     private var service: LocationService? = null
     private lateinit var sharedPrefs: SharedPreferences
-
     private lateinit var viewModel: SharedViewModel
-
     private lateinit var currentShiftId: String
     private var isRetryNetworkFab = false
-
     private lateinit var caseId: String
+    private lateinit var viewManager: LinearLayoutManager
+    private lateinit var viewAdapter: ImagesAdapter
 
     override fun getToolbar(): View? = toolbar_track
 
@@ -85,43 +82,9 @@ class TrackFragment : Fragment(R.layout.fragment_track), ICustomToolbarFragment 
         location_service_fab.hide()
         initFabClickListener()
         validateNetworkConnectivity()
+        setupImagesCardView()
 
         toolbar_track.setBackPressedListener(View.OnClickListener { requireActivity().onBackPressed() })
-
-        viewModel.getImageList().observe(viewLifecycleOwner, Observer {
-            image_number_text_view.text = it.size.toString()
-        })
-
-        // Capture image
-        capture_photo.setOnClickListener {
-            Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { intent ->
-                intent.resolveActivity(requireActivity().packageManager)?.also {
-                    if (!::currentShiftId.isInitialized) {
-                        Toast.makeText(
-                            requireContext(),
-                            "Shift hasn't started yet. Start one and try again.", Toast.LENGTH_LONG
-                        ).show()
-                        return@setOnClickListener
-                    }
-                    val photoFile = GlobalUtil.createImageFile(
-                        currentShiftId,
-                        requireActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/$currentShiftId/")!!
-                    )
-
-                    photoFile.also {
-                        val photoURI: Uri = FileProvider.getUriForFile(
-                            requireContext(),
-                            "sarcoordinator.sarsolutions.provider",
-                            it
-                        )
-
-                        currentImagePath = photoFile.absolutePath
-                        intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
-                        startActivityForResult(intent, REQUEST_IMAGE_CAPTURE)
-                    }
-                }
-            }
-        }
     }
 
     private fun validateNetworkConnectivity() {
@@ -181,7 +144,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ICustomToolbarFragment 
                     enableStartTrackingFab()
                     service?.completeShift()
 
-                    location_service_fab.isEnabled = false
+                    location_service_fab.isClickable = false
 
                     // Init, set and start circular progress bar
                     val progressCircle = CircularProgressDrawable(requireContext()).apply {
@@ -214,6 +177,56 @@ class TrackFragment : Fragment(R.layout.fragment_track), ICustomToolbarFragment 
                                 }
                             })
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    // Setup everything related to the images card
+    private fun setupImagesCardView() {
+        // Setup image recycler view
+        viewManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        viewAdapter = ImagesAdapter()
+        image_recycler_view.apply {
+            layoutManager = viewManager
+            adapter = viewAdapter
+        }
+
+        // Observe and populate list on change
+        viewModel.getImageList().observe(viewLifecycleOwner, Observer {
+            image_number_text_view.text = it.size.toString()
+        })
+
+        // Capture image
+        capture_photo.setOnClickListener {
+            Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { intent ->
+                intent.resolveActivity(requireActivity().packageManager)?.also {
+                    currentShiftId = "Test2"
+                    if (!::currentShiftId.isInitialized) {
+                        Toast.makeText(
+                            requireContext(),
+                            "Shift hasn't started yet. Start one and try again.", Toast.LENGTH_LONG
+                        ).show()
+                        return@setOnClickListener
+                    }
+
+                    // Create intent to request for camera app launch
+                    val photoFile = GlobalUtil.createImageFile(
+                        currentShiftId,
+                        requireActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/$currentShiftId/")!!
+                    )
+
+                    photoFile.also {
+                        val photoURI: Uri = FileProvider.getUriForFile(
+                            requireContext(),
+                            "sarcoordinator.sarsolutions.provider",
+                            it
+                        )
+
+                        currentImagePath = photoFile.absolutePath
+                        intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                        startActivityForResult(intent, REQUEST_IMAGE_CAPTURE)
                     }
                 }
             }
@@ -412,7 +425,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ICustomToolbarFragment 
             Toast.makeText(context, "Loading image...", Toast.LENGTH_LONG).show()
             val imagePath = currentImagePath
             viewModel.addImagePathToList(imagePath)
-            image_view.setImageBitmap(BitmapFactory.decodeFile(imagePath))
+            viewAdapter.addImagePath(imagePath)
         }
     }
 
