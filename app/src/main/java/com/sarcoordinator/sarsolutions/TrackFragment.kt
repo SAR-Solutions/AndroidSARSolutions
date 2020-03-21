@@ -48,7 +48,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ICustomToolbarFragment 
     }
 
     private val REQUEST_IMAGE_CAPTURE = 1
-    private val imagePathList = ArrayList<String>()
+    private lateinit var currentImagePath: String
 
     private val nav: Navigation = Navigation.getInstance()
 
@@ -88,11 +88,14 @@ class TrackFragment : Fragment(R.layout.fragment_track), ICustomToolbarFragment 
 
         toolbar_track.setBackPressedListener(View.OnClickListener { requireActivity().onBackPressed() })
 
+        viewModel.getImageList().observe(viewLifecycleOwner, Observer {
+            image_number_text_view.text = it.size.toString()
+        })
+
         // Capture image
         capture_photo.setOnClickListener {
             Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { intent ->
                 intent.resolveActivity(requireActivity().packageManager)?.also {
-                    currentShiftId = "TestShift"
                     if (!::currentShiftId.isInitialized) {
                         Toast.makeText(
                             requireContext(),
@@ -102,7 +105,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ICustomToolbarFragment 
                     }
                     val photoFile = GlobalUtil.createImageFile(
                         currentShiftId,
-                        requireActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
+                        requireActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/$currentShiftId/")!!
                     )
 
                     photoFile.also {
@@ -112,7 +115,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ICustomToolbarFragment 
                             it
                         )
 
-                        imagePathList.add(photoFile.absolutePath)
+                        currentImagePath = photoFile.absolutePath
                         intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
                         startActivityForResult(intent, REQUEST_IMAGE_CAPTURE)
                     }
@@ -407,7 +410,8 @@ class TrackFragment : Fragment(R.layout.fragment_track), ICustomToolbarFragment 
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
             Toast.makeText(context, "Loading image...", Toast.LENGTH_LONG).show()
-            val imagePath = imagePathList.last()
+            val imagePath = currentImagePath
+            viewModel.addImagePathToList(imagePath)
             image_view.setImageBitmap(BitmapFactory.decodeFile(imagePath))
         }
     }

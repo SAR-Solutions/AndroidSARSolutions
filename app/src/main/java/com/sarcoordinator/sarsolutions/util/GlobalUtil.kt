@@ -10,6 +10,7 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.MutableLiveData
 import com.google.android.material.snackbar.Snackbar
 import com.sarcoordinator.sarsolutions.R
 import timber.log.Timber
@@ -142,4 +143,9 @@ object GlobalUtil {
         val timeStamp: String = SimpleDateFormat("yyyyMMdd_HH:mm:ss").format(Date())
         return File.createTempFile("${shiftId}_${timeStamp}", ".jpg", storageDir)
     }
+}
+
+// Notify observers of change; adding item to list doesn't notify observers
+fun <T> MutableLiveData<T>.notifyObserver() {
+    this.value = this.value
 }

@@ -13,6 +13,7 @@ import com.sarcoordinator.sarsolutions.models.*
 import com.sarcoordinator.sarsolutions.util.CacheDatabase
 import com.sarcoordinator.sarsolutions.util.LocalCacheRepository
 import com.sarcoordinator.sarsolutions.util.LocationService
+import com.sarcoordinator.sarsolutions.util.notifyObserver
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.Dispatchers.IO
@@ -27,22 +28,16 @@ import kotlin.collections.ArrayList
 class SharedViewModel(application: Application) : AndroidViewModel(application) {
 
     var vehicleList = ArrayList<VehicleCardContent>()
-
     var lastUpdatedText: String? = null
     private val binder = MutableLiveData<LocationService.LocalBinder>()
-
     private val mIsShiftActive = MutableLiveData<Boolean>()
     val isShiftActive: LiveData<Boolean> = mIsShiftActive
-
     private val cacheRepo: LocalCacheRepository =
         LocalCacheRepository(CacheDatabase.getDatabase(application).casesDao())
-
     // Number of failed shift syncs in progress
     var numberOfSyncsInProgress: Int = 0
-
     // To keep track of vehicle names
     var numberOfVehicles: Int = 0
-
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(p0: ComponentName?, iBinder: IBinder?) {
             Timber.d("Connected to service")
@@ -61,8 +56,19 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         Timber.e(throwable)
         netWorkExceptionText.postValue("Failed network call, try again.")
     }
-
     private val netWorkExceptionText = MutableLiveData<String>()
+
+    // List of cases
+    private val cases = MutableLiveData<ArrayList<Case>>()
+    fun getCases(): LiveData<ArrayList<Case>> {
+        return cases
+    }
+
+    // List of image paths for the current case
+    private val currentCaseImageList = MutableLiveData<ArrayList<String>>()
+    fun getImageList(): LiveData<ArrayList<String>> {
+        return currentCaseImageList
+    }
 
     fun getNetworkExceptionObservable(): LiveData<String> {
         return netWorkExceptionText
@@ -70,12 +76,6 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
 
     fun clearNetworkExceptions() {
         netWorkExceptionText.value = null
-    }
-
-
-    private val cases = MutableLiveData<ArrayList<Case>>()
-    fun getCases(): LiveData<ArrayList<Case>> {
-        return cases
     }
 
     fun refreshCases() {
@@ -95,6 +95,7 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     val currentCase = MutableLiveData<Case>()
 
     fun getCaseDetails(caseId: String): LiveData<Case> {
+        currentCaseImageList.value = ArrayList<String>()
         viewModelScope.launch(IO + networkException) {
             try {
                 currentCase.postValue(Repository.getCaseDetail(caseId).also {
@@ -114,6 +115,8 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     fun getServiceConnection(): ServiceConnection {
         return serviceConnection
     }
+
+    /************************************************ Shift report **********************************************************/
 
     fun removeService() {
         binder.value = null
@@ -160,6 +163,10 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         mIsShiftActive.value = false
     }
 
+    fun addImagePathToList(imagePath: String) {
+        currentCaseImageList.value!!.add(imagePath)
+        currentCaseImageList.notifyObserver()
+    }
 
     /************************************************ Cache database **********************************************************/
 
