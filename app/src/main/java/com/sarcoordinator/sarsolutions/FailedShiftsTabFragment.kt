@@ -12,14 +12,14 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sarcoordinator.sarsolutions.models.LocationsInShiftReport
-import com.sarcoordinator.sarsolutions.util.ICustomToolbarFragment
+import com.sarcoordinator.sarsolutions.util.ISharedElementFragment
 import kotlinx.android.synthetic.main.fragment_failed_shifts.*
 import kotlinx.android.synthetic.main.loc_cache_list_item.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 
-class FailedShiftsTabFragment : Fragment(R.layout.fragment_failed_shifts), ICustomToolbarFragment {
+class FailedShiftsTabFragment : Fragment(R.layout.fragment_failed_shifts), ISharedElementFragment {
 
     private lateinit var viewModel: SharedViewModel
     private lateinit var viewManager: RecyclerView.LayoutManager
@@ -117,7 +117,7 @@ class FailedShiftsTabFragment : Fragment(R.layout.fragment_failed_shifts), ICust
         }
     }
 
-    override fun getToolbar(): View? {
-        return toolbar_failed_shifts
+    override fun getSharedElements(): Array<View> {
+        return arrayOf(toolbar_failed_shifts)
     }
 }

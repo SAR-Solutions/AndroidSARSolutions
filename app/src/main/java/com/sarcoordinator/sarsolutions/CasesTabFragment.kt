@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sarcoordinator.sarsolutions.models.Case
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
-import com.sarcoordinator.sarsolutions.util.ICustomToolbarFragment
+import com.sarcoordinator.sarsolutions.util.ISharedElementFragment
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.fragment_cases.*
 import kotlinx.android.synthetic.main.list_view_item.view.*
@@ -23,7 +23,7 @@ import kotlinx.android.synthetic.main.list_view_item.view.*
 /**
  * This fragment displays the list of cases for the user
  */
-class CasesTabFragment : Fragment(R.layout.fragment_cases), ICustomToolbarFragment {
+class CasesTabFragment : Fragment(R.layout.fragment_cases), ISharedElementFragment {
 
     private val nav: Navigation = Navigation.getInstance()
 
@@ -173,7 +173,7 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), ICustomToolbarFragme
                         putString(TrackFragment.CASE_ID, case.id)
                     }
 
-                    nav.pushFragment(null, trackFragment, parent.getToolbar()!!)
+                    nav.pushFragment(null, trackFragment, *parent.getSharedElements())
                 }
             }
         }
@@ -214,7 +214,7 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), ICustomToolbarFragme
         }
     }
 
-    override fun getToolbar(): View? {
-        return toolbar_cases
+    override fun getSharedElements(): Array<View> {
+        return arrayOf(toolbar_cases)
     }
 }

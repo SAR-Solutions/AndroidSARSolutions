@@ -29,6 +29,7 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
 
     var vehicleList = ArrayList<VehicleCardContent>()
     var lastUpdatedText: String? = null
+    lateinit var currentImagePath: String
     private val binder = MutableLiveData<LocationService.LocalBinder>()
     private val mIsShiftActive = MutableLiveData<Boolean>()
     val isShiftActive: LiveData<Boolean> = mIsShiftActive

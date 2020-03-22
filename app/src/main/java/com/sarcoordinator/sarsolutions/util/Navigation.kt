@@ -126,9 +126,11 @@ object Navigation {
         val fragmentToLoad = backStacks[goingTo]!!.lastElement()
         val transaction = fragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragmentToLoad)
-        if (comingFromFragment is ICustomToolbarFragment && fragmentToLoad is ICustomToolbarFragment) {
-            (comingFromFragment as ICustomToolbarFragment).getToolbar()?.let {
-                transaction.addSharedElement(it, it.transitionName)
+        if (comingFromFragment is ISharedElementFragment && fragmentToLoad is ISharedElementFragment) {
+            (comingFromFragment as ISharedElementFragment).getSharedElements().let {
+                it.forEach { element ->
+                    transaction.addSharedElement(element, element.transitionName)
+                }
             }
         }
         transaction.commit()
@@ -156,11 +158,18 @@ object Navigation {
     }
 
     private fun popFragment() {
-        backStacks[currentTab]!!.pop()
-        fragmentManager.beginTransaction()
+        val transaction = fragmentManager.beginTransaction()
+        val source = backStacks[currentTab]!!.pop()
+        val destination = backStacks[currentTab]!!.lastElement()
+        if (source is ISharedElementFragment) {
+            source.getSharedElements().forEach { element ->
+                transaction.addSharedElement(element, element.transitionName)
+            }
+        }
+        transaction
             .replace(
                 R.id.fragment_container,
-                backStacks[currentTab]!!.lastElement()
+                destination
             )
             .commit()
     }

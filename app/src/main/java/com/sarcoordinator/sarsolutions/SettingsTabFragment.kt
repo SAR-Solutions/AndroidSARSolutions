@@ -13,12 +13,12 @@ import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
-import com.sarcoordinator.sarsolutions.util.ICustomToolbarFragment
+import com.sarcoordinator.sarsolutions.util.ISharedElementFragment
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.fragment_settings.*
 import timber.log.Timber
 
-class SettingsTabFragment : Fragment(R.layout.fragment_settings), ICustomToolbarFragment {
+class SettingsTabFragment : Fragment(R.layout.fragment_settings), ISharedElementFragment {
 
     private val nav: Navigation = Navigation.getInstance()
 
@@ -100,7 +100,7 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), ICustomToolbar
         app_version_value.text = BuildConfig.VERSION_NAME
     }
 
-    override fun getToolbar(): View? {
-        return toolbar_settings
+    override fun getSharedElements(): Array<View> {
+        return arrayOf(toolbar_settings)
     }
 }

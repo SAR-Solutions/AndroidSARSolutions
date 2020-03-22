@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
-import com.sarcoordinator.sarsolutions.util.ICustomToolbarFragment
+import com.sarcoordinator.sarsolutions.util.ISharedElementFragment
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_shift_report.*
@@ -29,7 +29,7 @@ import timber.log.Timber
 /**
  * Fragment for volunteer shift report at the end of a shift
  */
-class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ICustomToolbarFragment {
+class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedElementFragment {
 
     private val nav: Navigation = Navigation.getInstance()
 
@@ -208,8 +208,8 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ICustomToo
         })
     }
 
-    override fun getToolbar(): View? {
-        return toolbar_shift_report
+    override fun getSharedElements(): Array<View> {
+        return arrayOf(toolbar_shift_report)
     }
 
     /*

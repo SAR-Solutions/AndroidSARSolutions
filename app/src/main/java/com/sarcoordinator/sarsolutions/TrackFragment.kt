@@ -29,7 +29,7 @@ import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
 import com.sarcoordinator.sarsolutions.models.Case
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
-import com.sarcoordinator.sarsolutions.util.ICustomToolbarFragment
+import com.sarcoordinator.sarsolutions.util.ISharedElementFragment
 import com.sarcoordinator.sarsolutions.util.LocationService
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.fragment_track.*
@@ -41,14 +41,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
-class TrackFragment : Fragment(R.layout.fragment_track), ICustomToolbarFragment {
+class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment {
 
     companion object ArgsTags {
         const val CASE_ID = "CASE_ID"
     }
 
     private val REQUEST_IMAGE_CAPTURE = 1
-    private lateinit var currentImagePath: String
     private val nav: Navigation = Navigation.getInstance()
     private var service: LocationService? = null
     private lateinit var sharedPrefs: SharedPreferences
@@ -59,7 +58,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ICustomToolbarFragment 
     private lateinit var viewManager: LinearLayoutManager
     private lateinit var viewAdapter: ImagesAdapter
 
-    override fun getToolbar(): View? = toolbar_track
+    override fun getSharedElements(): Array<View> = arrayOf(toolbar_track)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,6 +70,8 @@ class TrackFragment : Fragment(R.layout.fragment_track), ICustomToolbarFragment 
 
         // Set shared element transition
         sharedElementEnterTransition = TransitionInflater.from(context)
+            .inflateTransition(android.R.transition.move)
+        sharedElementReturnTransition = TransitionInflater.from(context)
             .inflateTransition(android.R.transition.move)
     }
 
@@ -115,7 +116,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ICustomToolbarFragment 
                 }
             })
         } else {
-            // Fetch from cach
+            // Fetch from cache
             populateViewWithCase(viewModel.currentCase.value!!)
             enableStartTrackingFab()
 
@@ -187,7 +188,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ICustomToolbarFragment 
     private fun setupImagesCardView() {
         // Setup image recycler view
         viewManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-        viewAdapter = ImagesAdapter()
+        viewAdapter = ImagesAdapter(nav, viewModel.getImageList().value!!)
         image_recycler_view.apply {
             layoutManager = viewManager
             adapter = viewAdapter
@@ -195,7 +196,8 @@ class TrackFragment : Fragment(R.layout.fragment_track), ICustomToolbarFragment 
 
         // Observe and populate list on change
         viewModel.getImageList().observe(viewLifecycleOwner, Observer {
-            image_number_text_view.text = it.size.toString()
+            val size = it.size
+            image_number_text_view.text = size.toString()
         })
 
         // Capture image
@@ -224,7 +226,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ICustomToolbarFragment 
                             it
                         )
 
-                        currentImagePath = photoFile.absolutePath
+                        viewModel.currentImagePath = photoFile.absolutePath
                         intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
                         startActivityForResult(intent, REQUEST_IMAGE_CAPTURE)
                     }
@@ -422,9 +424,8 @@ class TrackFragment : Fragment(R.layout.fragment_track), ICustomToolbarFragment 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
-            val imagePath = currentImagePath
+            val imagePath = viewModel.currentImagePath
             viewModel.addImagePathToList(imagePath)
-            viewAdapter.addImagePath(imagePath)
         }
     }
 
