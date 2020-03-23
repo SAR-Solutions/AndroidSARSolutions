@@ -31,7 +31,7 @@
         <Constraint android:id="@+id/detailed_image_view">
             <CustomAttribute
                 motion:attributeName="ColorFilter"
-                motion:customColorValue="#00FFFFFF" />
+                motion:customColorValue="#00000000" />
         </Constraint>
     </ConstraintSet>
     <ConstraintSet android:id="@+id/end">

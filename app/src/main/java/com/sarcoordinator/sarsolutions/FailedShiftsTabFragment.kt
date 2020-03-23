@@ -117,7 +117,7 @@ class FailedShiftsTabFragment : Fragment(R.layout.fragment_failed_shifts), IShar
         }
     }
 
-    override fun getSharedElements(): Array<View> {
-        return arrayOf(toolbar_failed_shifts)
+    override fun getSharedElement(): View? {
+        return toolbar_failed_shifts
     }
 }

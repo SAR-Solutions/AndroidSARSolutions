@@ -35,6 +35,13 @@ class ImageDetailFragment : Fragment(R.layout.fragment_image_detail), ISharedEle
             .inflateTransition(android.R.transition.move)
 
         postponeEnterTransition()
+
+        (requireActivity() as MainActivity).enableTransparentStatusBar(true)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        (requireActivity() as MainActivity).enableTransparentStatusBar(false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -76,7 +83,7 @@ class ImageDetailFragment : Fragment(R.layout.fragment_image_detail), ISharedEle
             }).submit()
     }
 
-    override fun getSharedElements(): Array<View> {
-        return arrayOf(detailed_image_view)
+    override fun getSharedElement(): View? {
+        return detailed_image_view
     }
 }

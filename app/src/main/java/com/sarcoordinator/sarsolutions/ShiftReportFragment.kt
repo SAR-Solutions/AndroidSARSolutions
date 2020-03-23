@@ -208,8 +208,8 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedEle
         })
     }
 
-    override fun getSharedElements(): Array<View> {
-        return arrayOf(toolbar_shift_report)
+    override fun getSharedElement(): View? {
+        return toolbar_shift_report
     }
 
     /*

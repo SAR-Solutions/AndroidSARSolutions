@@ -173,7 +173,7 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), ISharedElementFragme
                         putString(TrackFragment.CASE_ID, case.id)
                     }
 
-                    nav.pushFragment(null, trackFragment, *parent.getSharedElements())
+                    nav.pushFragment(null, trackFragment, parent.getSharedElement())
                 }
             }
         }
@@ -214,7 +214,7 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), ISharedElementFragme
         }
     }
 
-    override fun getSharedElements(): Array<View> {
-        return arrayOf(toolbar_cases)
+    override fun getSharedElement(): View? {
+        return toolbar_cases
     }
 }

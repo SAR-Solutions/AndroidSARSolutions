@@ -100,7 +100,7 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), ISharedElement
         app_version_value.text = BuildConfig.VERSION_NAME
     }
 
-    override fun getSharedElements(): Array<View> {
-        return arrayOf(toolbar_settings)
+    override fun getSharedElement(): View? {
+        return toolbar_settings
     }
 }

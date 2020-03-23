@@ -90,7 +90,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         if (GlobalUtil.getTheme(sharedPrefs, resources) == GlobalUtil.THEME_DARK) {
 
             // Set navigationBarColor to elevated gray
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
             window.navigationBarColor = resources.getColor(R.color.lightGray)
         }
     }
@@ -103,6 +102,40 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             ) == GlobalUtil.THEME_DARK
         ) {
             window.statusBarColor = resources.getColor(R.color.lightGray)
+        }
+    }
+
+    fun enableTransparentStatusBar(enableTransparency: Boolean) {
+        if (enableTransparency) {
+            window.apply {
+                clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+                addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    decorView.systemUiVisibility =
+                        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+                                View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or
+                                View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+                } else {
+                    decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                }
+                statusBarColor = Color.TRANSPARENT
+            }
+        } else {
+            window.apply {
+                decorView.systemUiVisibility = 0
+
+                // Restore system bar colors
+                if (GlobalUtil.getTheme(sharedPrefs, resources) == GlobalUtil.THEME_DARK) {
+                    // Set navigationBarColor to elevated gray
+                    window.navigationBarColor = resources.getColor(R.color.lightGray)
+                    window.statusBarColor = resources.getColor(R.color.lightGray)
+                } else {
+                    decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR or
+                            View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                    window.statusBarColor = Color.WHITE
+                    window.navigationBarColor = Color.WHITE
+                }
+            }
         }
     }
 }

@@ -58,7 +58,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
     private lateinit var viewManager: LinearLayoutManager
     private lateinit var viewAdapter: ImagesAdapter
 
-    override fun getSharedElements(): Array<View> = arrayOf(toolbar_track)
+    override fun getSharedElement(): View? = toolbar_track
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

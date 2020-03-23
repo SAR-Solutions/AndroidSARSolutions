@@ -104,17 +104,23 @@ object Navigation {
     fun pushFragment(
         identifier: BackStackIdentifiers?,
         fragment: Fragment,
-        vararg sharedTransitionViews: View
+        sharedTransitionView: View? = null
     ) {
         if (identifier == null)
             backStacks[currentTab]!!.add(fragment)
         else
             backStacks[identifier]!!.add(fragment)
 
+        // Hide bottom nav bar in ImageDetailFragment
+        if (fragment is ImageDetailFragment) {
+            bottomNavigationView.visibility = View.GONE
+        }
+
         fragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragment).apply {
-                for (element in sharedTransitionViews)
-                    this.addSharedElement(element, element.transitionName)
+                sharedTransitionView?.let {
+                    this.addSharedElement(sharedTransitionView, sharedTransitionView.transitionName)
+                }
             }
             .commit()
     }
@@ -127,10 +133,8 @@ object Navigation {
         val transaction = fragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragmentToLoad)
         if (comingFromFragment is ISharedElementFragment && fragmentToLoad is ISharedElementFragment) {
-            (comingFromFragment as ISharedElementFragment).getSharedElements().let {
-                it.forEach { element ->
-                    transaction.addSharedElement(element, element.transitionName)
-                }
+            (comingFromFragment as ISharedElementFragment).getSharedElement()?.let { element ->
+                transaction.addSharedElement(element, element.transitionName)
             }
         }
         transaction.commit()
@@ -161,8 +165,13 @@ object Navigation {
         val transaction = fragmentManager.beginTransaction()
         val source = backStacks[currentTab]!!.pop()
         val destination = backStacks[currentTab]!!.lastElement()
+
+        // Show nav bar again if coming back from ImageDetailFragment
+        if (source is ImageDetailFragment)
+            bottomNavigationView.visibility = View.VISIBLE
+
         if (source is ISharedElementFragment) {
-            source.getSharedElements().forEach { element ->
+            source.getSharedElement()?.let { element ->
                 transaction.addSharedElement(element, element.transitionName)
             }
         }

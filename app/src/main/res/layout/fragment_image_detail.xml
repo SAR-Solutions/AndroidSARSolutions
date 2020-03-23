@@ -28,19 +28,63 @@
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/materialCardView"
         style="@style/Widget.MaterialComponents.CardView.Standard"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="parent">
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            style="@style/Base.Widget.AppCompat.TextView.Heading"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Image name goes here" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/image_title"
+                style="@style/Base.Widget.AppCompat.TextView.Heading"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Image name goes here"
+                android:textAlignment="center"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/image_timestamp"
+                style="@style/Base.Widget.AppCompat.TextView.SubHeading"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="12/12/12"
+                android:textAlignment="center"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/image_title" />
+
+            <TextView
+                android:id="@+id/metadata_title"
+                style="@style/Base.Widget.AppCompat.TextView.SubHeading.Color"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/Metadata"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/image_timestamp" />
+
+            <EditText
+                android:id="@+id/metadata_content"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:hint="Click to edit metadata"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/metadata_title" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </com.google.android.material.card.MaterialCardView>
 
