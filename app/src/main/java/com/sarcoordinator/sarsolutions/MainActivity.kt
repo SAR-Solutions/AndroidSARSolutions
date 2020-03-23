@@ -67,6 +67,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         } else {
             // If shift is active and current tab is 'home', prevent from going back
             if (nav.currentTab == Navigation.BackStackIdentifiers.HOME &&
+                nav.getCurrentFragment() !is ImageDetailFragment &&
                 viewModel.isShiftActive.value == true
             ) {
                 Snackbar.make(

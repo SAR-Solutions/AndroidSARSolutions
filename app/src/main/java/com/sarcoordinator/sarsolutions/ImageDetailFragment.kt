@@ -14,6 +14,9 @@ import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.Target
 import com.sarcoordinator.sarsolutions.util.ISharedElementFragment
 import kotlinx.android.synthetic.main.fragment_image_detail.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.io.File
 
@@ -63,8 +66,10 @@ class ImageDetailFragment : Fragment(R.layout.fragment_image_detail), ISharedEle
                     dataSource: DataSource?,
                     isFirstResource: Boolean
                 ): Boolean {
-                    detailed_image_view.setImageBitmap(resource)
-                    startPostponedEnterTransition()
+                    CoroutineScope(Main).launch {
+                        detailed_image_view.setImageBitmap(resource)
+                        startPostponedEnterTransition()
+                    }
                     return true
                 }
 
