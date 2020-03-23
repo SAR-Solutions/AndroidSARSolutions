@@ -14,6 +14,7 @@ object Navigation {
 
     private lateinit var fragmentManager: FragmentManager
     private lateinit var bottomNavigationView: BottomNavigationView
+    private lateinit var hideBottomNavBar: (Boolean) -> Unit
 
     @Volatile
     private var instance: Navigation? = null
@@ -21,11 +22,13 @@ object Navigation {
     // Instance set in MainActivity and reused by fragments
     fun getInstance(
         fragmentManager: FragmentManager? = null,
-        bottomNavigationView: BottomNavigationView? = null
+        bottomNavigationView: BottomNavigationView? = null,
+        hideBottomNavBar: ((Boolean) -> Unit)? = null
     ): Navigation {
-        if (fragmentManager != null && bottomNavigationView != null) {
+        if (fragmentManager != null && bottomNavigationView != null && hideBottomNavBar != null) {
             this.fragmentManager = fragmentManager
             this.bottomNavigationView = bottomNavigationView
+            this.hideBottomNavBar = hideBottomNavBar
             instance = this
             setup()
         }
@@ -113,7 +116,7 @@ object Navigation {
 
         // Hide bottom nav bar in ImageDetailFragment
         if (fragment is ImageDetailFragment) {
-            bottomNavigationView.visibility = View.GONE
+            hideBottomNavBar(true)
         }
 
         fragmentManager.beginTransaction()
@@ -168,7 +171,7 @@ object Navigation {
 
         // Show nav bar again if coming back from ImageDetailFragment
         if (source is ImageDetailFragment)
-            bottomNavigationView.visibility = View.VISIBLE
+            hideBottomNavBar(false)
 
         if (source is ISharedElementFragment) {
             source.getSharedElement()?.let { element ->
@@ -191,7 +194,7 @@ object Navigation {
 
     // Navigate to cases after successful login
     fun loginNavigation() {
-        bottomNavigationView.visibility = View.VISIBLE
+        hideBottomNavBar(false)
         bottomNavigationView.selectedItemId = R.id.home_dest
     }
 
@@ -202,7 +205,7 @@ object Navigation {
         backStacks[BackStackIdentifiers.SETTINGS]!!.clear()
         tabBackStacks.clear()
 
-        bottomNavigationView.visibility = View.GONE
+        hideBottomNavBar(true)
         fragmentManager.beginTransaction()
             .replace(R.id.fragment_container, LoginFragment())
             .commitNow()

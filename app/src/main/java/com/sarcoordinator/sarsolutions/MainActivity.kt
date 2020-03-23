@@ -34,7 +34,10 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         loadUserPreferences()
         super.onCreate(savedInstanceState)
 
-        nav = Navigation.getInstance(supportFragmentManager, bottom_nav_bar)
+        nav = Navigation.getInstance(supportFragmentManager, bottom_nav_bar) { hide ->
+            parent_layout.setTransitionDuration(1000)
+            parent_layout.transitionToState(if (hide) R.id.hide_nav_bar else R.id.show_nav_bar)
+        }
 
         val repo = LocalCacheRepository(CacheDatabase.getDatabase(application).casesDao())
         repo.allShiftReports.observeForever {
@@ -53,10 +56,10 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 supportFragmentManager.beginTransaction()
                     .replace(R.id.fragment_container, LoginFragment())
                     .commit()
-                bottom_nav_bar.visibility = View.GONE
+                parent_layout.transitionToState(R.id.hide_nav_bar)
             } else {
                 nav.setSelectedTab(Navigation.BackStackIdentifiers.HOME)
-                bottom_nav_bar.visibility = View.VISIBLE
+                parent_layout.transitionToState(R.id.show_nav_bar)
             }
         }
     }
@@ -106,34 +109,32 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     }
 
     fun enableTransparentStatusBar(enableTransparency: Boolean) {
-        if (enableTransparency) {
-            window.apply {
+        window.apply {
+            if (enableTransparency) {
                 clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
                 addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    decorView.systemUiVisibility =
-                        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-                                View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or
-                                View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-                } else {
-                    decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                }
+                decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 statusBarColor = Color.TRANSPARENT
-            }
-        } else {
-            window.apply {
+
+                // If theme is light, show light navigation bar icons
+                if (GlobalUtil.getTheme(sharedPrefs, resources) == GlobalUtil.THEME_LIGHT) {
+                    decorView.systemUiVisibility += View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+                }
+
+            } else {
+                // Clear previously set flags
                 decorView.systemUiVisibility = 0
 
                 // Restore system bar colors
                 if (GlobalUtil.getTheme(sharedPrefs, resources) == GlobalUtil.THEME_DARK) {
                     // Set navigationBarColor to elevated gray
-                    window.navigationBarColor = resources.getColor(R.color.lightGray)
-                    window.statusBarColor = resources.getColor(R.color.lightGray)
+                    navigationBarColor = resources.getColor(R.color.lightGray)
+                    statusBarColor = resources.getColor(R.color.lightGray)
                 } else {
                     decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR or
                             View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                    window.statusBarColor = Color.WHITE
-                    window.navigationBarColor = Color.WHITE
+                    statusBarColor = Color.WHITE
+                    navigationBarColor = Color.WHITE
                 }
             }
         }
