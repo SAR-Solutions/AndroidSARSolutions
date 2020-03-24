@@ -1,26 +1,16 @@
 package com.sarcoordinator.sarsolutions
 
-import android.graphics.Bitmap
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.RequestOptions
-import com.bumptech.glide.request.target.Target
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.image_list_view_item.view.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import java.io.File
 
 class ImagesAdapter(private val nav: Navigation, private var imageList: ArrayList<String>) :
     RecyclerView.Adapter<ImagesAdapter.ImageViewHolder>() {
@@ -34,6 +24,11 @@ class ImagesAdapter(private val nav: Navigation, private var imageList: ArrayLis
 
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
         holder.bindView(imageList[position])
+    }
+
+    fun setData(imagePathList: ArrayList<String>) {
+        imageList = imagePathList
+        notifyDataSetChanged()
     }
 
     class ImageViewHolder(itemView: View, private val nav: Navigation) :
@@ -54,41 +49,17 @@ class ImagesAdapter(private val nav: Navigation, private var imageList: ArrayLis
                 nav.pushFragment(null, detailedFragment, itemView.image_view)
             }
 
-            Glide.with(itemView)
-                .asBitmap()
-                .apply {
-                    RequestOptions().dontTransform()
-                }
-                .load(Uri.fromFile(File(imagePath)))
-                .listener(object : RequestListener<Bitmap> {
-                    override fun onLoadFailed(
-                        e: GlideException?,
-                        model: Any?,
-                        target: Target<Bitmap>?,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        Toast.makeText(
-                            itemView.context,
-                            "Something went wrong while loading image.",
-                            Toast.LENGTH_LONG
-                        ).show()
-                        return false
-                    }
+            val circularProgressDrawable = CircularProgressDrawable(itemView.context)
+            circularProgressDrawable.strokeWidth = 5f
+            circularProgressDrawable.centerRadius = 30f
+            circularProgressDrawable.start()
 
-                    override fun onResourceReady(
-                        resource: Bitmap,
-                        model: Any,
-                        target: Target<Bitmap>,
-                        dataSource: DataSource,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        CoroutineScope(Dispatchers.Main).launch {
-                            itemView.image_progress_bar.visibility = View.GONE
-                            itemView.image_view.setImageBitmap(resource)
-                        }
-                        return true
-                    }
-                }).submit()
+            Glide.with(itemView)
+                .load(imagePath)
+                .fitCenter()
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .placeholder(circularProgressDrawable)
+                .into(itemView.image_view)
         }
     }
 }

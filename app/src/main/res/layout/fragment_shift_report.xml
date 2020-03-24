@@ -82,9 +82,38 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:nestedScrollingEnabled="false"
+                    tools:itemCount="1"
                     android:orientation="vertical"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     tools:listitem="@layout/vehicle_material_card" />
+
+                <com.google.android.material.card.MaterialCardView
+                    style="@style/Widget.MaterialComponents.CardView.Standard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/images_title"
+                            style="@style/Base.Widget.AppCompat.TextView.Heading"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/images_taken" />
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/images_recycler_view"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            tools:itemCount="1"
+                            tools:listitem="@layout/image_list_view_item" />
+
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
 
                 <Button
                     android:id="@+id/endShiftButton"

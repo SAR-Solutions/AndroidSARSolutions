@@ -1,23 +1,15 @@
 package com.sarcoordinator.sarsolutions
 
-import android.graphics.Bitmap
-import android.net.Uri
 import android.os.Bundle
 import android.transition.TransitionInflater
 import android.view.View
+import androidx.exifinterface.media.ExifInterface
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.RequestOptions
-import com.bumptech.glide.request.target.Target
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.sarcoordinator.sarsolutions.util.ISharedElementFragment
 import kotlinx.android.synthetic.main.fragment_image_detail.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers.Main
-import kotlinx.coroutines.launch
-import timber.log.Timber
 import java.io.File
 
 class ImageDetailFragment : Fragment(R.layout.fragment_image_detail), ISharedElementFragment {
@@ -25,8 +17,14 @@ class ImageDetailFragment : Fragment(R.layout.fragment_image_detail), ISharedEle
         const val IMAGE_PATH = "IMAGE_PATH"
     }
 
+    private lateinit var viewModel: SharedViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        viewModel = activity?.run {
+            ViewModelProvider(this)[SharedViewModel::class.java]
+        } ?: throw Exception("Invalid Activity")
 
         // Set shared element transition
         sharedElementEnterTransition = TransitionInflater.from(context)
@@ -49,38 +47,15 @@ class ImageDetailFragment : Fragment(R.layout.fragment_image_detail), ISharedEle
 
         detailed_image_view.transitionName = arguments!!.getString(IMAGE_PATH)
 
+        val imageFile = File(arguments!!.getString(IMAGE_PATH))
+        val image = ExifInterface(arguments!!.getString(IMAGE_PATH)!!)
+        image_title.text = imageFile.name
+        image_timestamp.text = image.getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL)
+
         Glide.with(this)
-            .asBitmap()
-            .apply {
-                RequestOptions().dontTransform()
-            }
-            .load(Uri.fromFile(File(arguments!!.getString(IMAGE_PATH)!!)))
-            .listener(object : RequestListener<Bitmap> {
-                override fun onLoadFailed(
-                    e: GlideException?,
-                    model: Any?,
-                    target: Target<Bitmap>?,
-                    isFirstResource: Boolean
-                ): Boolean {
-                    Timber.e("Error loading image")
-                    return false
-                }
-
-                override fun onResourceReady(
-                    resource: Bitmap?,
-                    model: Any?,
-                    target: Target<Bitmap>?,
-                    dataSource: DataSource?,
-                    isFirstResource: Boolean
-                ): Boolean {
-                    CoroutineScope(Main).launch {
-                        detailed_image_view.setImageBitmap(resource)
-                        startPostponedEnterTransition()
-                    }
-                    return true
-                }
-
-            }).submit()
+            .load(imageFile)
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .into(detailed_image_view)
     }
 
     override fun getSharedElement(): View? {

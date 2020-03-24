@@ -21,6 +21,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import java.io.File
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -67,7 +68,16 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
 
     // List of image paths for the current case
     private val currentCaseImageList = MutableLiveData<ArrayList<String>>()
-    fun getImageList(): LiveData<ArrayList<String>> {
+    fun getImageList(filesList: List<File>? = null): LiveData<ArrayList<String>> {
+        filesList?.let { files ->
+            viewModelScope.launch {
+                val imageList = ArrayList<String>()
+                files.sortedBy { file -> file.name }.forEach { file ->
+                    imageList.add(file.absolutePath)
+                }
+                currentCaseImageList.postValue(imageList)
+            }
+        }
         return currentCaseImageList
     }
 

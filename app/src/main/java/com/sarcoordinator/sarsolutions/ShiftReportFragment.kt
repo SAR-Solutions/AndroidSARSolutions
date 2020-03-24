@@ -39,8 +39,12 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedEle
 
     private lateinit var shiftId: String
     private lateinit var viewModel: SharedViewModel
+
     private lateinit var viewManager: RecyclerView.LayoutManager
     private lateinit var viewAdapter: Adapter
+    private lateinit var imagesViewManager: RecyclerView.LayoutManager
+    private lateinit var imagesViewAdapter: ImagesAdapter
+
 
     // Detect swipe
     private val swipeHelper = ItemTouchHelper(object :
@@ -81,6 +85,7 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedEle
         observeNetworkExceptions()
 
         setupRecyclerView()
+        setupImagesCardView()
         initViewListeners()
         if (viewModel.vehicleList.isNotEmpty())
             viewAdapter.setData(viewModel.vehicleList)
@@ -98,6 +103,15 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedEle
         vehicle_recycler_view.visibility = View.VISIBLE
     }
 
+    private fun setupImagesCardView() {
+        imagesViewManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        imagesViewAdapter = ImagesAdapter(nav, viewModel.getImageList().value!!)
+        images_recycler_view.apply {
+            setHasFixedSize(true)
+            layoutManager = imagesViewManager
+            adapter = imagesViewAdapter
+        }
+    }
 
     private fun addVehicle() {
         viewModel.addVehicle()

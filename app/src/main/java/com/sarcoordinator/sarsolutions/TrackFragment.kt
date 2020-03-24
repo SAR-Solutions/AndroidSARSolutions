@@ -186,9 +186,12 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
 
     // Setup everything related to the images card
     private fun setupImagesCardView() {
+        val externalCaseImageDir = requireActivity()
+            .getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/Test2")?.listFiles()?.asList()
+
         // Setup image recycler view
         viewManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-        viewAdapter = ImagesAdapter(nav, viewModel.getImageList().value!!)
+        viewAdapter = ImagesAdapter(nav, viewModel.getImageList(externalCaseImageDir).value!!)
         image_recycler_view.apply {
             layoutManager = viewManager
             adapter = viewAdapter
@@ -198,6 +201,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
         viewModel.getImageList().observe(viewLifecycleOwner, Observer {
             val size = it.size
             image_number_text_view.text = size.toString()
+            viewAdapter.setData(it)
         })
 
         // Capture image
