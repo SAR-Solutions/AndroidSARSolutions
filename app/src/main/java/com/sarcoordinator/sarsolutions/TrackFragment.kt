@@ -83,7 +83,6 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
         location_service_fab.hide()
         initFabClickListener()
         validateNetworkConnectivity()
-        setupImagesCardView()
 
         toolbar_track.setBackPressedListener(View.OnClickListener { requireActivity().onBackPressed() })
     }
@@ -123,7 +122,6 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
             // Restore state depending on view model
             restoreState()
         }
-
 
         viewModel.getBinder().observe(viewLifecycleOwner, Observer { binder ->
             // Either service was bound or unbound
@@ -187,7 +185,10 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
     // Setup everything related to the images card
     private fun setupImagesCardView() {
         val externalCaseImageDir = requireActivity()
-            .getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/Test2")?.listFiles()?.asList()
+            .getExternalFilesDir(
+                Environment.DIRECTORY_PICTURES +
+                        "/${viewModel.currentCase.value!!.caseName}"
+            )?.listFiles()?.asList()
 
         // Setup image recycler view
         viewManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
@@ -208,19 +209,15 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
         capture_photo.setOnClickListener {
             Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { intent ->
                 intent.resolveActivity(requireActivity().packageManager)?.also {
-                    currentShiftId = "Test2"
-                    if (!::currentShiftId.isInitialized) {
-                        Toast.makeText(
-                            requireContext(),
-                            "Shift hasn't started yet. Start one and try again.", Toast.LENGTH_LONG
-                        ).show()
-                        return@setOnClickListener
-                    }
 
+                    val caseName = viewModel.currentCase.value!!.caseName
                     // Create intent to request for camera app launch
                     val photoFile = GlobalUtil.createImageFile(
-                        currentShiftId,
-                        requireActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/$currentShiftId/")!!
+                        caseName,
+                        requireActivity().getExternalFilesDir(
+                            Environment.DIRECTORY_PICTURES +
+                                    "/$caseName/"
+                        )!!
                     )
 
                     photoFile.also {
@@ -296,6 +293,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
         missing_person_value_tv.text = listToOrderedListString(case.missingPersonName)
         equipment_value_tv.text = listToOrderedListString(case.equipmentUsed)
         toolbar_track.setHeading(case.caseName)
+        setupImagesCardView()
     }
 
     private fun requestLocPermission() {

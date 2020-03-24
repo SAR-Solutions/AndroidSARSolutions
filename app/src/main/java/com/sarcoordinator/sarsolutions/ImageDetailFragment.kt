@@ -32,8 +32,6 @@ class ImageDetailFragment : Fragment(R.layout.fragment_image_detail), ISharedEle
         sharedElementReturnTransition = TransitionInflater.from(context)
             .inflateTransition(android.R.transition.move)
 
-        postponeEnterTransition()
-
         (requireActivity() as MainActivity).enableTransparentStatusBar(true)
     }
 

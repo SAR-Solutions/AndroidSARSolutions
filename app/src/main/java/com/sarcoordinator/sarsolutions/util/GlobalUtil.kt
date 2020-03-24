@@ -139,9 +139,9 @@ object GlobalUtil {
     }
 
     // Create file with unique name and returns File
-    fun createImageFile(shiftId: String, storageDir: File): File {
+    fun createImageFile(caseName: String, storageDir: File): File {
         val timeStamp: String = SimpleDateFormat("yyyyMMdd_HH:mm:ss").format(Date())
-        return File.createTempFile("${shiftId}_${timeStamp}", ".jpg", storageDir)
+        return File.createTempFile("${caseName}_${timeStamp}", ".jpg", storageDir)
     }
 }
 

@@ -5,11 +5,9 @@ import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
-import androidx.exifinterface.media.ExifInterface
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
@@ -18,7 +16,6 @@ import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.LocalCacheRepository
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.activity_main.*
-import timber.log.Timber
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
@@ -37,16 +34,16 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         loadUserPreferences()
         super.onCreate(savedInstanceState)
 
-        val t =
-            getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/Test2")?.listFiles()?.asList()
-        t?.let {
-            it.forEach { file ->
-                val image = ExifInterface(file.absolutePath)
-                image.setAttribute("ImageDescription", "This was successful")
-                image.saveAttributes()
-                Timber.d("File contains ${image.getAttribute("ImageDescription")}")
-            }
-        }
+//        val t =
+//            getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/Test2")?.listFiles()?.asList()
+//        t?.let {
+//            it.forEach { file ->
+//                val image = ExifInterface(file.absolutePath)
+//                image.setAttribute("ImageDescription", "This was successful")
+//                image.saveAttributes()
+//                Timber.d("File contains ${image.getAttribute("ImageDescription")}")
+//            }
+//        }
 
         nav = Navigation.getInstance(supportFragmentManager, bottom_nav_bar) { hide ->
             parent_layout.setTransitionDuration(500)
