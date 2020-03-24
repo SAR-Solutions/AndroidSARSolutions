@@ -28,8 +28,8 @@
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/materialCardView"
         style="@style/Widget.MaterialComponents.CardView.Standard"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -79,19 +79,33 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
                 android:hint="@string/click_to_edit_metadata"
+                android:imeOptions="actionSend"
+                android:inputType="textAutoCorrect|textCapSentences"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/metadata_title" />
 
             <Button
-                android:id="@+id/upload_test_button"
+                android:id="@+id/upload_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:clickable="true"
                 android:text="@string/upload_image"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/delete_button"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/metadata_content" />
+
+            <Button
+                android:id="@+id/delete_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/error"
+                android:clickable="true"
+                android:text="@string/delete"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/upload_button"
                 app:layout_constraintTop_toBottomOf="@id/metadata_content" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

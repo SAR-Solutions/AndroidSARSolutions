@@ -122,14 +122,22 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     fun enableTransparentStatusBar(enableTransparency: Boolean) {
         window.apply {
             if (enableTransparency) {
-                clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+                clearFlags(
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS or
+                            WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION
+                )
+
                 addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
                 decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 statusBarColor = Color.TRANSPARENT
 
                 // If theme is light, show light navigation bar icons
                 if (GlobalUtil.getTheme(sharedPrefs, resources) == GlobalUtil.THEME_LIGHT) {
-                    decorView.systemUiVisibility += View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        decorView.systemUiVisibility += View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+                    } else {
+                        navigationBarColor = Color.BLACK
+                    }
                 }
             } else {
                 // Clear previously set flags
