@@ -78,11 +78,21 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
-                android:hint="Click to edit metadata"
-                app:layout_constraintBottom_toBottomOf="parent"
+                android:hint="@string/click_to_edit_metadata"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/metadata_title" />
+
+            <Button
+                android:id="@+id/upload_test_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:text="@string/upload_image"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/metadata_content" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

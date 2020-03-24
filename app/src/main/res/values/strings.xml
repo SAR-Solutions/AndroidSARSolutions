@@ -79,4 +79,6 @@
     <string name="images">Images:</string>
     <string name="images_taken">Images Taken</string>
     <string name="Metadata">Metadata</string>
+    <string name="upload_image">Upload Image</string>
+    <string name="click_to_edit_metadata">Click to edit metadata</string>
 </resources>

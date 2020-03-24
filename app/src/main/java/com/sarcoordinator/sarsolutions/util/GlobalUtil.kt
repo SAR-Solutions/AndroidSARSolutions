@@ -5,6 +5,9 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.content.res.Resources
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.net.ConnectivityManager
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -14,6 +17,7 @@ import androidx.lifecycle.MutableLiveData
 import com.google.android.material.snackbar.Snackbar
 import com.sarcoordinator.sarsolutions.R
 import timber.log.Timber
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
@@ -142,6 +146,36 @@ object GlobalUtil {
     fun createImageFile(caseName: String, storageDir: File): File {
         val timeStamp: String = SimpleDateFormat("yyyyMMdd_HH:mm:ss").format(Date())
         return File.createTempFile("${caseName}_${timeStamp}", ".jpg", storageDir)
+    }
+
+    // Returns byte array for image after fixing orientation
+    fun fixImageOrientation(imagePath: String, orientation: Int): ByteArray {
+        var bitmapImage = BitmapFactory.decodeFile(imagePath)
+        val matrix = Matrix()
+        when (orientation) {
+            6 -> {
+                matrix.postRotate(90F)
+            }
+            3 -> {
+                matrix.postRotate(180F)
+            }
+            8 -> {
+                matrix.postRotate(270F)
+            }
+        }
+        bitmapImage = Bitmap.createBitmap(
+            bitmapImage,
+            0,
+            0,
+            bitmapImage.width,
+            bitmapImage.height,
+            matrix,
+            true
+        )
+
+        val baos = ByteArrayOutputStream()
+        bitmapImage.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+        return baos.toByteArray()
     }
 }
 
