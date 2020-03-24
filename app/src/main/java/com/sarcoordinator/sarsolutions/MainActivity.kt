@@ -81,14 +81,22 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         } else {
             // If shift is active and current tab is 'home', prevent from going back
             if (nav.currentTab == Navigation.BackStackIdentifiers.HOME &&
-                nav.getCurrentFragment() !is ImageDetailFragment &&
-                viewModel.isShiftActive.value == true
+                nav.getCurrentFragment() !is ImageDetailFragment && viewModel.isShiftActive
             ) {
                 Snackbar.make(
                     nav.getCurrentFragment().requireView(),
                     "Complete shift to go back",
                     Snackbar.LENGTH_LONG
                 ).show()
+            } else if (nav.getCurrentFragment() is ImageDetailFragment &&
+                viewModel.isUploadTaskActive
+            ) {
+                Snackbar.make(
+                    nav.getCurrentFragment().requireView(),
+                    "Image upload in progress",
+                    Snackbar.LENGTH_LONG
+                )
+                    .show()
             } else if (!nav.handleOnBackPressed()) {
                 finishAffinity()
             }

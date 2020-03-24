@@ -30,21 +30,23 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
 
     var vehicleList = ArrayList<VehicleCardContent>()
     var lastUpdatedText: String? = null
+    var isShiftActive = false
+    var isUploadTaskActive = false
     lateinit var currentImagePath: String
     private val binder = MutableLiveData<LocationService.LocalBinder>()
-    private val mIsShiftActive = MutableLiveData<Boolean>()
-    val isShiftActive: LiveData<Boolean> = mIsShiftActive
     private val cacheRepo: LocalCacheRepository =
         LocalCacheRepository(CacheDatabase.getDatabase(application).casesDao())
+
     // Number of failed shift syncs in progress
     var numberOfSyncsInProgress: Int = 0
+
     // To keep track of vehicle names
     var numberOfVehicles: Int = 0
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(p0: ComponentName?, iBinder: IBinder?) {
             Timber.d("Connected to service")
             binder.postValue(iBinder as LocationService.LocalBinder)
-            mIsShiftActive.value = true
+            isShiftActive = true
         }
 
         override fun onServiceDisconnected(p0: ComponentName?) {
@@ -171,7 +173,7 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun completeShiftReportSubmission() {
-        mIsShiftActive.value = false
+        isShiftActive = false
     }
 
     fun addImagePathToList(imagePath: String) {

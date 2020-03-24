@@ -89,7 +89,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
 
     private fun validateNetworkConnectivity() {
         // If service is already running, disregard network state
-        if (viewModel.isShiftActive.value == null || viewModel.isShiftActive.value == false) {
+        if (!viewModel.isShiftActive) {
             if (!GlobalUtil.isNetworkConnectivityAvailable(requireActivity(), requireView())) {
                 enableRetryNetworkState()
                 return
@@ -137,7 +137,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
                 validateNetworkConnectivity()
             } else {
                 // Start new service, if there isn't a service running already
-                if (viewModel.isShiftActive.value == null || viewModel.isShiftActive.value == false) {
+                if (!viewModel.isShiftActive) {
                     requestLocPermission()
                 } else {
                     enableStartTrackingFab()
@@ -434,7 +434,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
     override fun onResume() {
         super.onResume()
         // Rebind service if an instance of a service exists
-        if (viewModel.isShiftActive.value == true)
+        if (viewModel.isShiftActive)
             bindService()
     }
 
@@ -447,7 +447,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
 
     // Restore view state on configuration change
     private fun restoreState() {
-        if (viewModel.isShiftActive.value == true) {
+        if (viewModel.isShiftActive) {
             // Service is alive and running but needs to be bound back to activity
             bindService()
             enableStopTrackingFab()

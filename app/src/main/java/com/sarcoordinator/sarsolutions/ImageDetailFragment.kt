@@ -18,6 +18,12 @@ import com.google.firebase.storage.ktx.storageMetadata
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.ISharedElementFragment
 import kotlinx.android.synthetic.main.fragment_image_detail.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.Default
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.File
 
@@ -98,35 +104,56 @@ class ImageDetailFragment : Fragment(R.layout.fragment_image_detail), ISharedEle
     private fun setupUploadButton() {
         upload_button.setOnClickListener {
             upload_button.isEnabled = false
-            val uriFile = Uri.fromFile(imageFile)
-            val storage = FirebaseStorage.getInstance().reference
-            val ref = storage.child(viewModel.currentCase.value!!.id)
-                .child("images/${uriFile.lastPathSegment}")
 
-            val testMetadata = storageMetadata {
-                setCustomMetadata(
-                    "Description",
-                    image.getAttribute(ExifInterface.TAG_IMAGE_DESCRIPTION)
-                )
-            }
+            CoroutineScope(Default).launch {
+                val uriFile = Uri.fromFile(imageFile)
+                val storage = FirebaseStorage.getInstance().reference
+                val ref = storage.child(viewModel.currentCase.value!!.id)
+                    .child("images/${uriFile.lastPathSegment}")
 
-            val uploadTask = ref.putBytes(
-                GlobalUtil.fixImageOrientation(
-                    arguments!!.getString(IMAGE_PATH)!!,
-                    image.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1)
-                ),
-                testMetadata
-            )
+                val testMetadata = storageMetadata {
+                    setCustomMetadata(
+                        "Description",
+                        image.getAttribute(ExifInterface.TAG_IMAGE_DESCRIPTION)
+                    )
+                }
 
-            uploadTask.addOnSuccessListener {
-                Timber.d("Image was uploaded successfully")
-                Toast.makeText(requireContext(), "Successfully uploaded image", Toast.LENGTH_LONG)
-                    .show()
-                deleteImageFile()
-            }.addOnFailureListener {
-                upload_button.isEnabled = true
-                Timber.e("Image was not uploaded")
-                Toast.makeText(requireContext(), "Error uploading image", Toast.LENGTH_LONG).show()
+                withContext(IO) {
+                    viewModel.isUploadTaskActive = true
+                    val uploadTask = ref.putBytes(
+                        GlobalUtil.fixImageOrientation(
+                            arguments!!.getString(IMAGE_PATH)!!,
+                            image.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1)
+                        ),
+                        testMetadata
+                    )
+
+                    uploadTask.addOnSuccessListener {
+                        Timber.d("Image was uploaded successfully")
+                        CoroutineScope(Main).launch {
+                            Toast.makeText(
+                                requireContext(),
+                                "Successfully uploaded image",
+                                Toast.LENGTH_LONG
+                            )
+                                .show()
+                            deleteImageFile()
+                        }
+                    }.addOnFailureListener {
+                        CoroutineScope(Main).launch {
+                            upload_button?.isEnabled = true
+                            Timber.e("Image was not uploaded")
+                            Toast.makeText(
+                                requireContext(),
+                                "Error uploading image",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    }.addOnCompleteListener {
+                        viewModel.isUploadTaskActive = false
+                    }
+                }
+
             }
         }
     }

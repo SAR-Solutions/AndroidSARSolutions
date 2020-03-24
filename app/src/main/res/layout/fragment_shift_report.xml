@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
     tools:context=".ShiftReportFragment">
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -88,6 +89,7 @@
                     tools:listitem="@layout/vehicle_material_card" />
 
                 <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/images_taken_card"
                     style="@style/Widget.MaterialComponents.CardView.Standard"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">

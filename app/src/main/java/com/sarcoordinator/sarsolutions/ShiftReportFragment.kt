@@ -104,6 +104,11 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedEle
     }
 
     private fun setupImagesCardView() {
+        // Don't inflate images card view if nothing to show
+        if (viewModel.getImageList().value!!.isNullOrEmpty()) {
+            images_taken_card.visibility = View.GONE
+            return
+        }
         imagesViewManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         imagesViewAdapter = ImagesAdapter(nav, viewModel.getImageList().value!!)
         images_recycler_view.apply {
