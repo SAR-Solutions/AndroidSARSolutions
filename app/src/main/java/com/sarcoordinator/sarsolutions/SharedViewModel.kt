@@ -129,11 +129,11 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         return serviceConnection
     }
 
-    /************************************************ Shift report **********************************************************/
-
     fun removeService() {
         binder.value = null
     }
+
+    /************************************************ Shift report **********************************************************/
 
     fun addVehicle() {
         numberOfVehicles++

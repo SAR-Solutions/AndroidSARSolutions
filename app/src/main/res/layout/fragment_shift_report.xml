@@ -18,28 +18,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.sarcoordinator.sarsolutions.custom_views.CustomToolbar
-            android:id="@+id/toolbar_shift_report"
-            style="@style/Toolbar"
-            android:padding="0dp"
-            app:Style="EXPANDED"
-            app:Title="@string/shift_report"
-            android:transitionName="toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <androidx.core.widget.ContentLoadingProgressBar
-            android:id="@+id/progress_bar"
-            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:indeterminate="true"
-            android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/toolbar_shift_report" />
-
         <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -130,6 +108,28 @@
 
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
+
+        <androidx.core.widget.ContentLoadingProgressBar
+            android:id="@+id/progress_bar"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            app:layout_constraintTop_toBottomOf="@id/toolbar_shift_report" />
+
+        <com.sarcoordinator.sarsolutions.custom_views.CustomToolbar
+            android:id="@+id/toolbar_shift_report"
+            style="@style/Toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="0dp"
+            android:transitionName="toolbar"
+            app:Style="EXPANDED"
+            app:Title="@string/shift_report"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

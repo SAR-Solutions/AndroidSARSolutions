@@ -54,10 +54,6 @@ class LocationService : Service() {
     private val shiftEndedWithError = MutableLiveData<ShiftErrors>()
     fun hasShiftEndedWithError(): LiveData<ShiftErrors> = shiftEndedWithError
 
-    private val isServiceSyncRunning = MutableLiveData<Boolean>()
-    fun isServiceSyncRunning(): LiveData<Boolean> = isServiceSyncRunning
-
-
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val UPDATE_INTERVAL = 4000L
     private val FASTEST_INTERVAL = 2000L
@@ -71,10 +67,6 @@ class LocationService : Service() {
 
     private var mEndTime: String? = null
     fun getEndTime(): String? = mEndTime
-
-    init {
-        isServiceSyncRunning.value = true
-    }
 
     /*
     * Makes network call to post data
@@ -218,13 +210,13 @@ class LocationService : Service() {
      * Removed location update callback
      * End shift, set endTime and sync remaining points
      */
-    fun completeShift() {
+    fun completeShift(): Job {
         if (::fusedLocationClient.isInitialized)
             fusedLocationClient.removeLocationUpdates(locationCallback)
 
         serviceInfoText.postValue("Syncing shift data with server")
 
-        CoroutineScope(IO).launch {
+        return CoroutineScope(IO).launch {
             // Nothing to do, if shift didn't start
             if (shiftEndedWithError.value == ShiftErrors.START_SHIFT)
                 return@launch
@@ -262,7 +254,6 @@ class LocationService : Service() {
                 mEndTime = endTime
                 shiftEndedWithError.postValue(ShiftErrors.PUT_END_TIME)
             }
-            isServiceSyncRunning.postValue(false)
         }
     }
 

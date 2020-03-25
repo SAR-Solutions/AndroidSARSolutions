@@ -23,6 +23,7 @@ import kotlinx.android.synthetic.main.fragment_shift_report.*
 import kotlinx.android.synthetic.main.vehicle_material_card.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -82,9 +83,11 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedEle
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        progress_bar.visibility = View.INVISIBLE
+
         observeNetworkExceptions()
 
-        setupRecyclerView()
+        setupVehicleRecyclerView()
         setupImagesCardView()
         initViewListeners()
         if (viewModel.vehicleList.isNotEmpty())
@@ -142,6 +145,7 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedEle
             } else {
                 progress_bar.visibility = View.VISIBLE
                 shift_report_fab.hide()
+
                 // Only submit shift if internet connectivity is available
                 if (GlobalUtil.isNetworkConnectivityAvailable(
                         requireActivity(),
@@ -155,8 +159,8 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedEle
                         resources.getStringArray(R.array.vehicle_array).toList()
                     ).invokeOnCompletion {
                         CoroutineScope(Main).launch {
+                            delay(10000)
                             viewModel.completeShiftReportSubmission()
-
                             nav.popFragmentClearBackStack(CasesTabFragment())
                         }
                     }
@@ -195,7 +199,7 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedEle
         return true
     }
 
-    private fun setupRecyclerView() {
+    private fun setupVehicleRecyclerView() {
         viewManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         viewAdapter = Adapter(viewModel)
         vehicle_recycler_view.apply {

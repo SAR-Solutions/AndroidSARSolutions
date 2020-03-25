@@ -18,6 +18,7 @@ import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -33,12 +34,9 @@ import com.sarcoordinator.sarsolutions.util.ISharedElementFragment
 import com.sarcoordinator.sarsolutions.util.LocationService
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.fragment_track.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment {
@@ -50,6 +48,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
     private val REQUEST_IMAGE_CAPTURE = 1
     private val nav: Navigation = Navigation.getInstance()
     private var service: LocationService? = null
+    private lateinit var serviceIntent: Intent
     private lateinit var sharedPrefs: SharedPreferences
     private lateinit var viewModel: SharedViewModel
     private lateinit var currentShiftId: String
@@ -57,6 +56,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
     private lateinit var caseId: String
     private lateinit var viewManager: LinearLayoutManager
     private lateinit var viewAdapter: ImagesAdapter
+    private var stopLocationTracking = false
 
     override fun getSharedElement(): View? = toolbar_track
 
@@ -100,6 +100,20 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
         location_desc.text = getString(R.string.start_tracking_desc)
 
         setupInterface()
+
+        // Stop fab was clicked already but fragment was detached
+        if (stopLocationTracking) {
+            completeShiftAndStopService()
+            return
+        }
+
+        // Restore state depending on view model
+        if (viewModel.isShiftActive) {
+            // Service is alive and running but needs to be bound back to activity
+            bindService()
+            enableStopTrackingFab()
+            location_desc.text = viewModel.lastUpdatedText
+        }
     }
 
     private fun setupInterface() {
@@ -118,9 +132,6 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
             // Fetch from cache
             populateViewWithCase(viewModel.currentCase.value!!)
             enableStartTrackingFab()
-
-            // Restore state depending on view model
-            restoreState()
         }
 
         viewModel.getBinder().observe(viewLifecycleOwner, Observer { binder ->
@@ -138,48 +149,55 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
             } else {
                 // Start new service, if there isn't a service running already
                 if (!viewModel.isShiftActive) {
+                    stopLocationTracking = false
                     requestLocPermission()
                 } else {
-                    enableStartTrackingFab()
-                    service?.completeShift()
-
-                    location_service_fab.isClickable = false
-
-                    // Init, set and start circular progress bar
-                    val progressCircle = CircularProgressDrawable(requireContext()).apply {
-                        strokeWidth = 10f
-                    }
-                    location_service_fab.setImageDrawable(progressCircle)
-                    progressCircle.start()
-
-                    location_desc.text = getString(R.string.waiting_for_server)
-
-                    // Delay till shiftId is fetched
-                    CoroutineScope(IO).launch {
-                        while (!::currentShiftId.isInitialized)
-                            delay(1000)
-
-                        // Observe service and shut down once it has finished syncing
-                        withContext(Main) {
-                            service?.isServiceSyncRunning()?.observe(viewLifecycleOwner, Observer {
-                                if (!it) {
-                                    // Stop ongoing service
-                                    stopLocationService()
-
-                                    val shiftReportFragment = ShiftReportFragment().apply {
-                                        arguments = Bundle().apply {
-                                            putString(ShiftReportFragment.SHIFT_ID, currentShiftId)
-                                        }
-                                    }
-
-                                    nav.pushFragment(null, shiftReportFragment)
-                                }
-                            })
-                        }
-                    }
+                    stopLocationTracking = true
+                    completeShiftAndStopService()
                 }
             }
         }
+    }
+
+    private fun completeShiftAndStopService() {
+        // Change view state
+        enableStartTrackingFab()
+        location_service_fab.isClickable = false
+        val progressCircle = CircularProgressDrawable(requireContext()).apply {
+            strokeWidth = 10f
+        }
+        location_service_fab.setImageDrawable(progressCircle)
+        progressCircle.start()
+        location_desc.text = getString(R.string.waiting_for_server)
+
+        if (service != null) {
+            service?.completeShift()?.invokeOnCompletion {
+                if (view != null) {
+                    viewLifecycleOwner.lifecycleScope.launch(Main) {
+
+                        // Delay till shiftId is fetched
+                        while (!::currentShiftId.isInitialized)
+                            delay(1000)
+
+                        stopLocationService()
+                        delay(2000)
+                        navigateToShiftReportFragment()
+                    }
+                }
+            }
+        } else {
+            navigateToShiftReportFragment()
+        }
+    }
+
+    private fun navigateToShiftReportFragment() {
+        val shiftReportFragment = ShiftReportFragment().apply {
+            arguments = Bundle().apply {
+                putString(ShiftReportFragment.SHIFT_ID, currentShiftId)
+            }
+        }
+
+        nav.pushFragment(null, shiftReportFragment)
     }
 
     // Setup everything related to the images card
@@ -382,7 +400,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
     private fun startLocationService() {
         location_desc.text = getString(R.string.starting_location_service)
         // Pass required extras and start location service
-        val serviceIntent = Intent(context, LocationService::class.java)
+        serviceIntent = Intent(context, LocationService::class.java)
         serviceIntent.putExtra(
             LocationService.isTestMode,
             sharedPrefs.getBoolean(SettingsTabFragment.TESTING_MODE_PREFS, false)
@@ -398,7 +416,6 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
 
     // Stops service and calls unbindService
     private fun stopLocationService() {
-        val serviceIntent = Intent(context, LocationService::class.java)
         unbindService()
         activity?.stopService(serviceIntent)
         // Deletes reference to binder in viewmodel
@@ -443,16 +460,6 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
         viewModel.lastUpdatedText = location_desc.text.toString()
         // Keep service running but detach from viewmodel
         unbindService()
-    }
-
-    // Restore view state on configuration change
-    private fun restoreState() {
-        if (viewModel.isShiftActive) {
-            // Service is alive and running but needs to be bound back to activity
-            bindService()
-            enableStopTrackingFab()
-            location_desc.text = viewModel.lastUpdatedText
-        }
     }
 
     // Convert list of string to a ordered string
