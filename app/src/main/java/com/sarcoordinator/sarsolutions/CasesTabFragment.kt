@@ -201,11 +201,11 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), ISharedElementFragme
             return ViewHolder(holder, nav, this.parent)
         }
 
-        override fun getItemCount(): Int = data.size
+        override fun getItemCount(): Int = data.size + 1
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             if (position != 0)
-                holder.bindView(data[position])
+                holder.bindView(data[position - 1])
         }
 
         fun setCaseList(list: ArrayList<Case>) {
