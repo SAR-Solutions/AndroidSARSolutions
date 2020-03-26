@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:animateLayoutChanges="true"
     tools:context=".ShiftReportFragment">
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -39,14 +38,13 @@
                     android:text="@string/general" />
 
                 <EditText
-                    android:id="@+id/shiftHoursEditText"
+                    android:id="@+id/shift_hours_edit_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
                     android:layout_marginTop="10dp"
-                    android:ems="10"
                     android:hint="@string/hours_on_search"
-                    android:importantForAutofill="no"
+                    android:imeOptions="actionSend"
                     android:inputType="numberDecimal" />
 
                 <TextView
@@ -115,6 +113,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:indeterminate="true"
+            android:visibility="gone"
             app:layout_constraintTop_toBottomOf="@id/toolbar_shift_report" />
 
         <com.sarcoordinator.sarsolutions.custom_views.CustomToolbar
