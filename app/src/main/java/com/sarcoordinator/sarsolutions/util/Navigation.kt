@@ -125,6 +125,7 @@ object Navigation {
                     this.addSharedElement(sharedTransitionView, sharedTransitionView.transitionName)
                 }
             }
+            .setReorderingAllowed(true)
             .commit()
     }
 

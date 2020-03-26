@@ -1,5 +1,6 @@
 package com.sarcoordinator.sarsolutions
 
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.transition.TransitionInflater
@@ -11,7 +12,10 @@ import androidx.exifinterface.media.ExifInterface
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storageMetadata
@@ -43,6 +47,8 @@ class ImageDetailFragment : Fragment(R.layout.fragment_image_detail), ISharedEle
             ViewModelProvider(this)[SharedViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
 
+        postponeEnterTransition()
+
         // Set shared element transition
         sharedElementEnterTransition = TransitionInflater.from(context)
             .inflateTransition(android.R.transition.move)
@@ -73,7 +79,30 @@ class ImageDetailFragment : Fragment(R.layout.fragment_image_detail), ISharedEle
 
         Glide.with(this)
             .load(imageFile)
-            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .dontTransform()
+            .centerCrop()
+            .listener(object : RequestListener<Drawable> {
+                override fun onLoadFailed(
+                    e: GlideException?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    startPostponedEnterTransition()
+                    return false
+                }
+
+                override fun onResourceReady(
+                    resource: Drawable?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    dataSource: DataSource?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    startPostponedEnterTransition()
+                    return false
+                }
+            })
             .into(detailed_image_view)
     }
 
@@ -137,6 +166,7 @@ class ImageDetailFragment : Fragment(R.layout.fragment_image_detail), ISharedEle
                                 Toast.LENGTH_LONG
                             )
                                 .show()
+                            viewModel.isUploadTaskActive = false
                             deleteImageFile()
                         }
                     }.addOnFailureListener {
