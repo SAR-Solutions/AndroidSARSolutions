@@ -28,6 +28,7 @@ import com.karumi.dexter.listener.PermissionDeniedResponse
 import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
+import com.sarcoordinator.sarsolutions.adapters.ImagesAdapter
 import com.sarcoordinator.sarsolutions.models.Case
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.ISharedElementFragment
@@ -191,12 +192,12 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
     }
 
     private fun navigateToShiftReportFragment() {
+        viewModel.numberOfVehicles = 0
         val shiftReportFragment = ShiftReportFragment().apply {
             arguments = Bundle().apply {
                 putString(ShiftReportFragment.SHIFT_ID, currentShiftId)
             }
         }
-
         nav.pushFragment(null, shiftReportFragment)
     }
 
@@ -210,7 +211,10 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
 
         // Setup image recycler view
         viewManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-        viewAdapter = ImagesAdapter(nav, viewModel.getImageList(externalCaseImageDir).value!!)
+        viewAdapter = ImagesAdapter(
+            nav,
+            viewModel.getImageList(externalCaseImageDir).value!!
+        )
         image_recycler_view.apply {
             layoutManager = viewManager
             adapter = viewAdapter

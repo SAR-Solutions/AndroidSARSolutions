@@ -28,8 +28,8 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), ISharedElementFragme
     private val nav: Navigation = Navigation.getInstance()
 
     private lateinit var viewModel: SharedViewModel
-    private lateinit var viewManager: RecyclerView.LayoutManager
-    private lateinit var viewAdapter: Adapter
+    private var viewManager: RecyclerView.LayoutManager? = null
+    private var viewAdapter: Adapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -103,7 +103,7 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), ISharedElementFragme
                 list_shimmer_layout.visibility = View.GONE
             if (swipe_refresh_layout.isRefreshing)
                 swipe_refresh_layout.isRefreshing = false
-            viewAdapter.setCaseList(caseList)
+            viewAdapter?.setCaseList(caseList)
         })
     }
 
@@ -149,7 +149,8 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), ISharedElementFragme
 
     override fun onDestroyView() {
         super.onDestroyView()
-        cases_recycler_view.adapter = null
+        viewManager = null
+        viewAdapter = null
     }
 
     /** Recycler view item stuff **/

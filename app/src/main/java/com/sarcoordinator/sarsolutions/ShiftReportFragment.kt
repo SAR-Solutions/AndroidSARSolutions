@@ -1,13 +1,8 @@
 package com.sarcoordinator.sarsolutions
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
 import androidx.core.view.isVisible
-import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -15,17 +10,15 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
-import com.sarcoordinator.sarsolutions.util.GlobalUtil
+import com.sarcoordinator.sarsolutions.adapters.ImagesAdapter
+import com.sarcoordinator.sarsolutions.adapters.VehiclesAdapter
 import com.sarcoordinator.sarsolutions.util.ISharedElementFragment
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_shift_report.*
-import kotlinx.android.synthetic.main.vehicle_material_card.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Main
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 /**
  * Fragment for volunteer shift report at the end of a shift
@@ -40,12 +33,10 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedEle
 
     private lateinit var shiftId: String
     private lateinit var viewModel: SharedViewModel
-
-    private lateinit var viewManager: RecyclerView.LayoutManager
-    private lateinit var viewAdapter: Adapter
-    private lateinit var imagesViewManager: RecyclerView.LayoutManager
-    private lateinit var imagesViewAdapter: ImagesAdapter
-
+    private var viewManager: RecyclerView.LayoutManager? = null
+    private var viewAdapter: VehiclesAdapter? = null
+    private var imagesViewManager: RecyclerView.LayoutManager? = null
+    private var imagesViewAdapter: ImagesAdapter? = null
 
     // Detect swipe
     private val swipeHelper = ItemTouchHelper(object :
@@ -62,11 +53,11 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedEle
         override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
             Snackbar.make(
                 requireView(),
-                "SWIPE: Removed ${viewModel.vehicleList[viewHolder.adapterPosition].name}",
+                "Removed ${viewModel.vehicleList[viewHolder.adapterPosition].name}",
                 Snackbar.LENGTH_LONG
             ).show()
             viewModel.vehicleList.removeAt(viewHolder.adapterPosition)
-            viewAdapter.removeVehicleAt(viewHolder.adapterPosition)
+            viewAdapter?.notifyItemRemoved(viewHolder.adapterPosition)
         }
     })
 
@@ -75,25 +66,25 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedEle
         viewModel = activity?.run {
             ViewModelProvider(this)[SharedViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
-
-        viewModel.numberOfVehicles = 0
         shiftId = arguments?.getString(SHIFT_ID)!!
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        progress_bar.visibility = View.INVISIBLE
-
         observeNetworkExceptions()
 
         setupVehicleRecyclerView()
         setupImagesCardView()
         initViewListeners()
-        if (viewModel.vehicleList.isNotEmpty())
-            viewAdapter.setData(viewModel.vehicleList)
-        else
-            hideVehicleSection()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        viewManager = null
+        viewAdapter = null
+        imagesViewManager = null
+        imagesViewAdapter = null
     }
 
     private fun hideVehicleSection() {
@@ -113,7 +104,11 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedEle
             return
         }
         imagesViewManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-        imagesViewAdapter = ImagesAdapter(nav, viewModel.getImageList().value!!)
+        imagesViewAdapter =
+            ImagesAdapter(
+                nav,
+                viewModel.getImageList().value!!
+            )
         images_recycler_view.apply {
             setHasFixedSize(true)
             layoutManager = imagesViewManager
@@ -121,71 +116,89 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedEle
         }
     }
 
+    private fun setupVehicleRecyclerView() {
+        viewManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+        viewAdapter =
+            VehiclesAdapter(viewModel)
+        vehicle_recycler_view.apply {
+            layoutManager = viewManager
+            adapter = viewAdapter
+        }
+        swipeHelper.attachToRecyclerView(vehicle_recycler_view)
+
+        if (viewModel.vehicleList.isNotEmpty())
+            viewAdapter?.notifyDataSetChanged()
+        else
+            hideVehicleSection()
+    }
+
     private fun addVehicle() {
         viewModel.addVehicle()
         if (!vehicle_heading_text.isVisible)
             showVehicleSection()
-        viewAdapter.add(viewModel.vehicleList.last())
+        viewAdapter?.notifyDataSetChanged()
     }
 
     private fun initViewListeners() {
-        endShiftButton.setOnClickListener {
-            endShiftButton.isEnabled = false
-
-            GlobalUtil.hideKeyboard(requireActivity())
-
-            // Validate form input
-            if (shiftHoursEditText.text.isNullOrEmpty() || !areVehicleFormsValid()) {
-                endShiftButton.isEnabled = true
-                Snackbar.make(
-                    requireView(),
-                    "Complete shift report to proceed",
-                    Snackbar.LENGTH_LONG
-                ).show()
-            } else {
-                progress_bar.visibility = View.VISIBLE
-                shift_report_fab.hide()
-
-                // Only submit shift if internet connectivity is available
-                if (GlobalUtil.isNetworkConnectivityAvailable(
-                        requireActivity(),
-                        requireView(),
-                        false
-                    )
-                ) {
-                    viewModel.submitShiftReport(
-                        shiftId,
-                        shiftHoursEditText.text.toString(),
-                        resources.getStringArray(R.array.vehicle_array).toList()
-                    ).invokeOnCompletion {
-                        CoroutineScope(Main).launch {
-                            delay(10000)
-                            viewModel.completeShiftReportSubmission()
-                            nav.popFragmentClearBackStack(CasesTabFragment())
-                        }
-                    }
-                } else {
-                    viewModel.addShiftReportToCache(
-                        shiftHoursEditText.text.toString(),
-                        shiftId
-                    ).invokeOnCompletion {
-                        CoroutineScope(Main).launch {
-                            viewModel.completeShiftReportSubmission()
-
-                            nav.popFragmentClearBackStack(CasesTabFragment())
-
-                            Snackbar.make(
-                                requireView(),
-                                "No internet connection, cached shift report",
-                                Snackbar.LENGTH_LONG
-                            ).show()
-                        }
-                    }
-                }
-            }
-        }
+//        endShiftButton.setOnClickListener {
+//            endShiftButton.requestFocus()
+//            endShiftButton.isEnabled = false
+//
+//            GlobalUtil.hideKeyboard(requireActivity())
+//
+//            // Validate form input
+//            if (shift_hours_edit_text.text.isNullOrEmpty() || !areVehicleFormsValid()) {
+//                endShiftButton.isEnabled = true
+//                Snackbar.make(
+//                    requireView(),
+//                    "Complete shift report to proceed",
+//                    Snackbar.LENGTH_LONG
+//                ).show()
+//            } else {
+//                progress_bar.visibility = View.VISIBLE
+//                shift_report_fab.hide()
+//
+//                // Only submit shift if internet connectivity is available
+//                if (GlobalUtil.isNetworkConnectivityAvailable(
+//                        requireActivity(),
+//                        requireView(),
+//                        false
+//                    )
+//                ) {
+//                    viewModel.submitShiftReport(
+//                        shiftId,
+//                        shift_hours_edit_text.text.toString(),
+//                        resources.getStringArray(R.array.vehicle_array).toList()
+//                    ).invokeOnCompletion {
+//                        CoroutineScope(Main).launch {
+//                            delay(10000)
+//                            viewModel.completeShiftReportSubmission()
+//                            nav.popFragmentClearBackStack(CasesTabFragment())
+//                        }
+//                    }
+//                } else {
+//                    viewModel.addShiftReportToCache(
+//                        shift_hours_edit_text.text.toString(),
+//                        shiftId
+//                    ).invokeOnCompletion {
+//                        CoroutineScope(Main).launch {
+//                            viewModel.completeShiftReportSubmission()
+//
+//                            nav.popFragmentClearBackStack(CasesTabFragment())
+//
+//                            Snackbar.make(
+//                                requireView(),
+//                                "No internet connection, cached shift report",
+//                                Snackbar.LENGTH_LONG
+//                            ).show()
+//                        }
+//                    }
+//                }
+//            }
+//        }
 
         shift_report_fab.setOnClickListener {
+            shift_report_fab.requestFocus()
             addVehicle()
         }
     }
@@ -199,16 +212,6 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedEle
         return true
     }
 
-    private fun setupVehicleRecyclerView() {
-        viewManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-        viewAdapter = Adapter(viewModel)
-        vehicle_recycler_view.apply {
-            layoutManager = viewManager
-            adapter = viewAdapter
-        }
-        swipeHelper.attachToRecyclerView(vehicle_recycler_view)
-    }
-
     private fun observeNetworkExceptions() {
         viewModel.getNetworkExceptionObservable().observe(viewLifecycleOwner, Observer { error ->
             if (error != null && error.isNotEmpty())
@@ -220,7 +223,7 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedEle
             ).show()
 
             viewModel.addShiftReportToCache(
-                shiftHoursEditText.text.toString(),
+                shift_hours_edit_text.text.toString(),
                 shiftId
             ).invokeOnCompletion {
                 CoroutineScope(Main).launch {
@@ -235,109 +238,4 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedEle
         return toolbar_shift_report
     }
 
-    /*
-     * Vehicle Adapter
-     */
-    class Adapter(private val viewModel: SharedViewModel) :
-        RecyclerView.Adapter<Adapter.Viewholder>() {
-
-        private var data = ArrayList<SharedViewModel.VehicleCardContent>()
-
-        class Viewholder(itemView: View, private val viewModel: SharedViewModel) :
-            RecyclerView.ViewHolder(itemView) {
-
-            init {
-                // Listeners
-                itemView.county_vehicle_check_box.setOnCheckedChangeListener { _, isChecked ->
-                    val vehicleCardContent = viewModel.vehicleList[adapterPosition]
-                    vehicleCardContent.isCountyVehicle = isChecked
-                    viewModel.updateVehicleAtPosition(position, vehicleCardContent)
-                }
-
-                itemView.personal_vehicle_check_box.setOnCheckedChangeListener { _, isChecked ->
-                    val vehicleCardContent = viewModel.vehicleList[adapterPosition]
-                    vehicleCardContent.isPersonalVehicle = isChecked
-                    viewModel.updateVehicleAtPosition(position, vehicleCardContent)
-                }
-
-                itemView.vehicle_type_spinner.onItemSelectedListener =
-                    object : AdapterView.OnItemSelectedListener {
-                        override fun onNothingSelected(p0: AdapterView<*>?) {
-                            Timber.e("Nothing selected")
-                        }
-
-                        override fun onItemSelected(
-                            parent: AdapterView<*>?,
-                            view: View?,
-                            pos: Int,
-                            d: Long
-                        ) {
-                            val vehicleCardContent = viewModel.vehicleList[adapterPosition]
-                            vehicleCardContent.vehicleType = pos
-                            viewModel.updateVehicleAtPosition(position, vehicleCardContent)
-                        }
-                    }
-
-                itemView.miles_traveled_edit_text.addTextChangedListener {
-                    val vehicleCardContent = viewModel.vehicleList[adapterPosition]
-                    vehicleCardContent.milesTraveled = it.toString()
-                    viewModel.updateVehicleAtPosition(adapterPosition, vehicleCardContent)
-                    Timber.d("Logged at ${adapterPosition}")
-                }
-            }
-
-            fun bindView(
-                vehicleCardContent: SharedViewModel.VehicleCardContent
-            ) {
-
-                // Init spinner options
-                itemView.vehicle_type_spinner.adapter = itemView.context?.let {
-                    ArrayAdapter(
-                        it,
-                        R.layout.support_simple_spinner_dropdown_item,
-                        it.resources.getStringArray(R.array.vehicle_array)
-                    )
-                }
-
-                // Set content
-                itemView.vehicle_title_text_view.text = vehicleCardContent.name
-                itemView.county_vehicle_check_box.isChecked = vehicleCardContent.isCountyVehicle
-                itemView.personal_vehicle_check_box.isChecked = vehicleCardContent.isPersonalVehicle
-                itemView.miles_traveled_edit_text.setText(vehicleCardContent.milesTraveled)
-                itemView.vehicle_type_spinner.setSelection(vehicleCardContent.vehicleType)
-
-
-            }
-        }
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Viewholder {
-            val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.vehicle_material_card, parent, false)
-
-            return Viewholder(view, viewModel)
-        }
-
-
-        override fun onBindViewHolder(holder: Viewholder, position: Int) {
-            holder.bindView(data[position])
-        }
-
-        override fun getItemCount() = data.size
-
-        fun add(vehicleCardContent: SharedViewModel.VehicleCardContent) {
-            data.add(vehicleCardContent)
-            notifyDataSetChanged()
-//            notifyItemInserted(data.size)
-        }
-
-        fun setData(list: ArrayList<SharedViewModel.VehicleCardContent>) {
-            data = list
-            notifyDataSetChanged()
-        }
-
-        fun removeVehicleAt(position: Int) {
-            data.removeAt(position)
-            notifyItemRemoved(position)
-        }
-    }
 }

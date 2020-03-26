@@ -1,4 +1,4 @@
-package com.sarcoordinator.sarsolutions
+package com.sarcoordinator.sarsolutions.adapters
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,6 +9,8 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.sarcoordinator.sarsolutions.ImageDetailFragment
+import com.sarcoordinator.sarsolutions.R
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.image_list_view_item.view.*
 
@@ -17,7 +19,10 @@ class ImagesAdapter(private val nav: Navigation, private var imageList: ArrayLis
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.image_list_view_item, parent, false)
-        return ImageViewHolder(view, nav)
+        return ImageViewHolder(
+            view,
+            nav
+        )
     }
 
     override fun getItemCount(): Int = imageList.count()
@@ -41,7 +46,8 @@ class ImagesAdapter(private val nav: Navigation, private var imageList: ArrayLis
             ViewCompat.setTransitionName(itemView.image_view, imagePath)
 
             itemView.setOnClickListener {
-                val detailedFragment = ImageDetailFragment()
+                val detailedFragment =
+                    ImageDetailFragment()
                 detailedFragment.arguments = Bundle().apply {
                     putString(ImageDetailFragment.IMAGE_PATH, imagePath)
                 }
