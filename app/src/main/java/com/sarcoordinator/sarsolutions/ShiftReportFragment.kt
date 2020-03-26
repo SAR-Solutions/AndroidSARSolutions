@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.sarcoordinator.sarsolutions.adapters.ImagesAdapter
 import com.sarcoordinator.sarsolutions.adapters.VehiclesAdapter
+import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.ISharedElementFragment
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.activity_main.*
@@ -140,62 +141,61 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedEle
     }
 
     private fun initViewListeners() {
-//        endShiftButton.setOnClickListener {
-//            endShiftButton.requestFocus()
-//            endShiftButton.isEnabled = false
-//
-//            GlobalUtil.hideKeyboard(requireActivity())
-//
-//            // Validate form input
-//            if (shift_hours_edit_text.text.isNullOrEmpty() || !areVehicleFormsValid()) {
-//                endShiftButton.isEnabled = true
-//                Snackbar.make(
-//                    requireView(),
-//                    "Complete shift report to proceed",
-//                    Snackbar.LENGTH_LONG
-//                ).show()
-//            } else {
-//                progress_bar.visibility = View.VISIBLE
-//                shift_report_fab.hide()
-//
-//                // Only submit shift if internet connectivity is available
-//                if (GlobalUtil.isNetworkConnectivityAvailable(
-//                        requireActivity(),
-//                        requireView(),
-//                        false
-//                    )
-//                ) {
-//                    viewModel.submitShiftReport(
-//                        shiftId,
-//                        shift_hours_edit_text.text.toString(),
-//                        resources.getStringArray(R.array.vehicle_array).toList()
-//                    ).invokeOnCompletion {
-//                        CoroutineScope(Main).launch {
-//                            delay(10000)
-//                            viewModel.completeShiftReportSubmission()
-//                            nav.popFragmentClearBackStack(CasesTabFragment())
-//                        }
-//                    }
-//                } else {
-//                    viewModel.addShiftReportToCache(
-//                        shift_hours_edit_text.text.toString(),
-//                        shiftId
-//                    ).invokeOnCompletion {
-//                        CoroutineScope(Main).launch {
-//                            viewModel.completeShiftReportSubmission()
-//
-//                            nav.popFragmentClearBackStack(CasesTabFragment())
-//
-//                            Snackbar.make(
-//                                requireView(),
-//                                "No internet connection, cached shift report",
-//                                Snackbar.LENGTH_LONG
-//                            ).show()
-//                        }
-//                    }
-//                }
-//            }
-//        }
+        endShiftButton.setOnClickListener {
+            endShiftButton.requestFocus()
+            endShiftButton.isEnabled = false
+
+            GlobalUtil.hideKeyboard(requireActivity())
+
+            // Validate form input
+            if (shift_hours_edit_text.text.isNullOrEmpty() || !areVehicleFormsValid()) {
+                endShiftButton.isEnabled = true
+                Snackbar.make(
+                    requireView(),
+                    "Complete shift report to proceed",
+                    Snackbar.LENGTH_LONG
+                ).show()
+            } else {
+                progress_bar.visibility = View.VISIBLE
+                shift_report_fab.hide()
+
+                // Only submit shift if internet connectivity is available
+                if (GlobalUtil.isNetworkConnectivityAvailable(
+                        requireActivity(),
+                        requireView(),
+                        false
+                    )
+                ) {
+                    viewModel.submitShiftReport(
+                        shiftId,
+                        shift_hours_edit_text.text.toString(),
+                        resources.getStringArray(R.array.vehicle_array).toList()
+                    ).invokeOnCompletion {
+                        CoroutineScope(Main).launch {
+                            viewModel.completeShiftReportSubmission()
+                            nav.popFragmentClearBackStack(CasesTabFragment())
+                        }
+                    }
+                } else {
+                    viewModel.addShiftReportToCache(
+                        shift_hours_edit_text.text.toString(),
+                        shiftId
+                    ).invokeOnCompletion {
+                        CoroutineScope(Main).launch {
+                            viewModel.completeShiftReportSubmission()
+
+                            nav.popFragmentClearBackStack(CasesTabFragment())
+
+                            Snackbar.make(
+                                requireView(),
+                                "No internet connection, cached shift report",
+                                Snackbar.LENGTH_LONG
+                            ).show()
+                        }
+                    }
+                }
+            }
+        }
 
         shift_report_fab.setOnClickListener {
             shift_report_fab.requestFocus()

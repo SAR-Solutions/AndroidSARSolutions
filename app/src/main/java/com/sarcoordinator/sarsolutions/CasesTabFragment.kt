@@ -167,6 +167,8 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), ISharedElementFragme
                 itemView.missing_person_text.text =
                     case.missingPersonName.toString().removeSurrounding("[", "]")
                 itemView.person_avatar_view.setText(case.missingPersonName[0])
+                itemView.case_name_text_view.text =
+                    case.caseName
                 itemView.date.text = GlobalUtil.convertEpochToDate(case.date)
                 itemView.setOnClickListener {
                     val trackFragment = TrackFragment()

@@ -16,6 +16,9 @@ import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.LocalCacheRepository
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
@@ -46,8 +49,11 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 //        }
 
         nav = Navigation.getInstance(supportFragmentManager, bottom_nav_bar) { hide ->
-            parent_layout.setTransitionDuration(500)
-            parent_layout.transitionToState(if (hide) R.id.hide_nav_bar else R.id.show_nav_bar)
+            GlobalScope.launch {
+                parent_layout.setTransitionDuration(500)
+                delay(500)
+                parent_layout.transitionToState(if (hide) R.id.hide_nav_bar else R.id.show_nav_bar)
+            }
         }
 
         val repo = LocalCacheRepository(CacheDatabase.getDatabase(application).casesDao())
