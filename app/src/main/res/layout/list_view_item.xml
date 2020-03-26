@@ -7,25 +7,39 @@
 
     <com.redmadrobot.acronymavatar.AvatarView
         android:id="@+id/person_avatar_view"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_margin="8dp"
-        app:layout_constraintBottom_toBottomOf="@+id/date"
+        android:layout_width="46dp"
+        android:layout_height="46dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/guideline3"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/missing_person_text" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/missing_person_text"
+        android:id="@+id/case_name_text_view"
         style="@style/Base.Widget.AppCompat.TextView.Heading"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:padding="0dp"
         android:paddingStart="8dp"
         android:paddingEnd="8dp"
+        android:text="Case Name"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/guideline3"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/missing_person_text"
+        style="@style/Base.Widget.AppCompat.TextView.SubHeading"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:padding="0dp"
+        android:paddingTop="0dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:text="Missign person name"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/guideline3"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/case_name_text_view" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/date"
@@ -34,6 +48,7 @@
         android:paddingStart="8dp"
         android:paddingTop="8dp"
         android:paddingEnd="8dp"
+        android:text="date/date/date"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/missing_person_text"
         app:layout_constraintTop_toBottomOf="@+id/missing_person_text" />
