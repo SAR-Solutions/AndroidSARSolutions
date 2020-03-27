@@ -34,7 +34,7 @@ class ResetPasswordFragment : Fragment(R.layout.fragment_reset_password) {
             email_input_text.setAutofillHints(View.AUTOFILL_HINT_EMAIL_ADDRESS)
         }
 
-        if (GlobalUtil.getThemeMode(resources) == GlobalUtil.THEME_DARK)
+        if (GlobalUtil.getCurrentTheme(resources) == GlobalUtil.THEME_DARK)
             imageView.setImageResource(R.mipmap.app_icon_white_text)
 
         forgot_password_button.setOnClickListener {

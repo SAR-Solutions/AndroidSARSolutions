@@ -39,6 +39,7 @@ import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.io.File
 
 class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment {
 
@@ -82,6 +83,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
         sharedPrefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
 
         location_service_fab.hide()
+
         initFabClickListener()
         validateNetworkConnectivity()
 
@@ -270,6 +272,8 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
     }
 
     private fun enableStartTrackingFab() {
+        capture_photo.visibility = View.GONE
+
         location_service_fab.show()
 
         location_service_fab.setImageDrawable(
@@ -283,6 +287,8 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
     }
 
     private fun enableStopTrackingFab() {
+        capture_photo.visibility = View.VISIBLE
+
         location_service_fab.setImageDrawable(
             resources.getDrawable(
                 R.drawable.ic_baseline_stop_24,
@@ -446,9 +452,15 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
+        if (requestCode == REQUEST_IMAGE_CAPTURE) {
             val imagePath = viewModel.currentImagePath
-            viewModel.addImagePathToList(imagePath)
+
+            if (resultCode == Activity.RESULT_CANCELED) {
+                // Delete the file that was made
+                File(imagePath).delete()
+            } else if (resultCode == Activity.RESULT_OK) {
+                viewModel.addImagePathToList(imagePath)
+            }
         }
     }
 

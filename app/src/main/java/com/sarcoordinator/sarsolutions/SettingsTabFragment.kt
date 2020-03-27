@@ -89,7 +89,7 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), ISharedElement
     // Set ui elements based on user preferences
     private fun loadPreferences() {
         // Set spinner based on theme
-        GlobalUtil.getTheme(sharedPrefs, resources).let {
+        GlobalUtil.getThemePreference(sharedPrefs, resources).let {
             theme_spinner.setSelection(it)
         }
 

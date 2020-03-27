@@ -7,8 +7,9 @@
     app:cardElevation="8dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        app:layout_optimizationLevel="none">
 
         <ImageButton
             android:id="@+id/back_button_expanded"
@@ -22,13 +23,16 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <com.google.android.material.textview.MaterialTextView
+        <TextView
             android:id="@+id/heading_expanded"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:padding="8dp"
             android:fontFamily="@font/catamaran_semibold"
             android:textSize="24sp"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:scrollHorizontally="true"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/back_button_expanded"

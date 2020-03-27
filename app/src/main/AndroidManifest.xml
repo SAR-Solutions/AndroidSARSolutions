@@ -41,7 +41,7 @@
         <service
             android:name=".util.LocationService"
             android:foregroundServiceType="location"
-            android:stopWithTask="true" />
+            android:stopWithTask="false" />
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />

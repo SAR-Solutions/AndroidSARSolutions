@@ -17,7 +17,6 @@ import com.sarcoordinator.sarsolutions.util.LocalCacheRepository
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
@@ -37,24 +36,10 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         loadUserPreferences()
         super.onCreate(savedInstanceState)
 
-//        val t =
-//            getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/Test2")?.listFiles()?.asList()
-//        t?.let {
-//            it.forEach { file ->
-//                val image = ExifInterface(file.absolutePath)
-//                image.setAttribute("ImageDescription", "This was successful")
-//                image.saveAttributes()
-//                Timber.d("File contains ${image.getAttribute("ImageDescription")}")
-//            }
-//        }
-
-        nav = Navigation.getInstance(supportFragmentManager, bottom_nav_bar) { hide ->
-            GlobalScope.launch {
-                parent_layout.setTransitionDuration(500)
-                delay(500)
-                parent_layout.transitionToState(if (hide) R.id.hide_nav_bar else R.id.show_nav_bar)
-            }
-        }
+        nav = Navigation.getInstance(
+            supportFragmentManager,
+            bottom_nav_bar
+        ) { hide -> hideBottomNavBar(hide) }
 
         val repo = LocalCacheRepository(CacheDatabase.getDatabase(application).casesDao())
         repo.allShiftReports.observeForever {
@@ -63,21 +48,24 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             }
         }
 
-//         Black status bar for old android version
+//       Black status bar for old android version
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
             window.statusBarColor = Color.BLACK
 
-        if (savedInstanceState == null) {
-            // Navigate to login screen if user isn't logged in
-            if (auth.currentUser == null) {
-                supportFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, LoginFragment())
-                    .commit()
-                parent_layout.transitionToState(R.id.hide_nav_bar)
-            } else {
-                nav.setSelectedTab(Navigation.BackStackIdentifiers.HOME)
-                parent_layout.transitionToState(R.id.show_nav_bar)
-            }
+        // Navigate to login screen if user isn't logged in
+        if (auth.currentUser == null) {
+            // Hide nav bar in login fragment
+            hideBottomNavBar(true)
+            parent_layout.transitionToState(R.id.hide_nav_bar)
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, LoginFragment())
+                .commit()
+            parent_layout.transitionToState(R.id.hide_nav_bar)
+        } else {
+            // Show nav bar
+            hideBottomNavBar(false)
+            nav.setSelectedTab(Navigation.BackStackIdentifiers.HOME)
+            parent_layout.transitionToState(R.id.show_nav_bar)
         }
     }
 
@@ -109,13 +97,23 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         }
     }
 
+    // Handle bottom nav bar state change
+    private fun hideBottomNavBar(hide: Boolean) {
+        GlobalScope.launch {
+            window.navigationBarColor =
+                resources.getColor(if (hide) R.color.gray else R.color.lightGray)
+            parent_layout.setTransitionDuration(500)
+            parent_layout.transitionToState(if (hide) R.id.hide_nav_bar else R.id.show_nav_bar)
+        }
+    }
+
     // Load user preferences using shared preferences
     // NOTE: Call before super.onCreate as it sets the app theme
     private fun loadUserPreferences() {
         sharedPrefs = getPreferences(Context.MODE_PRIVATE)
         // Get system default theme
         GlobalUtil.setCurrentTheme(sharedPrefs, resources)
-        if (GlobalUtil.getTheme(sharedPrefs, resources) == GlobalUtil.THEME_DARK) {
+        if (GlobalUtil.getThemePreference(sharedPrefs, resources) == GlobalUtil.THEME_DARK) {
 
             // Set navigationBarColor to elevated gray
             window.navigationBarColor = resources.getColor(R.color.lightGray)
@@ -124,7 +122,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     fun enableStatusBarColorForNestedFragment() {
         //TODO: Compelte implementing this
-        if (GlobalUtil.getTheme(
+        if (GlobalUtil.getThemePreference(
                 getPreferences(Context.MODE_PRIVATE),
                 resources
             ) == GlobalUtil.THEME_DARK
@@ -146,7 +144,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 statusBarColor = Color.TRANSPARENT
 
                 // If theme is light, show light navigation bar icons
-                if (GlobalUtil.getTheme(sharedPrefs, resources) == GlobalUtil.THEME_LIGHT) {
+                if (GlobalUtil.getCurrentTheme(resources) == GlobalUtil.THEME_LIGHT) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         decorView.systemUiVisibility += View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
                     } else {
@@ -158,7 +156,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 decorView.systemUiVisibility = 0
 
                 // Restore system bar colors
-                if (GlobalUtil.getTheme(sharedPrefs, resources) == GlobalUtil.THEME_DARK) {
+                if (GlobalUtil.getCurrentTheme(resources) == GlobalUtil.THEME_DARK) {
                     // Set navigationBarColor to elevated gray
                     navigationBarColor = resources.getColor(R.color.lightGray)
                     statusBarColor = resources.getColor(R.color.gray)
