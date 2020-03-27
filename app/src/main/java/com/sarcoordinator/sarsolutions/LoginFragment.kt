@@ -37,7 +37,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         }
 
         // Set app icon based on app theme
-        if (GlobalUtil.getThemeMode(resources) == GlobalUtil.THEME_DARK)
+        if (GlobalUtil.getCurrentTheme(resources) == GlobalUtil.THEME_DARK)
             imageView.setImageResource(R.mipmap.app_icon_white_text)
 
         password_text_layout.apply {
