@@ -206,6 +206,12 @@ class LocationService : Service() {
         stopSelf()
     }
 
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        completeShift().invokeOnCompletion {
+            onDestroy()
+        }
+    }
+
     /*
      * Removed location update callback
      * End shift, set endTime and sync remaining points

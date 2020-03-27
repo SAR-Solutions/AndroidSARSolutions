@@ -36,14 +36,10 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         loadUserPreferences()
         super.onCreate(savedInstanceState)
 
-        nav = Navigation.getInstance(supportFragmentManager, bottom_nav_bar) { hide ->
-            GlobalScope.launch {
-                window.navigationBarColor =
-                    resources.getColor(if (hide) R.color.gray else R.color.lightGray)
-                parent_layout.setTransitionDuration(500)
-                parent_layout.transitionToState(if (hide) R.id.hide_nav_bar else R.id.show_nav_bar)
-            }
-        }
+        nav = Navigation.getInstance(
+            supportFragmentManager,
+            bottom_nav_bar
+        ) { hide -> hideBottomNavBar(hide) }
 
         val repo = LocalCacheRepository(CacheDatabase.getDatabase(application).casesDao())
         repo.allShiftReports.observeForever {
@@ -59,6 +55,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         // Navigate to login screen if user isn't logged in
         if (auth.currentUser == null) {
             // Hide nav bar in login fragment
+            hideBottomNavBar(true)
             parent_layout.transitionToState(R.id.hide_nav_bar)
             supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, LoginFragment())
@@ -66,7 +63,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             parent_layout.transitionToState(R.id.hide_nav_bar)
         } else {
             // Show nav bar
-            parent_layout.transitionToState(R.id.show_nav_bar)
+            hideBottomNavBar(false)
             nav.setSelectedTab(Navigation.BackStackIdentifiers.HOME)
             parent_layout.transitionToState(R.id.show_nav_bar)
         }
@@ -97,6 +94,16 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             } else if (!nav.handleOnBackPressed()) {
                 finishAffinity()
             }
+        }
+    }
+
+    // Handle bottom nav bar state change
+    private fun hideBottomNavBar(hide: Boolean) {
+        GlobalScope.launch {
+            window.navigationBarColor =
+                resources.getColor(if (hide) R.color.gray else R.color.lightGray)
+            parent_layout.setTransitionDuration(500)
+            parent_layout.transitionToState(if (hide) R.id.hide_nav_bar else R.id.show_nav_bar)
         }
     }
 
