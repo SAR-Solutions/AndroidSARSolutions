@@ -81,7 +81,9 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
 
         sharedPrefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
 
+        capture_photo.visibility = View.GONE
         location_service_fab.hide()
+
         initFabClickListener()
         validateNetworkConnectivity()
 
@@ -150,9 +152,11 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
             } else {
                 // Start new service, if there isn't a service running already
                 if (!viewModel.isShiftActive) {
+                    capture_photo.visibility = View.VISIBLE
                     stopLocationTracking = false
                     requestLocPermission()
                 } else {
+                    capture_photo.visibility = View.GONE
                     stopLocationTracking = true
                     completeShiftAndStopService()
                 }

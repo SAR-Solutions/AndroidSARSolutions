@@ -38,6 +38,8 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
         nav = Navigation.getInstance(supportFragmentManager, bottom_nav_bar) { hide ->
             GlobalScope.launch {
+                window.navigationBarColor =
+                    resources.getColor(if (hide) R.color.gray else R.color.lightGray)
                 parent_layout.setTransitionDuration(500)
                 parent_layout.transitionToState(if (hide) R.id.hide_nav_bar else R.id.show_nav_bar)
             }
@@ -54,17 +56,19 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
             window.statusBarColor = Color.BLACK
 
-        if (savedInstanceState == null) {
-            // Navigate to login screen if user isn't logged in
-            if (auth.currentUser == null) {
-                supportFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, LoginFragment())
-                    .commit()
-                parent_layout.transitionToState(R.id.hide_nav_bar)
-            } else {
-                nav.setSelectedTab(Navigation.BackStackIdentifiers.HOME)
-                parent_layout.transitionToState(R.id.show_nav_bar)
-            }
+        // Navigate to login screen if user isn't logged in
+        if (auth.currentUser == null) {
+            // Hide nav bar in login fragment
+            parent_layout.transitionToState(R.id.hide_nav_bar)
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, LoginFragment())
+                .commit()
+            parent_layout.transitionToState(R.id.hide_nav_bar)
+        } else {
+            // Show nav bar
+            parent_layout.transitionToState(R.id.show_nav_bar)
+            nav.setSelectedTab(Navigation.BackStackIdentifiers.HOME)
+            parent_layout.transitionToState(R.id.show_nav_bar)
         }
     }
 
