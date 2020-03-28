@@ -72,7 +72,7 @@ object Navigation {
         }
     }
 
-    fun setSelectedTab(identifier: BackStackIdentifiers) {
+    private fun setSelectedTab(identifier: BackStackIdentifiers) {
         var comingFromFragment: Fragment? = null
         if (backStacks[currentTab]!!.size != 0)
             comingFromFragment = backStacks[currentTab]!!.lastElement()
@@ -209,6 +209,16 @@ object Navigation {
         hideBottomNavBar(true)
         fragmentManager.beginTransaction()
             .replace(R.id.fragment_container, LoginFragment())
+            .commitNow()
+    }
+
+    // Loads current tab and fragment again
+    fun restoreState() {
+        hideBottomNavBar(false)
+        setSelectedTab(currentTab)
+
+        fragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, getCurrentFragment())
             .commitNow()
     }
 

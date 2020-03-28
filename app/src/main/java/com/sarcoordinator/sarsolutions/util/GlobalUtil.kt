@@ -118,7 +118,7 @@ object GlobalUtil {
     }
 
     fun getThemePreference(preferences: SharedPreferences, resources: Resources): Int {
-        val def = preferences.getString(THEME_PREFS, null)!!
+        val def = preferences.getString(THEME_PREFS, THEME_DEFAULT.toString())!!
         return try {
             def.toInt()
         } catch (exception: NumberFormatException) {
