@@ -63,9 +63,10 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             parent_layout.transitionToState(R.id.hide_nav_bar)
         } else {
             // Show nav bar
-            hideBottomNavBar(false)
-            nav.setSelectedTab(Navigation.BackStackIdentifiers.HOME)
-            parent_layout.transitionToState(R.id.show_nav_bar)
+            nav.restoreState()
+//            hideBottomNavBar(false)
+//            nav.setSelectedTab(Navigation.BackStackIdentifiers.HOME)
+//            parent_layout.transitionToState(R.id.show_nav_bar)
         }
     }
 
@@ -100,8 +101,14 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     // Handle bottom nav bar state change
     private fun hideBottomNavBar(hide: Boolean) {
         GlobalScope.launch {
-            window.navigationBarColor =
-                resources.getColor(if (hide) R.color.gray else R.color.lightGray)
+            val currentTheme = GlobalUtil.getCurrentTheme(resources)
+            if (currentTheme == GlobalUtil.THEME_DARK) {
+                window.navigationBarColor =
+                    resources.getColor(if (hide) R.color.gray else R.color.lightGray)
+            } else if (currentTheme == GlobalUtil.THEME_LIGHT) {
+                window.navigationBarColor =
+                    resources.getColor(android.R.color.white)
+            }
             parent_layout.setTransitionDuration(500)
             parent_layout.transitionToState(if (hide) R.id.hide_nav_bar else R.id.show_nav_bar)
         }
@@ -111,6 +118,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     // NOTE: Call before super.onCreate as it sets the app theme
     private fun loadUserPreferences() {
         sharedPrefs = getPreferences(Context.MODE_PRIVATE)
+
         // Get system default theme
         GlobalUtil.setCurrentTheme(sharedPrefs, resources)
         if (GlobalUtil.getThemePreference(sharedPrefs, resources) == GlobalUtil.THEME_DARK) {
