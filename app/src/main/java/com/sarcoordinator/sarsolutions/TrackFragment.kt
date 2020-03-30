@@ -50,7 +50,6 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
     private val REQUEST_IMAGE_CAPTURE = 1
     private val nav: Navigation by lazy { Navigation.getInstance() }
     private var service: LocationService? = null
-    private lateinit var serviceIntent: Intent
     private lateinit var sharedPrefs: SharedPreferences
     private lateinit var viewModel: SharedViewModel
     private lateinit var currentShiftId: String
@@ -415,7 +414,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
     private fun startLocationService() {
         location_desc.text = getString(R.string.starting_location_service)
         // Pass required extras and start location service
-        serviceIntent = Intent(context, LocationService::class.java)
+        val serviceIntent = Intent(context, LocationService::class.java)
         serviceIntent.putExtra(
             LocationService.isTestMode,
             sharedPrefs.getBoolean(SettingsTabFragment.TESTING_MODE_PREFS, false)
@@ -432,6 +431,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
     // Stops service and calls unbindService
     private fun stopLocationService() {
         unbindService()
+        val serviceIntent = Intent(context, LocationService::class.java)
         activity?.stopService(serviceIntent)
         // Deletes reference to binder in viewmodel
         // Will not be re-bind on configuration change

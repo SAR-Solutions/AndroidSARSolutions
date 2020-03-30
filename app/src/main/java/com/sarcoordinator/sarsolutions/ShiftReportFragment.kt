@@ -67,7 +67,7 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedEle
         viewModel = activity?.run {
             ViewModelProvider(this)[SharedViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
-        shiftId = arguments?.getString(SHIFT_ID)!!
+        shiftId = arguments?.getString(SHIFT_ID) ?: savedInstanceState?.getString(SHIFT_ID)!!
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -78,6 +78,11 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedEle
         setupVehicleRecyclerView()
         setupImagesCardView()
         initViewListeners()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString(SHIFT_ID, shiftId)
     }
 
     override fun onDestroyView() {
