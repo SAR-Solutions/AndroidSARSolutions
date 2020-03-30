@@ -21,6 +21,10 @@ import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
+    // Required for the navigation the navigation component
+    // to prevent saving fragment state on activity close
+    private var endActivity: Boolean = false
+
     private val auth = FirebaseAuth.getInstance()
     private lateinit var sharedPrefs: SharedPreferences
 
@@ -62,37 +66,50 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 .commit()
             parent_layout.transitionToState(R.id.hide_nav_bar)
         } else {
-            // Show nav bar
-            nav.restoreState()
-//            hideBottomNavBar(false)
-//            nav.setSelectedTab(Navigation.BackStackIdentifiers.HOME)
-//            parent_layout.transitionToState(R.id.show_nav_bar)
+            if (savedInstanceState == null) {
+                nav.loadTab(Navigation.TabIdentifiers.HOME)
+            } else {
+                nav.showTab()
+            }
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (!endActivity)
+            nav.saveCurrentFragmentState()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        nav.onFragmentManagerDestroy()
     }
 
     override fun onBackPressed() {
         if (auth.currentUser == null) {
             super.onBackPressed()
         } else {
+            val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)!!
             // If shift is active and current tab is 'home', prevent from going back
-            if (nav.currentTab == Navigation.BackStackIdentifiers.HOME &&
-                nav.getCurrentFragment() !is ImageDetailFragment && viewModel.isShiftActive
+            if (nav.currentTab == Navigation.TabIdentifiers.HOME &&
+                currentFragment !is ImageDetailFragment
+                && viewModel.isShiftActive
             ) {
                 Snackbar.make(
-                    nav.getCurrentFragment().requireView(),
+                    currentFragment.requireView(),
                     "Complete shift to go back",
                     Snackbar.LENGTH_LONG
                 ).show()
-            } else if (nav.getCurrentFragment() is ImageDetailFragment &&
+            } else if (currentFragment is ImageDetailFragment &&
                 viewModel.isUploadTaskActive
             ) {
                 Snackbar.make(
-                    nav.getCurrentFragment().requireView(),
+                    currentFragment.requireView(),
                     "Image upload in progress",
                     Snackbar.LENGTH_LONG
                 )
                     .show()
-            } else if (!nav.handleOnBackPressed()) {
+            } else if (!nav.popFragment()) {
                 finishAffinity()
             }
         }

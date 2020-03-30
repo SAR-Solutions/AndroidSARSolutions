@@ -82,7 +82,13 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), ISharedElement
 
         sign_out_button.setOnClickListener {
             auth.signOut()
-            nav.logoutNavigation()
+            nav.hideBottomNavBar?.let { it(true) }
+            nav.loadTab(Navigation.TabIdentifiers.HOME)
+            nav.clearBackstack()
+
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, LoginFragment())
+                .commit()
         }
     }
 

@@ -48,7 +48,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
     }
 
     private val REQUEST_IMAGE_CAPTURE = 1
-    private val nav: Navigation = Navigation.getInstance()
+    private val nav: Navigation by lazy { Navigation.getInstance() }
     private var service: LocationService? = null
     private lateinit var serviceIntent: Intent
     private lateinit var sharedPrefs: SharedPreferences
@@ -68,7 +68,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
             ViewModelProvider(this)[SharedViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
 
-        caseId = arguments?.getString(CASE_ID)!!
+        caseId = arguments?.getString(CASE_ID) ?: savedInstanceState?.getString(CASE_ID)!!
 
         // Set shared element transition
         sharedElementEnterTransition = TransitionInflater.from(context)
@@ -88,6 +88,11 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
         validateNetworkConnectivity()
 
         toolbar_track.setBackPressedListener(View.OnClickListener { requireActivity().onBackPressed() })
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString(CASE_ID, caseId)
     }
 
     private fun validateNetworkConnectivity() {
@@ -200,7 +205,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
                 putString(ShiftReportFragment.SHIFT_ID, currentShiftId)
             }
         }
-        nav.pushFragment(null, shiftReportFragment)
+        nav.pushFragment(shiftReportFragment, Navigation.TabIdentifiers.HOME)
     }
 
     // Setup everything related to the images card

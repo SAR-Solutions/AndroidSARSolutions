@@ -176,7 +176,7 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), ISharedElementFragme
                         putString(TrackFragment.CASE_ID, case.id)
                     }
 
-                    nav.pushFragment(null, trackFragment, parent.getSharedElement())
+                    nav.pushFragment(trackFragment, Navigation.TabIdentifiers.HOME)
                 }
             }
         }

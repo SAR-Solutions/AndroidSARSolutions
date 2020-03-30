@@ -173,7 +173,8 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedEle
                     ).invokeOnCompletion {
                         CoroutineScope(Main).launch {
                             viewModel.completeShiftReportSubmission()
-                            nav.popFragmentClearBackStack(CasesTabFragment())
+                            nav.clearBackstack()
+                            nav.loadTab(Navigation.TabIdentifiers.HOME)
                         }
                     }
                 } else {
@@ -184,7 +185,8 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedEle
                         CoroutineScope(Main).launch {
                             viewModel.completeShiftReportSubmission()
 
-                            nav.popFragmentClearBackStack(CasesTabFragment())
+                            nav.clearBackstack()
+                            nav.loadTab(Navigation.TabIdentifiers.HOME)
 
                             Snackbar.make(
                                 requireView(),
@@ -228,7 +230,8 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedEle
             ).invokeOnCompletion {
                 CoroutineScope(Main).launch {
                     viewModel.completeShiftReportSubmission()
-                    nav.popFragmentClearBackStack(CasesTabFragment())
+                    nav.clearBackstack()
+                    nav.loadTab(Navigation.TabIdentifiers.HOME)
                 }
             }
         })

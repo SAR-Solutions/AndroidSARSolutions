@@ -98,7 +98,8 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                                 afm?.commit()
                             }
-                            nav.loginNavigation()
+                            nav.hideBottomNavBar?.let { it(false) }
+                            nav.loadTab(Navigation.TabIdentifiers.HOME)
                         } else {
                             it.isEnabled = true
                             Toast.makeText(
