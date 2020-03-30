@@ -72,6 +72,8 @@ object Navigation {
         //TODO: Implement popping up to home/parent fragment
             return
 
+        currentTab = tabIdentifier
+
         // Manage tabStack
         // Add to tabStack
         if (tabStack.contains(tabIdentifier))
@@ -160,11 +162,10 @@ object Navigation {
 
             return if (tabStack.size > 1) {
                 tabStack.pop()
-                currentTab = tabStack.peek()
 
                 // onItemSelected listener will be called
                 bottomNavBar?.selectedItemId =
-                    when (currentTab) {
+                    when (tabStack.peek()) {
                         TabIdentifiers.HOME -> R.id.home_dest
                         TabIdentifiers.FAILED_SHIFTS -> R.id.failed_shifts_dest
                         TabIdentifiers.SETTINGS -> R.id.settings_dest

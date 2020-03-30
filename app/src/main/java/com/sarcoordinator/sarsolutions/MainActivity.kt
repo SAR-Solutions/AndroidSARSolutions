@@ -118,7 +118,8 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     // Handle bottom nav bar state change
     private fun hideBottomNavBar(hide: Boolean) {
         GlobalScope.launch {
-            val currentTheme = GlobalUtil.getCurrentTheme(resources)
+            val currentTheme =
+                GlobalUtil.getCurrentTheme(resources, getPreferences(Context.MODE_PRIVATE))
             if (currentTheme == GlobalUtil.THEME_DARK) {
                 window.navigationBarColor =
                     resources.getColor(if (hide) R.color.gray else R.color.lightGray)
@@ -137,8 +138,8 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         sharedPrefs = getPreferences(Context.MODE_PRIVATE)
 
         // Get system default theme
-        GlobalUtil.setCurrentTheme(sharedPrefs, resources)
-        if (GlobalUtil.getThemePreference(sharedPrefs, resources) == GlobalUtil.THEME_DARK) {
+        GlobalUtil.setCurrentTheme(sharedPrefs)
+        if (GlobalUtil.getCurrentTheme(resources, sharedPrefs) == GlobalUtil.THEME_DARK) {
 
             // Set navigationBarColor to elevated gray
             window.navigationBarColor = resources.getColor(R.color.lightGray)
@@ -148,8 +149,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     fun enableStatusBarColorForNestedFragment() {
         //TODO: Compelte implementing this
         if (GlobalUtil.getThemePreference(
-                getPreferences(Context.MODE_PRIVATE),
-                resources
+                getPreferences(Context.MODE_PRIVATE)
             ) == GlobalUtil.THEME_DARK
         ) {
             window.statusBarColor = resources.getColor(R.color.lightGray)
@@ -158,6 +158,8 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     fun enableTransparentStatusBar(enableTransparency: Boolean) {
         window.apply {
+            val currentTheme =
+                GlobalUtil.getCurrentTheme(resources, getPreferences(Context.MODE_PRIVATE))
             if (enableTransparency) {
                 clearFlags(
                     WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS or
@@ -169,7 +171,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 statusBarColor = Color.TRANSPARENT
 
                 // If theme is light, show light navigation bar icons
-                if (GlobalUtil.getCurrentTheme(resources) == GlobalUtil.THEME_LIGHT) {
+                if (currentTheme == GlobalUtil.THEME_LIGHT) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         decorView.systemUiVisibility += View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
                     } else {
@@ -181,7 +183,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 decorView.systemUiVisibility = 0
 
                 // Restore system bar colors
-                if (GlobalUtil.getCurrentTheme(resources) == GlobalUtil.THEME_DARK) {
+                if (currentTheme == GlobalUtil.THEME_DARK) {
                     // Set navigationBarColor to elevated gray
                     navigationBarColor = resources.getColor(R.color.lightGray)
                     statusBarColor = resources.getColor(R.color.gray)

@@ -66,10 +66,12 @@ class ImageDetailFragment : Fragment(R.layout.fragment_image_detail), ISharedEle
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        detailed_image_view.transitionName = arguments!!.getString(IMAGE_PATH)
+        val imagePath =
+            arguments?.getString(IMAGE_PATH) ?: savedInstanceState?.getString(IMAGE_PATH)!!
 
-        imageFile = File(arguments!!.getString(IMAGE_PATH))
-        image = ExifInterface(arguments!!.getString(IMAGE_PATH)!!)
+        detailed_image_view.transitionName = imagePath
+        imageFile = File(imagePath)
+        image = ExifInterface(imagePath)
         image_title.text = imageFile.name
         image_timestamp.text = image.getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL)
 
@@ -104,6 +106,12 @@ class ImageDetailFragment : Fragment(R.layout.fragment_image_detail), ISharedEle
                 }
             })
             .into(detailed_image_view)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        outState.putString(IMAGE_PATH, imageFile.absolutePath)
     }
 
     private fun setupMetaDataEditText() {
