@@ -8,9 +8,9 @@ import com.sarcoordinator.sarsolutions.CasesTabFragment
 import com.sarcoordinator.sarsolutions.FailedShiftsTabFragment
 import com.sarcoordinator.sarsolutions.R
 import com.sarcoordinator.sarsolutions.SettingsTabFragment
+import java.io.Serializable
 import java.util.*
 import kotlin.collections.HashMap
-import kotlin.reflect.KClass
 
 // Navigation class singleton
 // Responsible for handling backstacks for each tab and the tabs themselves
@@ -24,16 +24,16 @@ object Navigation {
     private var bottomNavBar: BottomNavigationView? = null
     var hideBottomNavBar: ((Boolean) -> Unit)? = null
 
-    private val tabBackStack = HashMap<TabIdentifiers, Stack<KClass<Fragment>>>().apply {
+    private val tabBackStack = HashMap<TabIdentifiers, Stack<String>>().apply {
         TabIdentifiers.values().forEach {
-            this[it] = Stack<KClass<Fragment>>()
+            this[it] = Stack<String>()
         }
     }
     private val tabStack = Stack<TabIdentifiers>()
 
     var currentTab: TabIdentifiers = TabIdentifiers.HOME
 
-    private val fragmentStateMap = HashMap<KClass<Fragment>, Fragment.SavedState?>()
+    private val fragmentStateMap = HashMap<String, Fragment.SavedState?>()
 
     @Volatile
     private lateinit var instance: Navigation
@@ -109,7 +109,7 @@ object Navigation {
             // Nothing to do if current fragment is the same as to-be-replaced fragment
             if (currentTabBackstack.isNotEmpty() &&
                 currentTabBackstack.peek()
-                == fragment::class
+                == fragment::class.qualifiedName
             )
                 return
         }
@@ -121,16 +121,16 @@ object Navigation {
         saveCurrentFragmentState()
 
         // Restore state if previous fragment state exists
-        if (fragmentStateMap.containsKey(fragment.javaClass.kotlin)) {
-            fragment.setInitialSavedState(fragmentStateMap[fragment.javaClass.kotlin])
+        if (fragmentStateMap.containsKey(fragment.javaClass.kotlin.qualifiedName)) {
+            fragment.setInitialSavedState(fragmentStateMap[fragment.javaClass.kotlin.qualifiedName])
         }
 
         // If fragment was found in backstack, remove it; Will be added to the top
-        if (backStack.contains(fragment::class)) {
-            backStack.remove(fragment::class)
+        if (backStack.contains(fragment::class.qualifiedName)) {
+            backStack.remove(fragment::class.qualifiedName)
         }
 
-        backStack.push(fragment.javaClass.kotlin)
+        backStack.push(fragment::class.qualifiedName)
 
         fragmentManager?.beginTransaction()
             ?.replace(R.id.fragment_container, fragment)
@@ -188,8 +188,8 @@ object Navigation {
             currentTab = tabIdentifier
 
         val backStack = tabBackStack[currentTab]!!
-        val fragmentToShow = backStack.peek().java.newInstance()
-        fragmentToShow.setInitialSavedState(fragmentStateMap[fragmentToShow.javaClass.kotlin])
+        val fragmentToShow: Fragment = Class.forName(backStack.peek()).newInstance() as Fragment
+        fragmentToShow.setInitialSavedState(fragmentStateMap[fragmentToShow.javaClass.kotlin.qualifiedName])
         fragmentManager?.beginTransaction()
             ?.replace(R.id.fragment_container, fragmentToShow)
             ?.commitNow()
@@ -199,7 +199,7 @@ object Navigation {
     fun saveCurrentFragmentState() {
         val currentFragment = fragmentManager?.findFragmentById(R.id.fragment_container)
         if (currentFragment != null) {
-            fragmentStateMap[currentFragment.javaClass.kotlin] =
+            fragmentStateMap[currentFragment::class.qualifiedName!!] =
                 fragmentManager?.saveFragmentInstanceState(currentFragment)
         }
     }
@@ -216,9 +216,14 @@ object Navigation {
         currentTab = TabIdentifiers.HOME
         tabBackStack.apply {
             TabIdentifiers.values().forEach {
-                this[it] = Stack<KClass<Fragment>>()
+                this[it] = Stack<String>()
             }
         }
         tabStack.clear()
+    }
+
+    // Related to process death
+    fun getBackStack():  Serializable {
+        return tabBackStack
     }
 }

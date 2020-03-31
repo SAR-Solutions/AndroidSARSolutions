@@ -17,8 +17,9 @@ import com.sarcoordinator.sarsolutions.util.ISharedElementFragment
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.fragment_settings.*
 import timber.log.Timber
+import java.io.Serializable
 
-class SettingsTabFragment : Fragment(R.layout.fragment_settings), ISharedElementFragment {
+class SettingsTabFragment : Fragment(R.layout.fragment_settings), ISharedElementFragment, Serializable {
 
     private val nav: Navigation = Navigation.getInstance()
 

@@ -18,8 +18,9 @@ import kotlinx.android.synthetic.main.loc_cache_list_item.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
+import java.io.Serializable
 
-class FailedShiftsTabFragment : Fragment(R.layout.fragment_failed_shifts), ISharedElementFragment {
+class FailedShiftsTabFragment : Fragment(R.layout.fragment_failed_shifts), ISharedElementFragment, Serializable {
 
     private lateinit var viewModel: SharedViewModel
     private lateinit var viewManager: RecyclerView.LayoutManager

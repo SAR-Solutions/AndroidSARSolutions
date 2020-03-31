@@ -1,6 +1,7 @@
 package com.sarcoordinator.sarsolutions
 
 import android.os.Bundle
+import android.os.Parcelable
 import android.transition.TransitionInflater
 import android.view.LayoutInflater
 import android.view.View
@@ -17,13 +18,16 @@ import com.sarcoordinator.sarsolutions.models.Case
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.ISharedElementFragment
 import com.sarcoordinator.sarsolutions.util.Navigation
+import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.fragment_cases.*
 import kotlinx.android.synthetic.main.list_view_item.view.*
+import java.io.Serializable
 
 /**
  * This fragment displays the list of cases for the user
  */
-class CasesTabFragment : Fragment(R.layout.fragment_cases), ISharedElementFragment {
+@Parcelize
+class CasesTabFragment : Fragment(R.layout.fragment_cases), ISharedElementFragment, Parcelable, Serializable{
 
     private val nav: Navigation = Navigation.getInstance()
 
