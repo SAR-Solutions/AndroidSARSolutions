@@ -10,6 +10,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
@@ -30,6 +31,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     private val BACKSTACK = "BACKSTACK"
     private val TABSTACK = "TABSTACK"
+    private val FRAGMENT_STATES_MAP = "FRAGMENT_STATES_MAP"
 
     // Required for the navigation the navigation component
     // to prevent saving fragment state on activity close
@@ -65,8 +67,16 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
             savedInstanceState.getSerializable(TABSTACK)?.let {
                 val temp = Stack<Navigation.TabIdentifiers>()
-                temp.addAll(it as ArrayList<Navigation.TabIdentifiers>)
+                if(it is Stack<*>) {
+                    temp.addAll(it as Stack<Navigation.TabIdentifiers>)
+                } else {
+                    temp.addAll(it as ArrayList<Navigation.TabIdentifiers>)
+                }
                 nav.setTabStack(temp)
+            }
+
+            savedInstanceState.getSerializable(FRAGMENT_STATES_MAP)?.let {
+                nav.setFragmentStateMap(it as HashMap<String, Fragment.SavedState?>)
             }
 
         }
@@ -94,8 +104,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         } else {
             if (savedInstanceState == null) {
                 nav.loadTab(Navigation.TabIdentifiers.HOME)
-            } else {
-                nav.showTab()
             }
         }
     }
@@ -104,6 +112,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         super.onSaveInstanceState(outState)
         outState.putSerializable(BACKSTACK, nav.getBackStack())
         outState.putSerializable(TABSTACK, nav.getTabStack())
+        outState.putSerializable(FRAGMENT_STATES_MAP, nav.getFragmentStateMap())
     }
 
     override fun onPause() {

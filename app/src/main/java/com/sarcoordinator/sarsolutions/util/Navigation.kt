@@ -11,6 +11,7 @@ import com.sarcoordinator.sarsolutions.R
 import com.sarcoordinator.sarsolutions.SettingsTabFragment
 import timber.log.Timber
 import java.io.Serializable
+import java.lang.Exception
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
@@ -23,6 +24,7 @@ object Navigation {
         HOME, FAILED_SHIFTS, SETTINGS
     }
 
+    private var saveCurrentViewState: Boolean = true
     private var fragmentManager: FragmentManager? = null
     private var bottomNavBar: BottomNavigationView? = null
     var hideBottomNavBar: ((Boolean) -> Unit)? = null
@@ -36,7 +38,7 @@ object Navigation {
 
     var currentTab: TabIdentifiers = TabIdentifiers.HOME
 
-    private val fragmentStateMap = HashMap<String, Fragment.SavedState?>()
+    private var fragmentStateMap = HashMap<String, Fragment.SavedState?>()
 
     @Volatile
     private lateinit var instance: Navigation
@@ -58,6 +60,11 @@ object Navigation {
 
     private fun setupBottomNavBar() {
         bottomNavBar?.setOnNavigationItemSelectedListener {
+            if(!saveCurrentViewState){
+                saveCurrentViewState = true
+            } else {
+                saveCurrentFragmentState()
+            }
             when (it.itemId) {
                 R.id.home_dest -> loadTab(TabIdentifiers.HOME)
                 R.id.failed_shifts_dest -> loadTab(TabIdentifiers.FAILED_SHIFTS)
@@ -166,6 +173,7 @@ object Navigation {
             return if (tabStack.size > 1) {
                 tabStack.pop()
 
+                saveCurrentViewState = false
                 // onItemSelected listener will be called
                 bottomNavBar?.selectedItemId =
                     when (tabStack.peek()) {
@@ -186,16 +194,16 @@ object Navigation {
     }
 
     // Show current tab and restore its state; if null, loads current tab
-    fun showTab(tabIdentifier: TabIdentifiers? = null) {
+    private fun showTab(tabIdentifier: TabIdentifiers? = null) {
         if (tabIdentifier != null)
             currentTab = tabIdentifier
 
         val backStack = tabBackStack[currentTab]!!
         val fragmentToShow: Fragment = Class.forName(backStack.peek()).newInstance() as Fragment
-        fragmentToShow.setInitialSavedState(fragmentStateMap[fragmentToShow.javaClass.kotlin.qualifiedName])
+        fragmentToShow.setInitialSavedState(fragmentStateMap[fragmentToShow::class.qualifiedName ?: throw Exception("Unexpected class")])
         fragmentManager?.beginTransaction()
             ?.replace(R.id.fragment_container, fragmentToShow)
-            ?.commitNow()
+            ?.commit()
     }
 
     // Save current fragment state in fragmentStateMap
@@ -248,4 +256,16 @@ object Navigation {
         this.tabStack = tabStack
         currentTab = tabStack.peek()
     }
+
+    fun getFragmentStateMap(): HashMap<String, Fragment.SavedState?> {
+        return fragmentStateMap
+    }
+
+    fun setFragmentStateMap(fragmentStates: HashMap<String, Fragment.SavedState?>) {
+        this.fragmentStateMap = HashMap<String, Fragment.SavedState?>()
+        fragmentStates.forEach {
+            fragmentStateMap[it.key] = it.value
+        }
+    }
+
 }

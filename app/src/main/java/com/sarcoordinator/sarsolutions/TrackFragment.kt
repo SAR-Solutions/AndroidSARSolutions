@@ -67,7 +67,11 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
             ViewModelProvider(this)[SharedViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
 
-        caseId = arguments?.getString(CASE_ID) ?: savedInstanceState?.getString(CASE_ID)!!
+        try {
+            caseId = arguments?.getString(CASE_ID) ?: savedInstanceState?.getString(CASE_ID)!!
+        } catch (ex: java.lang.Exception) {
+            Timber.e("WHAT?")
+        }
 
         // Set shared element transition
         sharedElementEnterTransition = TransitionInflater.from(context)
