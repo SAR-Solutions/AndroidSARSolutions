@@ -35,9 +35,11 @@ import com.sarcoordinator.sarsolutions.util.ISharedElementFragment
 import com.sarcoordinator.sarsolutions.util.LocationService
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.fragment_track.*
+import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.File
 
@@ -45,6 +47,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
 
     companion object ArgsTags {
         const val CASE_ID = "CASE_ID"
+        const val LOCATION_TRACKING_STATUS = "LOCATION_TRACKING_STATUS"
     }
 
     private val REQUEST_IMAGE_CAPTURE = 1
@@ -52,7 +55,6 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
     private var service: LocationService? = null
     private lateinit var sharedPrefs: SharedPreferences
     private lateinit var viewModel: SharedViewModel
-    private lateinit var currentShiftId: String
     private var isRetryNetworkFab = false
     private lateinit var caseId: String
     private lateinit var viewManager: LinearLayoutManager
@@ -67,10 +69,10 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
             ViewModelProvider(this)[SharedViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
 
-        try {
-            caseId = arguments?.getString(CASE_ID) ?: savedInstanceState?.getString(CASE_ID)!!
-        } catch (ex: java.lang.Exception) {
-            Timber.e("WHAT?")
+        // Get arguments / Restore state
+        caseId = arguments?.getString(CASE_ID) ?: savedInstanceState?.getString(CASE_ID)!!
+        savedInstanceState?.getBoolean(LOCATION_TRACKING_STATUS)?.let {
+            stopLocationTracking = it
         }
 
         // Set shared element transition
@@ -96,6 +98,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putString(CASE_ID, caseId)
+        outState.putBoolean(LOCATION_TRACKING_STATUS, stopLocationTracking)
     }
 
     private fun validateNetworkConnectivity() {
@@ -114,6 +117,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
 
         // Stop fab was clicked already but fragment was detached
         if (stopLocationTracking) {
+            stopLocationService()
             completeShiftAndStopService()
             return
         }
@@ -123,7 +127,6 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
             // Service is alive and running but needs to be bound back to activity
             bindService()
             enableStopTrackingFab()
-            location_desc.text = viewModel.lastUpdatedText
         }
     }
 
@@ -154,6 +157,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
 
     private fun initFabClickListener() {
         location_service_fab.setOnClickListener {
+            // Retry for network connectivity
             if (isRetryNetworkFab) {
                 isRetryNetworkFab = false
                 validateNetworkConnectivity()
@@ -163,6 +167,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
                     stopLocationTracking = false
                     requestLocPermission()
                 } else {
+                    // Stop ongoing service
                     stopLocationTracking = true
                     completeShiftAndStopService()
                 }
@@ -183,20 +188,22 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
 
         if (service != null) {
             service?.completeShift()?.invokeOnCompletion {
-                if (view != null) {
-                    viewLifecycleOwner.lifecycleScope.launch(Main) {
+                lifecycleScope.launch(IO) {
 
-                        // Delay till shiftId is fetched
-                        while (!::currentShiftId.isInitialized)
-                            delay(1000)
+                    // Delay till shiftId is fetched
+                    while (viewModel.currentShiftId.isNullOrEmpty())
+                        delay(1000)
 
-                        stopLocationService()
-                        delay(2000)
-                        navigateToShiftReportFragment()
+                    withContext(Main) {
+                        if(context != null) {
+                            stopLocationService()
+                            navigateToShiftReportFragment()
+                        }
                     }
                 }
             }
         } else {
+            // Service is not running
             navigateToShiftReportFragment()
         }
     }
@@ -205,7 +212,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
         viewModel.numberOfVehicles = 0
         val shiftReportFragment = ShiftReportFragment().apply {
             arguments = Bundle().apply {
-                putString(ShiftReportFragment.SHIFT_ID, currentShiftId)
+                putString(ShiftReportFragment.SHIFT_ID, viewModel.currentShiftId)
             }
         }
         nav.pushFragment(shiftReportFragment, Navigation.TabIdentifiers.HOME)
@@ -385,7 +392,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
                 location_desc.text = lastUpdated
             })
             it.getShiftId().observe(viewLifecycleOwner, Observer { shiftId ->
-                currentShiftId = shiftId
+                viewModel.currentShiftId = shiftId
             })
 
             // Handle shift errors
@@ -401,11 +408,15 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
                         }
                         LocationService.ShiftErrors.PUT_LOCATIONS -> {
                             Timber.e("All locations could not posted")
-                            viewModel.addLocationsToCache(service!!.getSyncList(), currentShiftId)
+                            viewModel.addLocationsToCache(service!!.getSyncList())
                         }
                         LocationService.ShiftErrors.PUT_END_TIME -> {
                             Timber.e("Posting end time failed")
-                            viewModel.addEndTimeToCache(service!!.getEndTime()!!, currentShiftId)
+                            viewModel.addEndTimeToCache(service!!.getEndTime()!!)
+                        }
+                        LocationService.ShiftErrors.GET_SHIFT_ID -> {
+                            Timber.e("Getting shift id failed")
+                            Toast.makeText(requireContext(), "Failed to start shift", Toast.LENGTH_LONG).show()
                         }
                         else -> Timber.e("Unhandled shift error")
                     }
@@ -435,7 +446,7 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
     // Stops service and calls unbindService
     private fun stopLocationService() {
         unbindService()
-        val serviceIntent = Intent(context, LocationService::class.java)
+        val serviceIntent = Intent(requireContext(), LocationService::class.java)
         activity?.stopService(serviceIntent)
         // Deletes reference to binder in viewmodel
         // Will not be re-bind on configuration change
@@ -455,8 +466,10 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
 
     // Detach viewmodel from running service
     private fun unbindService() {
-        if (viewModel.getBinder().value != null)
+        if (viewModel.isServiceBound) {
+            viewModel.isServiceBound = false
             activity?.unbindService(viewModel.getServiceConnection())
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -471,20 +484,6 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
                 viewModel.addImagePathToList(imagePath)
             }
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        // Rebind service if an instance of a service exists
-        if (viewModel.isShiftActive)
-            bindService()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        viewModel.lastUpdatedText = location_desc.text.toString()
-        // Keep service running but detach from viewmodel
-        unbindService()
     }
 
     // Convert list of string to a ordered string

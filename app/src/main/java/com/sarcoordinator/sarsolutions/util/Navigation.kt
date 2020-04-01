@@ -224,13 +224,13 @@ object Navigation {
     }
 
     fun clearBackstack() {
-        currentTab = TabIdentifiers.HOME
         tabBackStack.apply {
             TabIdentifiers.values().forEach {
                 this[it] = Stack<String>()
             }
         }
         tabStack.clear()
+        fragmentStateMap.clear()
     }
 
     /** Process death related stuff **/

@@ -2,6 +2,7 @@ package com.sarcoordinator.sarsolutions
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -184,8 +185,7 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedEle
                     }
                 } else {
                     viewModel.addShiftReportToCache(
-                        shift_hours_edit_text.text.toString(),
-                        shiftId
+                        shift_hours_edit_text.text.toString()
                     ).invokeOnCompletion {
                         CoroutineScope(Main).launch {
                             viewModel.completeShiftReportSubmission()
@@ -230,8 +230,7 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedEle
             ).show()
 
             viewModel.addShiftReportToCache(
-                shift_hours_edit_text.text.toString(),
-                shiftId
+                shift_hours_edit_text.text.toString()
             ).invokeOnCompletion {
                 CoroutineScope(Main).launch {
                     viewModel.completeShiftReportSubmission()
