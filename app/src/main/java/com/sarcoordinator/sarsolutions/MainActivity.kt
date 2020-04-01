@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
@@ -19,9 +20,16 @@ import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import timber.log.Timber
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 import kotlin.random.Random
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
+
+    private val BACKSTACK = "BACKSTACK"
+    private val TABSTACK = "TABSTACK"
 
     // Required for the navigation the navigation component
     // to prevent saving fragment state on activity close
@@ -40,12 +48,28 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         // Theme needs to be applied before calling super.onCreate
         // Otherwise a new instance of this activity will be created
         loadUserPreferences()
+
         super.onCreate(savedInstanceState)
 
         nav = Navigation.getInstance(
             supportFragmentManager,
             bottom_nav_bar
         ) { hide -> hideBottomNavBar(hide) }
+
+        if (savedInstanceState != null) {
+
+            // Recover from process death
+            savedInstanceState.getSerializable(BACKSTACK)?.let {
+                nav.setBackStack(it as HashMap<Navigation.TabIdentifiers, Stack<String>>)
+            }
+
+            savedInstanceState.getSerializable(TABSTACK)?.let {
+                val temp = Stack<Navigation.TabIdentifiers>()
+                temp.addAll(it as ArrayList<Navigation.TabIdentifiers>)
+                nav.setTabStack(temp)
+            }
+
+        }
 
         val repo = LocalCacheRepository(CacheDatabase.getDatabase(application).casesDao())
         repo.allShiftReports.observeForever {
@@ -74,6 +98,12 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 nav.showTab()
             }
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putSerializable(BACKSTACK, nav.getBackStack())
+        outState.putSerializable(TABSTACK, nav.getTabStack())
     }
 
     override fun onPause() {
@@ -135,7 +165,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     }
 
     // Load user preferences using shared preferences
-    // NOTE: Call before super.onCreate as it sets the app theme
+// NOTE: Call before super.onCreate as it sets the app theme
     private fun loadUserPreferences() {
         sharedPrefs = getPreferences(Context.MODE_PRIVATE)
 

@@ -1,5 +1,6 @@
 package com.sarcoordinator.sarsolutions.util
 
+import android.os.Parcelable
 import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -8,8 +9,10 @@ import com.sarcoordinator.sarsolutions.CasesTabFragment
 import com.sarcoordinator.sarsolutions.FailedShiftsTabFragment
 import com.sarcoordinator.sarsolutions.R
 import com.sarcoordinator.sarsolutions.SettingsTabFragment
+import timber.log.Timber
 import java.io.Serializable
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 // Navigation class singleton
@@ -24,12 +27,12 @@ object Navigation {
     private var bottomNavBar: BottomNavigationView? = null
     var hideBottomNavBar: ((Boolean) -> Unit)? = null
 
-    private val tabBackStack = HashMap<TabIdentifiers, Stack<String>>().apply {
+    private var tabBackStack = HashMap<TabIdentifiers, Stack<String>>().apply {
         TabIdentifiers.values().forEach {
             this[it] = Stack<String>()
         }
     }
-    private val tabStack = Stack<TabIdentifiers>()
+    private var tabStack = Stack<TabIdentifiers>()
 
     var currentTab: TabIdentifiers = TabIdentifiers.HOME
 
@@ -182,7 +185,7 @@ object Navigation {
         }
     }
 
-    // Show current tab and restore state its state; if null, loads current tab
+    // Show current tab and restore its state; if null, loads current tab
     fun showTab(tabIdentifier: TabIdentifiers? = null) {
         if (tabIdentifier != null)
             currentTab = tabIdentifier
@@ -222,8 +225,27 @@ object Navigation {
         tabStack.clear()
     }
 
-    // Related to process death
-    fun getBackStack():  Serializable {
+    /** Process death related stuff **/
+
+    fun getBackStack(): HashMap<TabIdentifiers, Stack<String>> {
         return tabBackStack
+    }
+
+    fun setBackStack(backStack: HashMap<TabIdentifiers, Stack<String>>) {
+        TabIdentifiers.values().forEach {
+            tabBackStack[it] = Stack<String>()
+            backStack[it]!!.forEach {  stackVal ->
+                tabBackStack[it]!!.push(stackVal)
+            }
+        }
+    }
+
+    fun getTabStack(): Stack<TabIdentifiers> {
+        return tabStack
+    }
+
+    fun setTabStack(tabStack: Stack<TabIdentifiers>) {
+        this.tabStack = tabStack
+        currentTab = tabStack.peek()
     }
 }

@@ -21,7 +21,7 @@ import java.io.Serializable
 
 class SettingsTabFragment : Fragment(R.layout.fragment_settings), ISharedElementFragment, Serializable {
 
-    private val nav: Navigation = Navigation.getInstance()
+    private val nav: Navigation by lazy { Navigation.getInstance() }
 
     companion object {
         const val TESTING_MODE_PREFS = "TESTING_MODE"

@@ -29,7 +29,7 @@ import java.io.Serializable
 @Parcelize
 class CasesTabFragment : Fragment(R.layout.fragment_cases), ISharedElementFragment, Parcelable, Serializable{
 
-    private val nav: Navigation = Navigation.getInstance()
+    private val nav: Navigation by lazy { Navigation.getInstance() }
 
     private lateinit var viewModel: SharedViewModel
     private var viewManager: RecyclerView.LayoutManager? = null
