@@ -103,7 +103,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                                 afm?.commit()
                             }
                             nav.hideBottomNavBar?.let { it(false) }
-                            nav.loadTab(Navigation.TabIdentifiers.HOME)
+                            nav.selectTab(Navigation.TabIdentifiers.HOME)
                         } else {
                             it.isEnabled = true
                             Toast.makeText(

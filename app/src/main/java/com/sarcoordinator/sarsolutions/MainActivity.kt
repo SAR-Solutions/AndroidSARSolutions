@@ -103,7 +103,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             parent_layout.transitionToState(R.id.hide_nav_bar)
         } else {
             if (savedInstanceState == null) {
-                nav.loadTab(Navigation.TabIdentifiers.HOME)
+                nav.selectTab(Navigation.TabIdentifiers.HOME)
             }
         }
     }

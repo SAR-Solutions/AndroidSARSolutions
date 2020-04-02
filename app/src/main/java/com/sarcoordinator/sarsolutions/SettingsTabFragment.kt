@@ -85,12 +85,14 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), CustomFragment
         sign_out_button.setOnClickListener {
             auth.signOut()
             nav.hideBottomNavBar?.let { it(true) }
+            nav.clearBackstack()
+
+            requireActivity().viewModelStore.clear()
 
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, LoginFragment())
                 .commit()
 
-            nav.clearBackstack()
         }
     }
 

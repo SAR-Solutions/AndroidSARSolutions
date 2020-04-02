@@ -205,12 +205,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
 
     private fun navigateToShiftReportFragment() {
         viewModel.numberOfVehicles = 0
-        val shiftReportFragment = ShiftReportFragment().apply {
-            arguments = Bundle().apply {
-                putString(ShiftReportFragment.SHIFT_ID, viewModel.currentShiftId)
-            }
-        }
-        nav.pushFragment(shiftReportFragment, Navigation.TabIdentifiers.HOME)
+        nav.pushFragment(ShiftReportFragment(), Navigation.TabIdentifiers.HOME)
     }
 
     // Setup everything related to the images card

@@ -69,8 +69,16 @@ object Navigation {
         }
     }
 
+    fun selectTab(tabIdentifier: TabIdentifiers) {
+        bottomNavBar?.selectedItemId = when(tabIdentifier) {
+            TabIdentifiers.HOME -> R.id.home_dest
+            TabIdentifiers.FAILED_SHIFTS -> R.id.failed_shifts_dest
+            TabIdentifiers.SETTINGS -> R.id.settings_dest
+        }
+    }
+
     // Loads tab stack into current view, makes a new parent tab fragment if stack is null
-    fun loadTab(tabIdentifier: TabIdentifiers) {
+    private fun loadTab(tabIdentifier: TabIdentifiers) {
 
         if (currentTab == tabIdentifier && tabBackStack[tabIdentifier]!!.isNotEmpty())
         //TODO: Implement popping up to home/parent fragment

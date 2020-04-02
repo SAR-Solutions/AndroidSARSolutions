@@ -66,7 +66,7 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
         viewModel = activity?.run {
             ViewModelProvider(this)[SharedViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
-        shiftId = arguments?.getString(SHIFT_ID) ?: savedInstanceState?.getString(SHIFT_ID)!!
+        shiftId = viewModel.currentShiftId ?: savedInstanceState?.getString(SHIFT_ID)!!
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -178,7 +178,7 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
                         CoroutineScope(Main).launch {
                             viewModel.completeShiftReportSubmission()
                             nav.clearBackstack()
-                            nav.loadTab(Navigation.TabIdentifiers.HOME)
+                            nav.selectTab(Navigation.TabIdentifiers.HOME)
                         }
                     }
                 } else {
@@ -189,7 +189,7 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
                             viewModel.completeShiftReportSubmission()
 
                             nav.clearBackstack()
-                            nav.loadTab(Navigation.TabIdentifiers.HOME)
+                            nav.selectTab(Navigation.TabIdentifiers.HOME)
 
                             Snackbar.make(
                                 requireView(),
@@ -233,7 +233,7 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
                 CoroutineScope(Main).launch {
                     viewModel.completeShiftReportSubmission()
                     nav.clearBackstack()
-                    nav.loadTab(Navigation.TabIdentifiers.HOME)
+                    nav.selectTab(Navigation.TabIdentifiers.HOME)
                 }
             }
         })
