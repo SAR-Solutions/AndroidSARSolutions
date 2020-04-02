@@ -31,7 +31,6 @@ import com.karumi.dexter.listener.single.PermissionListener
 import com.sarcoordinator.sarsolutions.adapters.ImagesAdapter
 import com.sarcoordinator.sarsolutions.models.Case
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
-import com.sarcoordinator.sarsolutions.util.ISharedElementFragment
 import com.sarcoordinator.sarsolutions.util.LocationService
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.fragment_track.*
@@ -43,7 +42,7 @@ import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.File
 
-class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment {
+class TrackFragment : Fragment(R.layout.fragment_track) {
 
     companion object ArgsTags {
         const val CASE_ID = "CASE_ID"
@@ -60,8 +59,6 @@ class TrackFragment : Fragment(R.layout.fragment_track), ISharedElementFragment 
     private lateinit var viewManager: LinearLayoutManager
     private lateinit var viewAdapter: ImagesAdapter
     private var stopLocationTracking = false
-
-    override fun getSharedElement(): View? = toolbar_track
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

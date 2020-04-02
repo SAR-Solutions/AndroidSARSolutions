@@ -16,8 +16,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sarcoordinator.sarsolutions.models.Case
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
-import com.sarcoordinator.sarsolutions.util.ISharedElementFragment
 import com.sarcoordinator.sarsolutions.util.Navigation
+import com.sarcoordinator.sarsolutions.util.TabFragment
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.fragment_cases.*
 import kotlinx.android.synthetic.main.list_view_item.view.*
@@ -26,14 +26,15 @@ import java.io.Serializable
 /**
  * This fragment displays the list of cases for the user
  */
-@Parcelize
-class CasesTabFragment : Fragment(R.layout.fragment_cases), ISharedElementFragment, Parcelable, Serializable{
+class CasesTabFragment : Fragment(R.layout.fragment_cases), TabFragment {
 
     private val nav: Navigation by lazy { Navigation.getInstance() }
 
     private lateinit var viewModel: SharedViewModel
     private var viewManager: RecyclerView.LayoutManager? = null
     private var viewAdapter: Adapter? = null
+
+    override fun getToolbar(): View = toolbar_cases
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -180,7 +181,7 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), ISharedElementFragme
                         putString(TrackFragment.CASE_ID, case.id)
                     }
 
-                    nav.pushFragment(trackFragment, Navigation.TabIdentifiers.HOME)
+                    nav.pushFragment(trackFragment, Navigation.TabIdentifiers.HOME, parent.getToolbar())
                 }
             }
         }
@@ -219,9 +220,5 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), ISharedElementFragme
             data = list
             notifyDataSetChanged()
         }
-    }
-
-    override fun getSharedElement(): View? {
-        return toolbar_cases
     }
 }

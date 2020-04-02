@@ -20,7 +20,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storageMetadata
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
-import com.sarcoordinator.sarsolutions.util.ISharedElementFragment
 import kotlinx.android.synthetic.main.fragment_image_detail.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Default
@@ -31,7 +30,7 @@ import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.File
 
-class ImageDetailFragment : Fragment(R.layout.fragment_image_detail), ISharedElementFragment {
+class ImageDetailFragment : Fragment(R.layout.fragment_image_detail) {
     companion object ArgsTags {
         const val IMAGE_PATH = "IMAGE_PATH"
     }
@@ -213,9 +212,5 @@ class ImageDetailFragment : Fragment(R.layout.fragment_image_detail), ISharedEle
     private fun deleteImageFile() {
         Timber.d("Image delete result: ${imageFile.delete()}")
         requireActivity().onBackPressed()
-    }
-
-    override fun getSharedElement(): View? {
-        return detailed_image_view
     }
 }

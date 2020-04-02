@@ -2,7 +2,6 @@ package com.sarcoordinator.sarsolutions
 
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -14,7 +13,6 @@ import com.google.android.material.snackbar.Snackbar
 import com.sarcoordinator.sarsolutions.adapters.ImagesAdapter
 import com.sarcoordinator.sarsolutions.adapters.VehiclesAdapter
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
-import com.sarcoordinator.sarsolutions.util.ISharedElementFragment
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_shift_report.*
@@ -25,7 +23,7 @@ import kotlinx.coroutines.launch
 /**
  * Fragment for volunteer shift report at the end of a shift
  */
-class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedElementFragment {
+class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
 
     private val nav: Navigation = Navigation.getInstance()
 
@@ -240,9 +238,4 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedEle
             }
         })
     }
-
-    override fun getSharedElement(): View? {
-        return toolbar_shift_report
-    }
-
 }

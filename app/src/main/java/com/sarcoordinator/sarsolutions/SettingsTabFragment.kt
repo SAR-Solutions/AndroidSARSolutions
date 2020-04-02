@@ -13,13 +13,13 @@ import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
-import com.sarcoordinator.sarsolutions.util.ISharedElementFragment
 import com.sarcoordinator.sarsolutions.util.Navigation
+import com.sarcoordinator.sarsolutions.util.TabFragment
 import kotlinx.android.synthetic.main.fragment_settings.*
 import timber.log.Timber
 import java.io.Serializable
 
-class SettingsTabFragment : Fragment(R.layout.fragment_settings), ISharedElementFragment, Serializable {
+class SettingsTabFragment : Fragment(R.layout.fragment_settings), TabFragment {
 
     private val nav: Navigation by lazy { Navigation.getInstance() }
 
@@ -30,6 +30,8 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), ISharedElement
     private val auth = FirebaseAuth.getInstance()
     private lateinit var sharedPrefs: SharedPreferences
     private var isThemeSelected: Boolean = false
+
+    override fun getToolbar(): View = toolbar_settings
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -105,9 +107,5 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), ISharedElement
 
         // app version
         app_version_value.text = BuildConfig.VERSION_NAME
-    }
-
-    override fun getSharedElement(): View? {
-        return toolbar_settings
     }
 }

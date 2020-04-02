@@ -2,6 +2,8 @@ package com.sarcoordinator.sarsolutions.util
 
 import android.os.Parcelable
 import android.util.Log
+import android.view.View
+import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -91,13 +93,15 @@ object Navigation {
         tabStack.add(tabIdentifier)
 
         if (tabBackStack[tabIdentifier].isNullOrEmpty()) {
+            val currentFragment = getCurrentFragment()
+            var toolbar: View? = null
+            if(currentFragment is TabFragment) {
+                toolbar = (currentFragment as TabFragment).getToolbar()
+            }
             when (tabIdentifier) {
-                TabIdentifiers.HOME -> pushFragment(CasesTabFragment(), tabIdentifier)
-                TabIdentifiers.FAILED_SHIFTS -> pushFragment(
-                    FailedShiftsTabFragment(),
-                    tabIdentifier
-                )
-                TabIdentifiers.SETTINGS -> pushFragment(SettingsTabFragment(), tabIdentifier)
+                TabIdentifiers.HOME -> pushFragment(CasesTabFragment(), tabIdentifier, toolbar)
+                TabIdentifiers.FAILED_SHIFTS -> pushFragment(FailedShiftsTabFragment(), tabIdentifier, toolbar)
+                TabIdentifiers.SETTINGS -> pushFragment(SettingsTabFragment(), tabIdentifier, toolbar)
             }
         } else {
             showTab(tabIdentifier)
@@ -109,9 +113,7 @@ object Navigation {
      * saveState: Whether or not to save previous fragment state
      * tab: Tab to put fragment into
      */
-    fun pushFragment(fragment: Fragment, tab: TabIdentifiers) {
-
-        Log.d("HOAL", "Putting ${fragment.javaClass.name} into ${currentTab.name}")
+    fun pushFragment(fragment: Fragment, tab: TabIdentifiers, vararg sharedElements: View?) {
 
         // Check to a void making another instance of top fragment
         if (currentTab == tab) {
@@ -142,7 +144,15 @@ object Navigation {
 
         backStack.push(fragment::class.qualifiedName)
 
-        fragmentManager?.beginTransaction()
+        val transaction = fragmentManager?.beginTransaction()
+
+        sharedElements.forEach { element ->
+            element?.let {
+                transaction?.addSharedElement(it, it.transitionName)
+            }
+        }
+
+        transaction
             ?.replace(R.id.fragment_container, fragment)
             ?.commit()
     }
@@ -201,7 +211,16 @@ object Navigation {
         val backStack = tabBackStack[currentTab]!!
         val fragmentToShow: Fragment = Class.forName(backStack.peek()).newInstance() as Fragment
         fragmentToShow.setInitialSavedState(fragmentStateMap[fragmentToShow::class.qualifiedName ?: throw Exception("Unexpected class")])
-        fragmentManager?.beginTransaction()
+
+        val currentFragment = getCurrentFragment()
+        val transaction = fragmentManager?.beginTransaction()
+
+        if(currentFragment is TabFragment) {
+            val toolbar = (currentFragment as TabFragment).getToolbar()
+            transaction?.addSharedElement(toolbar, toolbar.transitionName)
+        }
+
+        transaction
             ?.replace(R.id.fragment_container, fragmentToShow)
             ?.commit()
     }
@@ -214,6 +233,8 @@ object Navigation {
                 fragmentManager?.saveFragmentInstanceState(currentFragment)
         }
     }
+
+    private fun getCurrentFragment(): Fragment? = fragmentManager?.findFragmentById(R.id.fragment_container)
 
     // Stores state of current fragment and loses fragmentManager reference
     // To be called from MainActivity
