@@ -13,7 +13,6 @@ import com.google.android.material.snackbar.Snackbar
 import com.sarcoordinator.sarsolutions.adapters.ImagesAdapter
 import com.sarcoordinator.sarsolutions.adapters.VehiclesAdapter
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
-import com.sarcoordinator.sarsolutions.util.ISharedElementFragment
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_shift_report.*
@@ -24,7 +23,7 @@ import kotlinx.coroutines.launch
 /**
  * Fragment for volunteer shift report at the end of a shift
  */
-class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedElementFragment {
+class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
 
     private val nav: Navigation = Navigation.getInstance()
 
@@ -67,7 +66,7 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedEle
         viewModel = activity?.run {
             ViewModelProvider(this)[SharedViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
-        shiftId = arguments?.getString(SHIFT_ID)!!
+        shiftId = arguments?.getString(SHIFT_ID) ?: savedInstanceState?.getString(SHIFT_ID)!!
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -78,6 +77,11 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedEle
         setupVehicleRecyclerView()
         setupImagesCardView()
         initViewListeners()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString(SHIFT_ID, shiftId)
     }
 
     override fun onDestroyView() {
@@ -173,18 +177,19 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedEle
                     ).invokeOnCompletion {
                         CoroutineScope(Main).launch {
                             viewModel.completeShiftReportSubmission()
-                            nav.popFragmentClearBackStack(CasesTabFragment())
+                            nav.clearBackstack()
+                            nav.loadTab(Navigation.TabIdentifiers.HOME)
                         }
                     }
                 } else {
                     viewModel.addShiftReportToCache(
-                        shift_hours_edit_text.text.toString(),
-                        shiftId
+                        shift_hours_edit_text.text.toString()
                     ).invokeOnCompletion {
                         CoroutineScope(Main).launch {
                             viewModel.completeShiftReportSubmission()
 
-                            nav.popFragmentClearBackStack(CasesTabFragment())
+                            nav.clearBackstack()
+                            nav.loadTab(Navigation.TabIdentifiers.HOME)
 
                             Snackbar.make(
                                 requireView(),
@@ -223,19 +228,14 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report), ISharedEle
             ).show()
 
             viewModel.addShiftReportToCache(
-                shift_hours_edit_text.text.toString(),
-                shiftId
+                shift_hours_edit_text.text.toString()
             ).invokeOnCompletion {
                 CoroutineScope(Main).launch {
                     viewModel.completeShiftReportSubmission()
-                    nav.popFragmentClearBackStack(CasesTabFragment())
+                    nav.clearBackstack()
+                    nav.loadTab(Navigation.TabIdentifiers.HOME)
                 }
             }
         })
     }
-
-    override fun getSharedElement(): View? {
-        return toolbar_shift_report
-    }
-
 }

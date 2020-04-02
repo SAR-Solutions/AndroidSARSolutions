@@ -5,9 +5,12 @@ import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.view.View
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
@@ -18,8 +21,21 @@ import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import timber.log.Timber
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
+import kotlin.random.Random
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
+
+    private val BACKSTACK = "BACKSTACK"
+    private val TABSTACK = "TABSTACK"
+    private val FRAGMENT_STATES_MAP = "FRAGMENT_STATES_MAP"
+
+    // Required for the navigation the navigation component
+    // to prevent saving fragment state on activity close
+    private var endActivity: Boolean = false
 
     private val auth = FirebaseAuth.getInstance()
     private lateinit var sharedPrefs: SharedPreferences
@@ -34,12 +50,36 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         // Theme needs to be applied before calling super.onCreate
         // Otherwise a new instance of this activity will be created
         loadUserPreferences()
+
         super.onCreate(savedInstanceState)
 
         nav = Navigation.getInstance(
             supportFragmentManager,
             bottom_nav_bar
         ) { hide -> hideBottomNavBar(hide) }
+
+        if (savedInstanceState != null) {
+
+            // Recover from process death
+            savedInstanceState.getSerializable(BACKSTACK)?.let {
+                nav.setBackStack(it as HashMap<Navigation.TabIdentifiers, Stack<String>>)
+            }
+
+            savedInstanceState.getSerializable(TABSTACK)?.let {
+                val temp = Stack<Navigation.TabIdentifiers>()
+                if(it is Stack<*>) {
+                    temp.addAll(it as Stack<Navigation.TabIdentifiers>)
+                } else {
+                    temp.addAll(it as ArrayList<Navigation.TabIdentifiers>)
+                }
+                nav.setTabStack(temp)
+            }
+
+            savedInstanceState.getSerializable(FRAGMENT_STATES_MAP)?.let {
+                nav.setFragmentStateMap(it as HashMap<String, Fragment.SavedState?>)
+            }
+
+        }
 
         val repo = LocalCacheRepository(CacheDatabase.getDatabase(application).casesDao())
         repo.allShiftReports.observeForever {
@@ -62,37 +102,55 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 .commit()
             parent_layout.transitionToState(R.id.hide_nav_bar)
         } else {
-            // Show nav bar
-            nav.restoreState()
-//            hideBottomNavBar(false)
-//            nav.setSelectedTab(Navigation.BackStackIdentifiers.HOME)
-//            parent_layout.transitionToState(R.id.show_nav_bar)
+            if (savedInstanceState == null) {
+                nav.loadTab(Navigation.TabIdentifiers.HOME)
+            }
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putSerializable(BACKSTACK, nav.getBackStack())
+        outState.putSerializable(TABSTACK, nav.getTabStack())
+        outState.putSerializable(FRAGMENT_STATES_MAP, nav.getFragmentStateMap())
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (!endActivity)
+            nav.saveCurrentFragmentState()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        nav.onFragmentManagerDestroy()
     }
 
     override fun onBackPressed() {
         if (auth.currentUser == null) {
             super.onBackPressed()
         } else {
+            val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)!!
             // If shift is active and current tab is 'home', prevent from going back
-            if (nav.currentTab == Navigation.BackStackIdentifiers.HOME &&
-                nav.getCurrentFragment() !is ImageDetailFragment && viewModel.isShiftActive
+            if (nav.currentTab == Navigation.TabIdentifiers.HOME &&
+                currentFragment !is ImageDetailFragment
+                && viewModel.isShiftActive
             ) {
                 Snackbar.make(
-                    nav.getCurrentFragment().requireView(),
+                    currentFragment.requireView(),
                     "Complete shift to go back",
                     Snackbar.LENGTH_LONG
                 ).show()
-            } else if (nav.getCurrentFragment() is ImageDetailFragment &&
+            } else if (currentFragment is ImageDetailFragment &&
                 viewModel.isUploadTaskActive
             ) {
                 Snackbar.make(
-                    nav.getCurrentFragment().requireView(),
+                    currentFragment.requireView(),
                     "Image upload in progress",
                     Snackbar.LENGTH_LONG
                 )
                     .show()
-            } else if (!nav.handleOnBackPressed()) {
+            } else if (!nav.popFragment()) {
                 finishAffinity()
             }
         }
@@ -101,7 +159,8 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     // Handle bottom nav bar state change
     private fun hideBottomNavBar(hide: Boolean) {
         GlobalScope.launch {
-            val currentTheme = GlobalUtil.getCurrentTheme(resources)
+            val currentTheme =
+                GlobalUtil.getCurrentTheme(resources, getPreferences(Context.MODE_PRIVATE))
             if (currentTheme == GlobalUtil.THEME_DARK) {
                 window.navigationBarColor =
                     resources.getColor(if (hide) R.color.gray else R.color.lightGray)
@@ -115,13 +174,13 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     }
 
     // Load user preferences using shared preferences
-    // NOTE: Call before super.onCreate as it sets the app theme
+// NOTE: Call before super.onCreate as it sets the app theme
     private fun loadUserPreferences() {
         sharedPrefs = getPreferences(Context.MODE_PRIVATE)
 
         // Get system default theme
-        GlobalUtil.setCurrentTheme(sharedPrefs, resources)
-        if (GlobalUtil.getThemePreference(sharedPrefs, resources) == GlobalUtil.THEME_DARK) {
+        GlobalUtil.setCurrentTheme(sharedPrefs)
+        if (GlobalUtil.getCurrentTheme(resources, sharedPrefs) == GlobalUtil.THEME_DARK) {
 
             // Set navigationBarColor to elevated gray
             window.navigationBarColor = resources.getColor(R.color.lightGray)
@@ -131,8 +190,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     fun enableStatusBarColorForNestedFragment() {
         //TODO: Compelte implementing this
         if (GlobalUtil.getThemePreference(
-                getPreferences(Context.MODE_PRIVATE),
-                resources
+                getPreferences(Context.MODE_PRIVATE)
             ) == GlobalUtil.THEME_DARK
         ) {
             window.statusBarColor = resources.getColor(R.color.lightGray)
@@ -141,6 +199,8 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     fun enableTransparentStatusBar(enableTransparency: Boolean) {
         window.apply {
+            val currentTheme =
+                GlobalUtil.getCurrentTheme(resources, getPreferences(Context.MODE_PRIVATE))
             if (enableTransparency) {
                 clearFlags(
                     WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS or
@@ -152,7 +212,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 statusBarColor = Color.TRANSPARENT
 
                 // If theme is light, show light navigation bar icons
-                if (GlobalUtil.getCurrentTheme(resources) == GlobalUtil.THEME_LIGHT) {
+                if (currentTheme == GlobalUtil.THEME_LIGHT) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         decorView.systemUiVisibility += View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
                     } else {
@@ -164,7 +224,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 decorView.systemUiVisibility = 0
 
                 // Restore system bar colors
-                if (GlobalUtil.getCurrentTheme(resources) == GlobalUtil.THEME_DARK) {
+                if (currentTheme == GlobalUtil.THEME_DARK) {
                     // Set navigationBarColor to elevated gray
                     navigationBarColor = resources.getColor(R.color.lightGray)
                     statusBarColor = resources.getColor(R.color.gray)

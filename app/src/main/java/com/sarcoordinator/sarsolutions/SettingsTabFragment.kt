@@ -13,14 +13,14 @@ import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
-import com.sarcoordinator.sarsolutions.util.ISharedElementFragment
 import com.sarcoordinator.sarsolutions.util.Navigation
+import com.sarcoordinator.sarsolutions.util.CustomFragment
 import kotlinx.android.synthetic.main.fragment_settings.*
 import timber.log.Timber
 
-class SettingsTabFragment : Fragment(R.layout.fragment_settings), ISharedElementFragment {
+class SettingsTabFragment : Fragment(R.layout.fragment_settings), CustomFragment {
 
-    private val nav: Navigation = Navigation.getInstance()
+    private val nav: Navigation by lazy { Navigation.getInstance() }
 
     companion object {
         const val TESTING_MODE_PREFS = "TESTING_MODE"
@@ -29,6 +29,8 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), ISharedElement
     private val auth = FirebaseAuth.getInstance()
     private lateinit var sharedPrefs: SharedPreferences
     private var isThemeSelected: Boolean = false
+
+    override fun getSharedElement(): View = toolbar_settings
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,14 +84,20 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), ISharedElement
 
         sign_out_button.setOnClickListener {
             auth.signOut()
-            nav.logoutNavigation()
+            nav.hideBottomNavBar?.let { it(true) }
+
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, LoginFragment())
+                .commit()
+
+            nav.clearBackstack()
         }
     }
 
     // Set ui elements based on user preferences
     private fun loadPreferences() {
         // Set spinner based on theme
-        GlobalUtil.getThemePreference(sharedPrefs, resources).let {
+        GlobalUtil.getThemePreference(sharedPrefs).let {
             theme_spinner.setSelection(it)
         }
 
@@ -98,9 +106,5 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), ISharedElement
 
         // app version
         app_version_value.text = BuildConfig.VERSION_NAME
-    }
-
-    override fun getSharedElement(): View? {
-        return toolbar_settings
     }
 }

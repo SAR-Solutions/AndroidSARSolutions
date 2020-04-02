@@ -5,6 +5,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.sarcoordinator.sarsolutions.*
+import kotlinx.android.synthetic.main.fragment_image_detail.*
+import java.lang.Exception
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -12,14 +14,29 @@ import kotlin.collections.HashMap
 // Responsible for handling backstacks for each tab and the tabs themselves
 object Navigation {
 
-    private lateinit var fragmentManager: FragmentManager
-    private lateinit var bottomNavigationView: BottomNavigationView
-    private lateinit var hideBottomNavBar: (Boolean) -> Unit
+    enum class TabIdentifiers {
+        HOME, FAILED_SHIFTS, SETTINGS
+    }
+
+    private var saveCurrentViewState: Boolean = true
+    private var fragmentManager: FragmentManager? = null
+    private var bottomNavBar: BottomNavigationView? = null
+    var hideBottomNavBar: ((Boolean) -> Unit)? = null
+
+    private var tabBackStack = HashMap<TabIdentifiers, Stack<String>>().apply {
+        TabIdentifiers.values().forEach {
+            this[it] = Stack<String>()
+        }
+    }
+    private var tabStack = Stack<TabIdentifiers>()
+
+    var currentTab: TabIdentifiers = TabIdentifiers.HOME
+
+    private var fragmentStateMap = HashMap<String, Fragment.SavedState?>()
 
     @Volatile
-    private var instance: Navigation? = null
+    private lateinit var instance: Navigation
 
-    // Instance set in MainActivity and reused by fragments
     fun getInstance(
         fragmentManager: FragmentManager? = null,
         bottomNavigationView: BottomNavigationView? = null,
@@ -27,216 +44,242 @@ object Navigation {
     ): Navigation {
         if (fragmentManager != null && bottomNavigationView != null && hideBottomNavBar != null) {
             this.fragmentManager = fragmentManager
-            this.bottomNavigationView = bottomNavigationView
+            this.bottomNavBar = bottomNavigationView
             this.hideBottomNavBar = hideBottomNavBar
+            setupBottomNavBar()
             instance = this
-            setup()
         }
-        return instance!!
+        return instance
     }
 
-    enum class BackStackIdentifiers {
-        HOME, FAILED_SHIFTS, SETTINGS
-    }
-
-    private var tabBackStacks = Stack<BackStackIdentifiers>()
-
-    private var backStacks = HashMap<BackStackIdentifiers, Stack<Fragment>>().apply {
-        this[BackStackIdentifiers.HOME] = Stack<Fragment>()
-        this[BackStackIdentifiers.FAILED_SHIFTS] = Stack<Fragment>()
-        this[BackStackIdentifiers.SETTINGS] = Stack<Fragment>()
-    }
-
-    var currentTab =
-        BackStackIdentifiers.HOME
-
-    private var navBarSelectedProgrammatically = false
-
-    private fun setup() {
-        bottomNavigationView.setOnNavigationItemSelectedListener {
-            if (!navBarSelectedProgrammatically) {
-                when (it.itemId) {
-                    R.id.home_dest -> {
-                        setSelectedTab(BackStackIdentifiers.HOME)
-                    }
-                    R.id.failed_shifts_dest -> {
-                        setSelectedTab(BackStackIdentifiers.FAILED_SHIFTS)
-                    }
-                    R.id.settings_dest -> {
-                        setSelectedTab(BackStackIdentifiers.SETTINGS)
-                    }
-                }
-            } else
-                navBarSelectedProgrammatically = false
+    private fun setupBottomNavBar() {
+        bottomNavBar?.setOnNavigationItemSelectedListener {
+            if(!saveCurrentViewState){
+                saveCurrentViewState = true
+            } else {
+                saveCurrentFragmentState()
+            }
+            when (it.itemId) {
+                R.id.home_dest -> loadTab(TabIdentifiers.HOME)
+                R.id.failed_shifts_dest -> loadTab(TabIdentifiers.FAILED_SHIFTS)
+                R.id.settings_dest -> loadTab(TabIdentifiers.SETTINGS)
+                else -> return@setOnNavigationItemSelectedListener false
+            }
             return@setOnNavigationItemSelectedListener true
         }
     }
 
-    private fun setSelectedTab(identifier: BackStackIdentifiers) {
-        var comingFromFragment: Fragment? = null
-        if (backStacks[currentTab]!!.size != 0)
-            comingFromFragment = backStacks[currentTab]!!.lastElement()
+    // Loads tab stack into current view, makes a new parent tab fragment if stack is null
+    fun loadTab(tabIdentifier: TabIdentifiers) {
 
-        currentTab = identifier
-        if (tabBackStacks.isEmpty())
-            tabBackStacks.push(currentTab)
-        else if (tabBackStacks.peek() != currentTab)
-            tabBackStacks.push(currentTab)
+        if (currentTab == tabIdentifier && tabBackStack[tabIdentifier]!!.isNotEmpty())
+        //TODO: Implement popping up to home/parent fragment
+            return
 
-        if (backStacks[identifier]!!.size == 0) {
-            when (identifier) {
-                BackStackIdentifiers.HOME -> pushFragment(
-                    identifier,
-                    CasesTabFragment()
-                )
-                BackStackIdentifiers.FAILED_SHIFTS -> pushFragment(
-                    identifier,
-                    FailedShiftsTabFragment()
-                )
-                BackStackIdentifiers.SETTINGS -> pushFragment(
-                    identifier,
-                    SettingsTabFragment()
-                )
+        currentTab = tabIdentifier
+
+        // Manage tabStack
+        // Add to tabStack
+        if (tabStack.contains(tabIdentifier))
+            tabStack.remove(tabIdentifier)
+        tabStack.add(tabIdentifier)
+
+        if (tabBackStack[tabIdentifier].isNullOrEmpty()) {
+            val currentFragment = getCurrentFragment()
+            var toolbar: View? = null
+            if(currentFragment is CustomFragment) {
+                toolbar = (currentFragment as CustomFragment).getSharedElement()
+            }
+            when (tabIdentifier) {
+                TabIdentifiers.HOME -> pushFragment(CasesTabFragment(), tabIdentifier, toolbar)
+                TabIdentifiers.FAILED_SHIFTS -> pushFragment(FailedShiftsTabFragment(), tabIdentifier, toolbar)
+                TabIdentifiers.SETTINGS -> pushFragment(SettingsTabFragment(), tabIdentifier, toolbar)
             }
         } else {
-            loadTab(comingFromFragment, identifier)
+            showTab(tabIdentifier)
         }
     }
 
-    // If identifier is null, adds fragment to currentTab backstack
-    fun pushFragment(
-        identifier: BackStackIdentifiers?,
-        fragment: Fragment,
-        sharedTransitionView: View? = null
-    ) {
-        if (identifier == null)
-            backStacks[currentTab]!!.add(fragment)
-        else
-            backStacks[identifier]!!.add(fragment)
+    /**
+     * fragment: Fragment to put into container
+     * saveState: Whether or not to save previous fragment state
+     * tab: Tab to put fragment into
+     */
+    fun pushFragment(fragment: Fragment, tab: TabIdentifiers, vararg sharedElements: View?) {
 
-        // Hide bottom nav bar in ImageDetailFragment
-        if (fragment is ImageDetailFragment) {
-            hideBottomNavBar(true)
-        }
-
-        fragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, fragment).apply {
-                sharedTransitionView?.let {
-                    this.addSharedElement(sharedTransitionView, sharedTransitionView.transitionName)
-                }
-            }
-            .setReorderingAllowed(true)
-            .commit()
-    }
-
-    private fun loadTab(
-        comingFromFragment: Fragment?,
-        goingTo: BackStackIdentifiers
-    ) {
-        val fragmentToLoad = backStacks[goingTo]!!.lastElement()
-        val transaction = fragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, fragmentToLoad)
-        if (comingFromFragment is ISharedElementFragment && fragmentToLoad is ISharedElementFragment) {
-            (comingFromFragment as ISharedElementFragment).getSharedElement()?.let { element ->
-                transaction.addSharedElement(element, element.transitionName)
-            }
-        }
-        transaction.commit()
-    }
-
-    // Set last tab as active/current tab and change bottom_nav_bar selection
-    private fun popTabFragmentStack() {
-        tabBackStacks.pop()
-        fragmentManager.beginTransaction()
-            .replace(
-                R.id.fragment_container,
-                backStacks[tabBackStacks.lastElement()]!!.lastElement()
+        // Check to a void making another instance of top fragment
+        if (currentTab == tab) {
+            val currentTabBackstack = tabBackStack[currentTab]!!
+            // Nothing to do if current fragment is the same as to-be-replaced fragment
+            if (currentTabBackstack.isNotEmpty() &&
+                currentTabBackstack.peek()
+                == fragment::class.qualifiedName
             )
-            .commit()
-        navBarSelectedProgrammatically = true
-        currentTab = tabBackStacks.lastElement()
-        when (currentTab) {
-            BackStackIdentifiers.HOME -> bottomNavigationView.selectedItemId =
-                R.id.home_dest
-            BackStackIdentifiers.FAILED_SHIFTS -> bottomNavigationView.selectedItemId =
-                R.id.failed_shifts_dest
-            BackStackIdentifiers.SETTINGS -> bottomNavigationView.selectedItemId =
-                R.id.settings_dest
+                return
         }
-    }
 
-    private fun popFragment() {
-        val transaction = fragmentManager.beginTransaction()
-        val source = backStacks[currentTab]!!.pop()
-        val destination = backStacks[currentTab]!!.lastElement()
+        currentTab = tab
+        val backStack = tabBackStack[currentTab]!!
 
-        // Show nav bar again if coming back from ImageDetailFragment
-        if (source is ImageDetailFragment)
-            hideBottomNavBar(false)
+        // Save current fragment state
+        saveCurrentFragmentState()
 
-        if (source is ISharedElementFragment) {
-            source.getSharedElement()?.let { element ->
-                transaction.addSharedElement(element, element.transitionName)
+        // Restore state if previous fragment state exists
+        if (fragmentStateMap.containsKey(fragment.javaClass.kotlin.qualifiedName)) {
+            fragment.setInitialSavedState(fragmentStateMap[fragment.javaClass.kotlin.qualifiedName])
+        }
+
+        // If fragment was found in backstack, remove it; Will be added to the top
+        if (backStack.contains(fragment::class.qualifiedName)) {
+            backStack.remove(fragment::class.qualifiedName)
+        }
+
+        backStack.push(fragment::class.qualifiedName)
+
+        val transaction = fragmentManager?.beginTransaction()
+
+        sharedElements.forEach { element ->
+            element?.let {
+                transaction?.addSharedElement(it, it.transitionName)
             }
         }
+
         transaction
-            .replace(
-                R.id.fragment_container,
-                destination
-            )
-            .commit()
+            ?.setReorderingAllowed(true)
+            ?.replace(R.id.fragment_container, fragment)
+            ?.commit()
     }
 
-    // Clear backstack and place given fragment on stack
-    fun popFragmentClearBackStack(fragment: Fragment) {
-        backStacks[currentTab]!!.clear()
-        pushFragment(null, fragment)
-    }
+    // Returns true if handled, false otherwise
+    fun popFragment(): Boolean {
+        val backStack = tabBackStack[currentTab]!!
 
-    // Navigate to cases after successful login
-    fun loginNavigation() {
-        hideBottomNavBar(false)
-        bottomNavigationView.selectedItemId = R.id.home_dest
-    }
+        // 1) Check backStack
+        //      If nothing to pop, step 2
+        //      If something to pop, pop RETURN TRUE
+        // 2) Check tabStack
+        //      If nothing to pop, RETURN FALSE
+        //      If something to pop, pop to current tab and show it
 
-    fun logoutNavigation() {
-        // Clear back stacks
-        backStacks[BackStackIdentifiers.HOME]!!.clear()
-        backStacks[BackStackIdentifiers.FAILED_SHIFTS]!!.clear()
-        backStacks[BackStackIdentifiers.SETTINGS]!!.clear()
-        tabBackStacks.clear()
-
-        hideBottomNavBar(true)
-        fragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, LoginFragment())
-            .commitNow()
-    }
-
-    // Loads current tab and fragment again
-    fun restoreState() {
-        hideBottomNavBar(false)
-        setSelectedTab(currentTab)
-
-        fragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, getCurrentFragment())
-            .commitNow()
-    }
-
-    // Returns false if not handled
-    fun handleOnBackPressed(): Boolean {
-        if (backStacks[currentTab]!!.size <= 1) {
-            if (tabBackStacks.size <= 1) {
-                // Finish activity, nothing left to pop
-                return false
-            } else {
-                // Nothing to pop from back stack, pop tab back stack
-                popTabFragmentStack()
-            }
+        if (backStack.size > 1) {
+            val fragmentRemoved = backStack.pop()
+            fragmentStateMap.remove(fragmentRemoved)
+            showTab(currentTab)
+            return true
         } else {
-            popFragment()
+            // Clear out backstack if not empty
+            if (backStack.isNotEmpty()) {
+                val fragmentRemoved = backStack.pop()
+                fragmentStateMap.remove(fragmentRemoved)
+            }
+
+            return if (tabStack.size > 1) {
+                tabStack.pop()
+
+                saveCurrentViewState = false
+                // onItemSelected listener will be called
+                bottomNavBar?.selectedItemId =
+                    when (tabStack.peek()) {
+                        TabIdentifiers.HOME -> R.id.home_dest
+                        TabIdentifiers.FAILED_SHIFTS -> R.id.failed_shifts_dest
+                        TabIdentifiers.SETTINGS -> R.id.settings_dest
+                    }
+                true
+            } else {
+                // Clear out backstack if not empty
+                if (backStack.isNotEmpty()) {
+                    val fragmentRemoved = backStack.pop()
+                    fragmentStateMap.remove(fragmentRemoved)
+                }
+                false
+            }
         }
-        return true
     }
 
-    fun getCurrentFragment(): Fragment = backStacks[currentTab]!!.lastElement()
+    // Show current tab and restore its state; if null, loads current tab
+    private fun showTab(tabIdentifier: TabIdentifiers? = null) {
+        if (tabIdentifier != null)
+            currentTab = tabIdentifier
+
+        val backStack = tabBackStack[currentTab]!!
+        val fragmentToShow: Fragment = Class.forName(backStack.peek()).newInstance() as Fragment
+        fragmentToShow.setInitialSavedState(fragmentStateMap[fragmentToShow::class.qualifiedName ?: throw Exception("Unexpected class")])
+
+        val currentFragment = getCurrentFragment()
+        val transaction = fragmentManager?.beginTransaction()
+
+        if(currentFragment is CustomFragment) {
+            val toolbar = (currentFragment as CustomFragment).getSharedElement()
+            transaction?.addSharedElement(toolbar, toolbar.transitionName)
+        }
+
+        transaction
+            ?.replace(R.id.fragment_container, fragmentToShow)
+            ?.commit()
+    }
+
+    // Save current fragment state in fragmentStateMap
+    fun saveCurrentFragmentState() {
+        val currentFragment = fragmentManager?.findFragmentById(R.id.fragment_container)
+        if (currentFragment != null) {
+            fragmentStateMap[currentFragment::class.qualifiedName!!] =
+                fragmentManager?.saveFragmentInstanceState(currentFragment)
+        }
+    }
+
+    private fun getCurrentFragment(): Fragment? = fragmentManager?.findFragmentById(R.id.fragment_container)
+
+    // Stores state of current fragment and loses fragmentManager reference
+    // To be called from MainActivity
+    fun onFragmentManagerDestroy() {
+        fragmentManager = null
+        bottomNavBar = null
+        hideBottomNavBar = null
+    }
+
+    fun clearBackstack() {
+        tabBackStack.apply {
+            TabIdentifiers.values().forEach {
+                this[it] = Stack<String>()
+            }
+        }
+        tabStack.clear()
+        fragmentStateMap.clear()
+    }
+
+    /** Process death related stuff **/
+
+    fun getBackStack(): HashMap<TabIdentifiers, Stack<String>> {
+        return tabBackStack
+    }
+
+    fun setBackStack(backStack: HashMap<TabIdentifiers, Stack<String>>) {
+        TabIdentifiers.values().forEach {
+            tabBackStack[it] = Stack<String>()
+            backStack[it]!!.forEach {  stackVal ->
+                tabBackStack[it]!!.push(stackVal)
+            }
+        }
+    }
+
+    fun getTabStack(): Stack<TabIdentifiers> {
+        return tabStack
+    }
+
+    fun setTabStack(tabStack: Stack<TabIdentifiers>) {
+        this.tabStack = tabStack
+        currentTab = tabStack.peek()
+    }
+
+    fun getFragmentStateMap(): HashMap<String, Fragment.SavedState?> {
+        return fragmentStateMap
+    }
+
+    fun setFragmentStateMap(fragmentStates: HashMap<String, Fragment.SavedState?>) {
+        this.fragmentStateMap = HashMap<String, Fragment.SavedState?>()
+        fragmentStates.forEach {
+            fragmentStateMap[it.key] = it.value
+        }
+    }
+
 }

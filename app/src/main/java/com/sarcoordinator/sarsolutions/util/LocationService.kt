@@ -40,7 +40,7 @@ class LocationService : Service() {
     }
 
     enum class ShiftErrors {
-        START_SHIFT, PUT_END_TIME, PUT_LOCATIONS
+        START_SHIFT, PUT_END_TIME, PUT_LOCATIONS, GET_SHIFT_ID
     }
 
     private var mTestMode: Boolean = false
@@ -229,11 +229,19 @@ class LocationService : Service() {
 
             val endTime = Calendar.getInstance().time.toString()
 
+            var networkRetries = 0
+
             while (shiftId.value == null) {
+                if(networkRetries > 10) {
+                    shiftEndedWithError.postValue(ShiftErrors.GET_SHIFT_ID)
+                    return@launch
+                }
                 Timber.d(
                     "Shift didn't start and no points were recorded\n" +
-                            "Waiting to get shift and token id"
+                            "Waiting to get shift and token id" +
+                            "Retry number: $networkRetries"
                 )
+                networkRetries++
                 delay(1000)
             }
 

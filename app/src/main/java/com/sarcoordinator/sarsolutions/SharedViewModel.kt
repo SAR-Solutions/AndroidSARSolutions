@@ -4,22 +4,16 @@ import android.app.Application
 import android.content.ComponentName
 import android.content.ServiceConnection
 import android.os.IBinder
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.sarcoordinator.sarsolutions.api.Repository
 import com.sarcoordinator.sarsolutions.models.*
 import com.sarcoordinator.sarsolutions.util.CacheDatabase
 import com.sarcoordinator.sarsolutions.util.LocalCacheRepository
 import com.sarcoordinator.sarsolutions.util.LocationService
 import com.sarcoordinator.sarsolutions.util.notifyObserver
-import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.File
 import java.util.*
@@ -29,9 +23,10 @@ import kotlin.collections.ArrayList
 class SharedViewModel(application: Application) : AndroidViewModel(application) {
 
     var vehicleList = ArrayList<VehicleCardContent>()
-    var lastUpdatedText: String? = null
     var isShiftActive = false
+    var isServiceBound = false
     var isUploadTaskActive = false
+    var currentShiftId: String? = null
     lateinit var currentImagePath: String
     private val binder = MutableLiveData<LocationService.LocalBinder>()
     private val cacheRepo: LocalCacheRepository =
@@ -46,6 +41,7 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         override fun onServiceConnected(p0: ComponentName?, iBinder: IBinder?) {
             Timber.d("Connected to service")
             binder.postValue(iBinder as LocationService.LocalBinder)
+            isServiceBound = true
             isShiftActive = true
         }
 
@@ -130,7 +126,7 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun removeService() {
-        binder.value = null
+        binder.postValue(null)
     }
 
     /************************************************ Shift report **********************************************************/
@@ -173,6 +169,7 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun completeShiftReportSubmission() {
+        currentShiftId = null
         isShiftActive = false
     }
 
@@ -186,30 +183,33 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     fun getAllShiftReports(): LiveData<List<LocationsInShiftReport>> =
         cacheRepo.allShiftReports
 
-    fun addLocationsToCache(locations: List<LocationPoint>, shiftId: String) {
+    fun addLocationsToCache(locations: List<LocationPoint>) {
         viewModelScope.launch(Default) {
+            while(currentShiftId.isNullOrEmpty())
+                delay(1000)
+
             val list = ArrayList<CacheLocation>()
             locations.forEach { location ->
                 list.add(
                     CacheLocation(
                         0,
-                        shiftId,
+                        currentShiftId!!,
                         location.latitude,
                         location.longitude
                     )
                 )
             }
             withContext(IO) {
-                cacheRepo.insertLocationList(shiftId, list)
+                cacheRepo.insertLocationList(currentShiftId!!, list)
             }
         }
     }
 
-    fun addEndTimeToCache(endTime: String, shiftId: String) {
+    fun addEndTimeToCache(endTime: String) {
         viewModelScope.launch(IO) {
             cacheRepo.insertShiftReport(
                 CacheShiftReport(
-                    shiftId = shiftId,
+                    shiftId = currentShiftId!!,
                     caseName = currentCase.value!!.caseName,
                     endTime = endTime,
                     cacheTime = Calendar.getInstance().time.toString()
@@ -218,14 +218,16 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    fun addShiftReportToCache(searchDuration: String, shiftId: String): Job {
-        Timber.i("Adding shift report to cache with id $shiftId")
+    fun addShiftReportToCache(searchDuration: String): Job {
         return viewModelScope.launch(IO) {
+
+            while(currentShiftId.isNullOrEmpty())
+                delay(1000)
 
             // Insert shift Reports
             cacheRepo.insertShiftReport(
                 CacheShiftReport(
-                    shiftId = shiftId,
+                    shiftId = currentShiftId!!,
                     caseName = currentCase.value!!.caseName,
                     searchDuration = searchDuration,
                     cacheTime = Calendar.getInstance().time.toString()
@@ -233,7 +235,7 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
             )
 
             // Insert vehicles
-            cacheRepo.insertVehicleList(vehicleListToCacheObjects(shiftId), shiftId)
+            cacheRepo.insertVehicleList(vehicleListToCacheObjects(), currentShiftId!!)
         }
     }
 
@@ -293,13 +295,13 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         return list
     }
 
-    private fun vehicleListToCacheObjects(shiftId: String): List<CacheVehicle> {
+    private fun vehicleListToCacheObjects(): List<CacheVehicle> {
         val list = ArrayList<CacheVehicle>()
         vehicleList.forEachIndexed { index, vehicleCardContent ->
             list.add(
                 CacheVehicle(
                     0,
-                    shiftId,
+                    currentShiftId!!,
                     index,
                     vehicleCardContent.isCountyVehicle,
                     vehicleCardContent.isPersonalVehicle,

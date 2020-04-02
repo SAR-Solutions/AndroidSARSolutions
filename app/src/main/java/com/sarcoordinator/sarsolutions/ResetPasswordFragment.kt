@@ -1,5 +1,6 @@
 package com.sarcoordinator.sarsolutions
 
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.transition.TransitionInflater
@@ -34,7 +35,11 @@ class ResetPasswordFragment : Fragment(R.layout.fragment_reset_password) {
             email_input_text.setAutofillHints(View.AUTOFILL_HINT_EMAIL_ADDRESS)
         }
 
-        if (GlobalUtil.getCurrentTheme(resources) == GlobalUtil.THEME_DARK)
+        if (GlobalUtil.getCurrentTheme(
+                resources,
+                requireActivity().getPreferences(Context.MODE_PRIVATE)
+            ) == GlobalUtil.THEME_DARK
+        )
             imageView.setImageResource(R.mipmap.app_icon_white_text)
 
         forgot_password_button.setOnClickListener {

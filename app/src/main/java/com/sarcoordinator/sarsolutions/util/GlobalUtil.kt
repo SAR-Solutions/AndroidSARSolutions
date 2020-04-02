@@ -117,7 +117,7 @@ object GlobalUtil {
         }
     }
 
-    fun getThemePreference(preferences: SharedPreferences, resources: Resources): Int {
+    fun getThemePreference(preferences: SharedPreferences): Int {
         val def = preferences.getString(THEME_PREFS, THEME_DEFAULT.toString())!!
         return try {
             def.toInt()
@@ -127,16 +127,21 @@ object GlobalUtil {
     }
 
     // Returns whether theme is light or dark
-    fun getCurrentTheme(resources: Resources): Int {
-        when (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
-            Configuration.UI_MODE_NIGHT_NO -> return THEME_LIGHT
-            Configuration.UI_MODE_NIGHT_YES -> return THEME_DARK
+    fun getCurrentTheme(resources: Resources, preferences: SharedPreferences): Int {
+        val themePreference = getThemePreference(preferences)
+        if (themePreference == THEME_DEFAULT) {
+            when (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
+                Configuration.UI_MODE_NIGHT_NO -> return THEME_LIGHT
+                Configuration.UI_MODE_NIGHT_YES -> return THEME_DARK
+            }
+            return -1
+        } else {
+            return themePreference
         }
-        return -1
     }
 
-    fun setCurrentTheme(sharedPrefs: SharedPreferences, resources: Resources) {
-        val def = getThemePreference(sharedPrefs, resources)
+    fun setCurrentTheme(sharedPrefs: SharedPreferences) {
+        val def = getThemePreference(sharedPrefs)
         setTheme(sharedPrefs, def)
     }
 
