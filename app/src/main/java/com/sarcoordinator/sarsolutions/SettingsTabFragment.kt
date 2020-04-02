@@ -14,12 +14,11 @@ import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.Navigation
-import com.sarcoordinator.sarsolutions.util.TabFragment
+import com.sarcoordinator.sarsolutions.util.CustomFragment
 import kotlinx.android.synthetic.main.fragment_settings.*
 import timber.log.Timber
-import java.io.Serializable
 
-class SettingsTabFragment : Fragment(R.layout.fragment_settings), TabFragment {
+class SettingsTabFragment : Fragment(R.layout.fragment_settings), CustomFragment {
 
     private val nav: Navigation by lazy { Navigation.getInstance() }
 
@@ -31,7 +30,7 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), TabFragment {
     private lateinit var sharedPrefs: SharedPreferences
     private var isThemeSelected: Boolean = false
 
-    override fun getToolbar(): View = toolbar_settings
+    override fun getSharedElement(): View = toolbar_settings
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

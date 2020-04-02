@@ -75,8 +75,6 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         // Set shared element transition
         sharedElementEnterTransition = TransitionInflater.from(context)
             .inflateTransition(android.R.transition.move)
-        sharedElementReturnTransition = TransitionInflater.from(context)
-            .inflateTransition(android.R.transition.move)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

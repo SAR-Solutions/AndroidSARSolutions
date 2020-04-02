@@ -1,21 +1,13 @@
 package com.sarcoordinator.sarsolutions.util
 
-import android.os.Parcelable
-import android.util.Log
 import android.view.View
-import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.sarcoordinator.sarsolutions.CasesTabFragment
-import com.sarcoordinator.sarsolutions.FailedShiftsTabFragment
-import com.sarcoordinator.sarsolutions.R
-import com.sarcoordinator.sarsolutions.SettingsTabFragment
-import timber.log.Timber
-import java.io.Serializable
+import com.sarcoordinator.sarsolutions.*
+import kotlinx.android.synthetic.main.fragment_image_detail.*
 import java.lang.Exception
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 // Navigation class singleton
@@ -95,8 +87,8 @@ object Navigation {
         if (tabBackStack[tabIdentifier].isNullOrEmpty()) {
             val currentFragment = getCurrentFragment()
             var toolbar: View? = null
-            if(currentFragment is TabFragment) {
-                toolbar = (currentFragment as TabFragment).getToolbar()
+            if(currentFragment is CustomFragment) {
+                toolbar = (currentFragment as CustomFragment).getSharedElement()
             }
             when (tabIdentifier) {
                 TabIdentifiers.HOME -> pushFragment(CasesTabFragment(), tabIdentifier, toolbar)
@@ -153,6 +145,7 @@ object Navigation {
         }
 
         transaction
+            ?.setReorderingAllowed(true)
             ?.replace(R.id.fragment_container, fragment)
             ?.commit()
     }
@@ -215,8 +208,8 @@ object Navigation {
         val currentFragment = getCurrentFragment()
         val transaction = fragmentManager?.beginTransaction()
 
-        if(currentFragment is TabFragment) {
-            val toolbar = (currentFragment as TabFragment).getToolbar()
+        if(currentFragment is CustomFragment) {
+            val toolbar = (currentFragment as CustomFragment).getSharedElement()
             transaction?.addSharedElement(toolbar, toolbar.transitionName)
         }
 

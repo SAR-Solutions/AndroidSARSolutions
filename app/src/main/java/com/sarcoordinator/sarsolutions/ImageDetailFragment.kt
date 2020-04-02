@@ -19,6 +19,7 @@ import com.bumptech.glide.request.target.Target
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storageMetadata
+import com.sarcoordinator.sarsolutions.util.CustomFragment
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import kotlinx.android.synthetic.main.fragment_image_detail.*
 import kotlinx.coroutines.CoroutineScope
@@ -30,7 +31,7 @@ import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.File
 
-class ImageDetailFragment : Fragment(R.layout.fragment_image_detail) {
+class ImageDetailFragment : Fragment(R.layout.fragment_image_detail), CustomFragment {
     companion object ArgsTags {
         const val IMAGE_PATH = "IMAGE_PATH"
     }
@@ -39,6 +40,8 @@ class ImageDetailFragment : Fragment(R.layout.fragment_image_detail) {
     private lateinit var imageFile: File
     private lateinit var image: ExifInterface
 
+    override fun getSharedElement(): View = detailed_image_view
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -46,12 +49,8 @@ class ImageDetailFragment : Fragment(R.layout.fragment_image_detail) {
             ViewModelProvider(this)[SharedViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
 
-        postponeEnterTransition()
-
         // Set shared element transition
         sharedElementEnterTransition = TransitionInflater.from(context)
-            .inflateTransition(android.R.transition.move)
-        sharedElementReturnTransition = TransitionInflater.from(context)
             .inflateTransition(android.R.transition.move)
 
         (requireActivity() as MainActivity).enableTransparentStatusBar(true)
@@ -82,28 +81,6 @@ class ImageDetailFragment : Fragment(R.layout.fragment_image_detail) {
             .load(imageFile)
             .dontTransform()
             .centerCrop()
-            .listener(object : RequestListener<Drawable> {
-                override fun onLoadFailed(
-                    e: GlideException?,
-                    model: Any?,
-                    target: Target<Drawable>?,
-                    isFirstResource: Boolean
-                ): Boolean {
-                    startPostponedEnterTransition()
-                    return false
-                }
-
-                override fun onResourceReady(
-                    resource: Drawable?,
-                    model: Any?,
-                    target: Target<Drawable>?,
-                    dataSource: DataSource?,
-                    isFirstResource: Boolean
-                ): Boolean {
-                    startPostponedEnterTransition()
-                    return false
-                }
-            })
             .into(detailed_image_view)
     }
 
