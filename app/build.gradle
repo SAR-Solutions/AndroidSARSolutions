@@ -20,8 +20,8 @@ android {
         applicationId "com.sarcoordinator.sarsolutions"
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 26
-        versionName "2.0.5"
+        versionCode 27
+        versionName "2.0.6"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -92,7 +92,7 @@ dependencies {
     implementation 'com.facebook.shimmer:shimmer:0.5.0'
 
     // Firebase Crashlytics
-    implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
+//    implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
 
     // Open Source Notices
     implementation 'com.google.android.gms:play-services-oss-licenses:17.0.0'
