@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.view.marginBottom
 import androidx.core.view.marginLeft
 import androidx.core.view.marginRight
@@ -58,9 +59,24 @@ class ShiftDetailFragment : Fragment(), OnMapReadyCallback {
 
         back_button.doOnApplyWindowInsets { view, insets, initialState ->
             view.setMargins(
-                view, view.marginLeft, insets.systemGestureInsets.top
+                view, insets.systemGestureInsets.left, insets.systemGestureInsets.top
                 , view.marginRight, view.marginBottom
             )
+        }
+
+        back_button.setOnClickListener {
+            requireActivity().onBackPressed()
+        }
+
+        info_button.doOnApplyWindowInsets { view, insets, initialState ->
+            view.setMargins(
+                view, view.marginLeft, insets.systemGestureInsets.top,
+                insets.systemGestureInsets.right, view.marginBottom
+            )
+        }
+
+        info_button.setOnClickListener {
+            Toast.makeText(requireContext(), "TODO", Toast.LENGTH_LONG).show()
         }
 
         cachedShiftReport =

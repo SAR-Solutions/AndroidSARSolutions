@@ -13,14 +13,13 @@
         app:cardElevation="4dp">
 
         <ImageButton
-            android:id="@+id/custom_back_button"
+            android:id="@+id/custom_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:padding="8dp"
-            android:src="@drawable/ic_baseline_arrow_back_24"
-            android:transitionName="back_button" />
+            android:src="@mipmap/app_icon_small" />
 
     </com.google.android.material.card.MaterialCardView>
 
