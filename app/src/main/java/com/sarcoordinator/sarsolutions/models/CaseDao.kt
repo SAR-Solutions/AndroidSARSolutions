@@ -1,7 +1,9 @@
 package com.sarcoordinator.sarsolutions.models
 
+import android.os.Parcelable
 import androidx.lifecycle.LiveData
 import androidx.room.*
+import kotlinx.android.parcel.Parcelize
 import java.io.Serializable
 
 @Entity
@@ -14,13 +16,14 @@ data class CacheShiftReport(
 )
 
 @Entity
+@Parcelize
 data class CacheLocation(
     @PrimaryKey(autoGenerate = true)
     val locationId: Int,
     val shiftId: String,
     val latitude: Double,
     val longitude: Double
-)
+): Parcelable
 
 @Entity
 data class CacheVehicle(
@@ -78,33 +81,4 @@ interface CaseDao {
 
     @Delete
     suspend fun deleteVehicles(vehicles: List<CacheVehicle>?)
-
-//
-//    @Insert(onConflict = OnConflictStrategy.IGNORE)
-//    suspend fun insertLocationList(locationList: List<CacheLocation>)
-//
-//    @Insert(onConflict = OnConflictStrategy.REPLACE)
-//    suspend fun insertEndTime(endTime: CacheEndTime)
-//
-//    @Insert(onConflict = OnConflictStrategy.REPLACE)
-//    suspend fun insertShiftReport(shiftId: CacheShiftReport)
-//
-//    @Insert(onConflict = OnConflictStrategy.REPLACE)
-//    suspend fun insertAllVehicles(vehicle: List<CacheVehicle>?)
-//
-//    @Delete
-//    suspend fun deleteLocations(locations: List<CacheLocation>)
-//
-//    @Query("SELECT * FROM CacheLocation GROUP BY shiftId")
-//    fun getAllLocationShiftIds(): LiveData<List<CacheLocation>>
-//
-//    @Query("SELECT * FROM CacheLocation WHERE shiftId = :shiftId")
-//    suspend fun getAllLocationsForShift(shiftId: String): List<CacheLocation>
-//
-//    @Query("SELECT * FROM CacheEndTime WHERE shiftId = :shiftId")
-//    suspend fun getEndTimeForShift(shiftId: String): CacheEndTime?
-//
-//    @Query("SELECT * FROM CacheLocation WHERE shiftId = :shiftId")
-//    fun testLocationList(shiftId: String): List<CacheLocation>
-
 }

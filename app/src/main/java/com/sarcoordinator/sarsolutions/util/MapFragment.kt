@@ -1,20 +1,28 @@
-package com.sarcoordinator.sarsolutions
+package com.sarcoordinator.sarsolutions.util
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.MapView
-import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.*
+import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.PolylineOptions
+import com.sarcoordinator.sarsolutions.R
+import com.sarcoordinator.sarsolutions.models.CacheLocation
 
 class MapFragment : Fragment(), OnMapReadyCallback {
 
+    companion object {
+        val LOCATIONS_KEY = "LocationsKey"
+    }
+
     private var mMapView: MapView? = null
     private val MAPVIEW_BUNDLE_KEY = "MapViewBundleKey"
+
+    private lateinit var locationList: ArrayList<CacheLocation>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -27,6 +35,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         if (savedInstanceState != null) {
             mapViewBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY)
         }
+
+        locationList = arguments!!.getParcelableArrayList(LOCATIONS_KEY)!!
+
         mMapView = view.findViewById(R.id.map)
         mMapView?.onCreate(mapViewBundle)
         mMapView?.getMapAsync(this)
@@ -35,7 +46,10 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
-        googleMap.addMarker(MarkerOptions().position(LatLng(0.0, 0.0)).title("Marker"))
+        locationList.forEach {
+            googleMap.addMarker(MarkerOptions().position(LatLng(it.latitude, it.longitude)).title(it.locationId.toString()))
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(it.latitude, it.longitude), 20F))
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
