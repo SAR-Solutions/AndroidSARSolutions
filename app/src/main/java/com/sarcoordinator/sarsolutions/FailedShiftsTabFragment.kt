@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.sarcoordinator.sarsolutions.adapters.CachedShiftAdapter
 import com.sarcoordinator.sarsolutions.models.LocationsInShiftReport
 import com.sarcoordinator.sarsolutions.util.CustomFragment
+import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.fragment_failed_shifts.*
 import kotlinx.android.synthetic.main.loc_cache_list_item.view.*
 import kotlinx.coroutines.CoroutineScope
@@ -25,6 +26,7 @@ class FailedShiftsTabFragment : Fragment(R.layout.fragment_failed_shifts), Custo
     private lateinit var viewModel: SharedViewModel
     private lateinit var viewManager: RecyclerView.LayoutManager
     private lateinit var viewAdapter: CachedShiftAdapter
+    private val nav: Navigation by lazy { Navigation.getInstance() }
 
     override fun getSharedElement(): View = toolbar_failed_shifts
 
@@ -61,7 +63,8 @@ class FailedShiftsTabFragment : Fragment(R.layout.fragment_failed_shifts), Custo
             viewModel,
             progress_bar,
             resources.getStringArray(R.array.vehicle_array).toList(),
-            requireActivity()
+            requireActivity(),
+            nav
         )
 
         failed_shifts_recycler_view.apply {
