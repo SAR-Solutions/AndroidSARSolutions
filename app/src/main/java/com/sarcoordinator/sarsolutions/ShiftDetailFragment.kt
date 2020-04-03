@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -27,7 +28,7 @@ class ShiftDetailFragment : Fragment(), CustomFragment, OnMapReadyCallback {
     private val nav: Navigation by lazy { Navigation.getInstance() }
     private lateinit var cachedShiftReport: LocationsInShiftReport
 
-    override fun getSharedElement(): View = toolbar_detailed_shift
+    override fun getSharedElement(): View = back_button
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -51,11 +52,12 @@ class ShiftDetailFragment : Fragment(), CustomFragment, OnMapReadyCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         nav.hideBottomNavBar?.let { it(true)}
+        (requireActivity() as MainActivity).enableTransparentSystemBars(true)
 
         cachedShiftReport = (arguments?.getSerializable(CACHED_SHIFT) ?: savedInstanceState?.getSerializable(
             CACHED_SHIFT)) as LocationsInShiftReport
 
-        toolbar_detailed_shift.setHeading(cachedShiftReport.shiftReport.caseName.toString())
+        back_button.setOnClickListener { requireActivity().onBackPressed() }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -83,7 +85,8 @@ class ShiftDetailFragment : Fragment(), CustomFragment, OnMapReadyCallback {
         cachedShiftReport.locationList?.forEachIndexed { index, cacheLocation ->
             googleMap
                 .addMarker(MarkerOptions().position(LatLng(cacheLocation.latitude, cacheLocation.longitude))
-                    .title("Track number ${(index + 1)}"))
+                    .title("Track number ${(index + 1)}")
+                )
         }
     }
 
@@ -109,6 +112,7 @@ class ShiftDetailFragment : Fragment(), CustomFragment, OnMapReadyCallback {
 
     override fun onDestroy() {
         nav.hideBottomNavBar?.let { it(false) }
+        (requireActivity() as MainActivity).enableTransparentSystemBars(false)
         mMapView?.onDestroy()
         mMapView = null
         super.onDestroy()

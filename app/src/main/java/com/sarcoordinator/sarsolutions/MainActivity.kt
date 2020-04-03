@@ -220,20 +220,46 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                     }
                 }
             } else {
-                // Clear previously set flags
-                decorView.systemUiVisibility = 0
+                restoreSystemBars()
+            }
+        }
+    }
 
-                // Restore system bar colors
-                if (currentTheme == GlobalUtil.THEME_DARK) {
-                    // Set navigationBarColor to elevated gray
-                    navigationBarColor = resources.getColor(R.color.lightGray)
-                    statusBarColor = resources.getColor(R.color.gray)
-                } else {
-                    decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR or
-                            View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                    statusBarColor = Color.WHITE
-                    navigationBarColor = Color.WHITE
-                }
+    fun enableTransparentSystemBars(enableTransparency: Boolean) {
+        window.apply {
+            if(enableTransparency) {
+                setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+                addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION or
+                        WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+                decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR or
+                        View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+            } else {
+                restoreSystemBars()
+            }
+        }
+    }
+
+    private fun restoreSystemBars() {
+        val currentTheme =
+            GlobalUtil.getCurrentTheme(resources, getPreferences(Context.MODE_PRIVATE))
+
+        window.apply {
+            // Clear previously set flags
+            decorView.systemUiVisibility = 0
+            clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION or
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+
+            // Restore system bar colors
+            if (currentTheme == GlobalUtil.THEME_DARK) {
+                // Set navigationBarColor to elevated gray
+                navigationBarColor = resources.getColor(R.color.lightGray)
+                statusBarColor = resources.getColor(R.color.gray)
+            } else {
+                decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR or
+                        View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                statusBarColor = Color.WHITE
+                navigationBarColor = Color.WHITE
             }
         }
     }

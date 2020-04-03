@@ -1,9 +1,7 @@
 package com.sarcoordinator.sarsolutions.models
 
-import android.os.Parcelable
 import androidx.lifecycle.LiveData
 import androidx.room.*
-import kotlinx.android.parcel.Parcelize
 import java.io.Serializable
 
 @Entity
