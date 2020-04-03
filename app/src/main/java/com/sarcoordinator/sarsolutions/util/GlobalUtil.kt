@@ -190,11 +190,11 @@ fun <T> MutableLiveData<T>.notifyObserver() {
     this.value = this.value
 }
 
-fun View.setMargins(v: View, l: Int, t: Int, r: Int, b: Int) {
-    if (v.layoutParams is ViewGroup.MarginLayoutParams) {
-        val p = v.layoutParams as ViewGroup.MarginLayoutParams
+fun View.setMargins(l: Int, t: Int, r: Int, b: Int) {
+    if (layoutParams is ViewGroup.MarginLayoutParams) {
+        val p = layoutParams as ViewGroup.MarginLayoutParams
         p.setMargins(l, t, r, b)
-        v.requestLayout()
+        requestLayout()
     }
 }
 
