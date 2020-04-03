@@ -23,6 +23,8 @@ android {
         versionCode 28
         versionName "2.1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        resValue 'string', "gmaps_api_key", GOOGLE_MAPS_API_KEY
     }
     buildTypes {
         release {
@@ -55,6 +57,9 @@ dependencies {
 
     // GPS Location
     implementation 'com.google.android.gms:play-services-location:17.0.0'
+
+    // Google maps
+    implementation 'com.google.android.gms:play-services-maps:17.0.0'
 
     // Dexter Permissions
     implementation 'com.karumi:dexter:6.0.2'

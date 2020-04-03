@@ -20,6 +20,10 @@ class ShiftDetailFragment : Fragment(R.layout.fragment_shift_detail), CustomFrag
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        requireActivity().supportFragmentManager.beginTransaction()
+            .add(R.id.map_container, MapFragment())
+            .commit()
+
         // TODO: Fetch from savedInstace if arguments is null
         cachedShiftReport = arguments?.getSerializable(CACHED_SHIFT) as LocationsInShiftReport
 
