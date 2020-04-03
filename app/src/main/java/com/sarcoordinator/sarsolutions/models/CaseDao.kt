@@ -13,17 +13,16 @@ data class CacheShiftReport(
     val searchDuration: String? = null,
     var endTime: String? = null,
     val cacheTime: String? = null
-)
+): Serializable
 
 @Entity
-@Parcelize
 data class CacheLocation(
     @PrimaryKey(autoGenerate = true)
     val locationId: Int,
     val shiftId: String,
     val latitude: Double,
     val longitude: Double
-): Parcelable
+): Serializable
 
 @Entity
 data class CacheVehicle(
@@ -34,7 +33,7 @@ data class CacheVehicle(
     val isPersonalVehicle: Boolean,
     val type: Int,
     val milesTraveled: String
-)
+): Serializable
 
 data class LocationsInShiftReport(
     @Embedded val shiftReport: CacheShiftReport,

@@ -9,10 +9,10 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
 import com.sarcoordinator.sarsolutions.models.LocationsInShiftReport
 import com.sarcoordinator.sarsolutions.util.CustomFragment
+import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.fragment_shift_detail.*
 
 class ShiftDetailFragment : Fragment(), CustomFragment, OnMapReadyCallback {
@@ -24,6 +24,7 @@ class ShiftDetailFragment : Fragment(), CustomFragment, OnMapReadyCallback {
     private var mMapView: MapView? = null
     private val MAPVIEW_BUNDLE_KEY = "MapViewBundleKey"
 
+    private val nav: Navigation by lazy { Navigation.getInstance() }
     private lateinit var cachedShiftReport: LocationsInShiftReport
 
     override fun getSharedElement(): View = toolbar_detailed_shift
@@ -40,7 +41,6 @@ class ShiftDetailFragment : Fragment(), CustomFragment, OnMapReadyCallback {
             mapViewBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY)
         }
 
-
         mMapView = view.findViewById(R.id.map)
         mMapView?.onCreate(mapViewBundle)
         mMapView?.getMapAsync(this)
@@ -50,16 +50,19 @@ class ShiftDetailFragment : Fragment(), CustomFragment, OnMapReadyCallback {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        nav.hideBottomNavBar?.let { it(true)}
 
-        // TODO: Fetch from savedInstace if arguments is null
-        cachedShiftReport = arguments?.getSerializable(CACHED_SHIFT) as LocationsInShiftReport
+        cachedShiftReport = (arguments?.getSerializable(CACHED_SHIFT) ?: savedInstanceState?.getSerializable(
+            CACHED_SHIFT)) as LocationsInShiftReport
 
         toolbar_detailed_shift.setHeading(cachedShiftReport.shiftReport.caseName.toString())
     }
 
-
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
+
+        outState.putSerializable(CACHED_SHIFT, cachedShiftReport)
+
         var mapViewBundle =
             outState.getBundle(MAPVIEW_BUNDLE_KEY)
         if (mapViewBundle == null) {
@@ -69,11 +72,18 @@ class ShiftDetailFragment : Fragment(), CustomFragment, OnMapReadyCallback {
         mMapView!!.onSaveInstanceState(mapViewBundle)
     }
 
-
     override fun onMapReady(googleMap: GoogleMap) {
-        cachedShiftReport.locationList?.forEach {
-            googleMap.addMarker(MarkerOptions().position(LatLng(it.latitude, it.longitude)).title(it.locationId.toString()))
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(it.latitude, it.longitude), 20F))
+
+        // Move camera to first point
+        cachedShiftReport.locationList?.let {
+            val firstLoc = cachedShiftReport.locationList!![0]
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(firstLoc.latitude, firstLoc.longitude), 15F))
+        }
+
+        cachedShiftReport.locationList?.forEachIndexed { index, cacheLocation ->
+            googleMap
+                .addMarker(MarkerOptions().position(LatLng(cacheLocation.latitude, cacheLocation.longitude))
+                    .title("Track number ${(index + 1)}"))
         }
     }
 
@@ -98,7 +108,9 @@ class ShiftDetailFragment : Fragment(), CustomFragment, OnMapReadyCallback {
     }
 
     override fun onDestroy() {
+        nav.hideBottomNavBar?.let { it(false) }
         mMapView?.onDestroy()
+        mMapView = null
         super.onDestroy()
     }
 
