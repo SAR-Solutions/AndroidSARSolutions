@@ -86,8 +86,6 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
 
         initFabClickListener()
         validateNetworkConnectivity()
-
-        toolbar_track.setBackPressedListener(View.OnClickListener { requireActivity().onBackPressed() })
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

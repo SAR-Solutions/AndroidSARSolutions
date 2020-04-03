@@ -2,6 +2,7 @@ package com.sarcoordinator.sarsolutions.models
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
+import java.io.Serializable
 
 @Entity
 data class CacheShiftReport(
@@ -48,7 +49,7 @@ data class LocationsInShiftReport(
         entity = CacheVehicle::class
     )
     val vehicleList: List<CacheVehicle>?
-)
+): Serializable
 
 @Dao
 interface CaseDao {

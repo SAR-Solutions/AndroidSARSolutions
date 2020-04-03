@@ -111,12 +111,13 @@ object Navigation {
     /**
      * fragment: Fragment to put into container
      * saveState: Whether or not to save previous fragment state
-     * tab: Tab to put fragment into
+     * tab: Tab to put fragment into; null will push to current tab
+     * sharedElements: views to be included in shared element transition
      */
-    fun pushFragment(fragment: Fragment, tab: TabIdentifiers, vararg sharedElements: View?) {
+    fun pushFragment(fragment: Fragment, tab: TabIdentifiers? = null, vararg sharedElements: View?) {
 
         // Check to a void making another instance of top fragment
-        if (currentTab == tab) {
+        if(tab != null && currentTab == tab) {
             val currentTabBackstack = tabBackStack[currentTab]!!
             // Nothing to do if current fragment is the same as to-be-replaced fragment
             if (currentTabBackstack.isNotEmpty() &&
@@ -124,9 +125,10 @@ object Navigation {
                 == fragment::class.qualifiedName
             )
                 return
+
+            currentTab = tab
         }
 
-        currentTab = tab
         val backStack = tabBackStack[currentTab]!!
 
         // Save current fragment state

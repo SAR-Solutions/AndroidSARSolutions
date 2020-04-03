@@ -1,6 +1,7 @@
 package com.sarcoordinator.sarsolutions.adapters
 
 import android.app.Activity
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -52,7 +53,11 @@ class CachedShiftAdapter(
 //            }
 
             itemView.setOnClickListener {
-                nav.pushFragment(ShiftDetailFragment(), Navigation.TabIdentifiers.FAILED_SHIFTS)
+                val shiftDetailFragment = ShiftDetailFragment()
+                shiftDetailFragment.arguments = Bundle().apply {
+                    putSerializable(ShiftDetailFragment.CACHED_SHIFT, cachedObj)
+                }
+                nav.pushFragment(shiftDetailFragment)
             }
         }
     }
