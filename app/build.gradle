@@ -116,7 +116,4 @@ dependencies {
     //Insetter
     implementation "dev.chrisbanes:insetter:0.2.1"
     implementation "dev.chrisbanes:insetter-ktx:0.2.1"
-    implementation "dev.chrisbanes:insetter-widgets:0.2.1"
-
-
 }

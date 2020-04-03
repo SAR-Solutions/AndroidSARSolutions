@@ -22,7 +22,6 @@ class CustomToolbar(context: Context, attrs: AttributeSet) : LinearLayout(contex
     private lateinit var backButton: ImageButton
 
     init {
-
         context.theme.obtainStyledAttributes(
             attrs,
             R.styleable.CustomToolbar,

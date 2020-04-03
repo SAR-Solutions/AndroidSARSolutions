@@ -12,8 +12,8 @@ import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.ConnectivityManager
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
@@ -189,3 +189,12 @@ object GlobalUtil {
 fun <T> MutableLiveData<T>.notifyObserver() {
     this.value = this.value
 }
+
+fun View.setMargins(v: View, l: Int, t: Int, r: Int, b: Int) {
+    if (v.layoutParams is ViewGroup.MarginLayoutParams) {
+        val p = v.layoutParams as ViewGroup.MarginLayoutParams
+        p.setMargins(l, t, r, b)
+        v.requestLayout()
+    }
+}
+
