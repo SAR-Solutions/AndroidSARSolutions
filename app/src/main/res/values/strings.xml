@@ -75,7 +75,7 @@
     <string name="sync_failure_desc">Shifts will appear here if they fail to sync</string>
     <string name="shift_report">Shift Report</string>
     <string name="image_information">Image Information</string>
-    <string name="number_of_images_taken">Number of images taken:</string>
+    <string name="number_of_images_taken">Number of images taken</string>
     <string name="images">Images:</string>
     <string name="images_taken">Images Taken</string>
     <string name="Metadata">Metadata</string>

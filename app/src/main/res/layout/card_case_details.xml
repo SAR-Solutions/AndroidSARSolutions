@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:elevation="4dp">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true">
+
+            <TextView
+                android:id="@+id/case_title"
+                style="@style/Base.Widget.AppCompat.TextView.Heading"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Case Title"
+                android:textAlignment="center"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/case_id"
+                style="@style/Base.Widget.AppCompat.TextView.SubHeading"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:padding="0dp"
+                android:text="Case Id Here"
+                android:textAlignment="center"
+                app:layout_constraintEnd_toEndOf="@id/guideline"
+                app:layout_constraintStart_toStartOf="@id/case_title"
+                app:layout_constraintTop_toBottomOf="@id/case_title" />
+
+            <TextView
+                android:id="@+id/case_id_title"
+                style="@style/Base.Widget.AppCompat.TextView.Subheading.Info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/case_id"
+                app:layout_constraintEnd_toEndOf="@id/case_id"
+                app:layout_constraintStart_toStartOf="@id/case_id"
+                app:layout_constraintTop_toBottomOf="@id/case_id" />
+
+            <TextView
+                android:id="@+id/reporter_name"
+                style="@style/Base.Widget.AppCompat.TextView.SubHeading"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:padding="0dp"
+                android:text="Reporter Name Here"
+                android:textAlignment="center"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@id/guideline"
+                app:layout_constraintTop_toBottomOf="@id/case_title" />
+
+            <TextView
+                android:id="@+id/reporter_name_title"
+                style="@style/Base.Widget.AppCompat.TextView.Subheading.Info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/reporter_name"
+                app:layout_constraintEnd_toEndOf="@id/reporter_name"
+                app:layout_constraintStart_toStartOf="@id/reporter_name"
+                app:layout_constraintTop_toBottomOf="@id/reporter_name" />
+
+            <TextView
+                android:id="@+id/missing_person"
+                style="@style/Base.Widget.AppCompat.TextView.SubHeading"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:padding="0dp"
+                android:text="Missing Person Name Here"
+                android:textAlignment="center"
+                app:layout_constraintEnd_toEndOf="@id/guideline"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/case_id_title" />
+
+            <TextView
+                android:id="@+id/missing_person_title"
+                style="@style/Base.Widget.AppCompat.TextView.Subheading.Info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/missing_person"
+                app:layout_constraintEnd_toEndOf="@id/missing_person"
+                app:layout_constraintStart_toStartOf="@id/missing_person"
+                app:layout_constraintTop_toBottomOf="@id/missing_person" />
+
+            <TextView
+                android:id="@+id/equipment_used"
+                style="@style/Base.Widget.AppCompat.TextView.SubHeading"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:padding="0dp"
+                android:text="Equipment Used Here"
+                android:textAlignment="center"
+                app:layout_constraintBottom_toBottomOf="@id/missing_person"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@id/guideline" />
+
+            <TextView
+                android:id="@+id/equipment_used_title"
+                style="@style/Base.Widget.AppCompat.TextView.Subheading.Info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/reporter_name"
+                app:layout_constraintEnd_toEndOf="@id/equipment_used"
+                app:layout_constraintStart_toStartOf="@id/equipment_used"
+                app:layout_constraintTop_toBottomOf="@id/equipment_used" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.5" />
+
+            <TextView
+                android:id="@+id/image_info_title"
+                style="@style/Base.Widget.AppCompat.TextView.SubHeading.Color"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="@string/image_information"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/missing_person_title" />
+
+            <TextView
+                android:id="@+id/image_number_text_view"
+                style="@style/Base.Widget.AppCompat.TextView.SubHeading"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:padding="0dp"
+                android:text="Number of images here"
+                android:textAlignment="center"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/image_info_title" />
+
+            <TextView
+                android:id="@+id/image_number_title"
+                style="@style/Base.Widget.AppCompat.TextView.Subheading.Info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/number_of_images_taken"
+                app:layout_constraintEnd_toEndOf="@id/image_number_text_view"
+                app:layout_constraintStart_toStartOf="@id/image_number_text_view"
+                app:layout_constraintTop_toBottomOf="@id/image_number_text_view" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/image_recycler_view"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/image_number_title"
+                tools:itemCount="1"
+                tools:listitem="@layout/image_list_view_item" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+</com.google.android.material.card.MaterialCardView>
