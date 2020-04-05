@@ -9,7 +9,7 @@ import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.RecyclerView
 import com.sarcoordinator.sarsolutions.R
 import com.sarcoordinator.sarsolutions.SharedViewModel
-import kotlinx.android.synthetic.main.vehicle_material_card.view.*
+import kotlinx.android.synthetic.main.card_vehicle_material.view.*
 import timber.log.Timber
 
 
@@ -94,7 +94,7 @@ class VehiclesAdapter(private val viewModel: SharedViewModel) :
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Viewholder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.vehicle_material_card, parent, false)
+            .inflate(R.layout.card_vehicle_material, parent, false)
 
         return Viewholder(
             view,

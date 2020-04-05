@@ -23,6 +23,7 @@
         android:layout_height="wrap_content"
         android:padding="8dp"
         app:Icon="@drawable/ic_baseline_arrow_back_24"
+        app:Tint="?colorPrimary"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -32,16 +33,18 @@
         android:layout_height="wrap_content"
         android:padding="8dp"
         app:Icon="@drawable/ic_baseline_info_24"
+        app:Tint="?colorPrimary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.google.android.material.card.MaterialCardView
+    <include
         android:id="@+id/info_card"
+        layout="@layout/card_shift_details"
         android:layout_width="0dp"
-        android:layout_height="200dp"
+        android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/info_button" />
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

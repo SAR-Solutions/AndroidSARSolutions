@@ -63,7 +63,7 @@
                     tools:itemCount="1"
                     android:orientation="vertical"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    tools:listitem="@layout/vehicle_material_card" />
+                    tools:listitem="@layout/card_vehicle_material" />
 
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/images_taken_card"

@@ -17,6 +17,12 @@ class CustomFloatingButton(context: Context, attrs: AttributeSet) : MotionLayout
             0, 0
         ).apply {
             custom_button.setImageDrawable(getDrawable(R.styleable.CustomFloatingButton_Icon))
+            custom_button.setColorFilter(
+                getColor(
+                    R.styleable.CustomFloatingButton_Tint,
+                    android.R.color.black
+                )
+            )
             recycle()
         }
     }

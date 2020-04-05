@@ -2,24 +2,16 @@ package com.sarcoordinator.sarsolutions
 
 import android.os.Bundle
 import android.transition.TransitionInflater
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import android.widget.ProgressBar
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sarcoordinator.sarsolutions.adapters.CachedShiftAdapter
-import com.sarcoordinator.sarsolutions.models.LocationsInShiftReport
 import com.sarcoordinator.sarsolutions.util.CustomFragment
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.fragment_failed_shifts.*
-import kotlinx.android.synthetic.main.loc_cache_list_item.view.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers.Main
-import kotlinx.coroutines.launch
 
 class FailedShiftsTabFragment : Fragment(R.layout.fragment_failed_shifts), CustomFragment {
 
@@ -59,13 +51,7 @@ class FailedShiftsTabFragment : Fragment(R.layout.fragment_failed_shifts), Custo
 
     private fun setUpRecyclerView() {
         viewManager = LinearLayoutManager(context)
-        viewAdapter = CachedShiftAdapter(
-            viewModel,
-            progress_bar,
-            resources.getStringArray(R.array.vehicle_array).toList(),
-            requireActivity(),
-            nav
-        )
+        viewAdapter = CachedShiftAdapter(nav)
 
         failed_shifts_recycler_view.apply {
             setHasFixedSize(true)

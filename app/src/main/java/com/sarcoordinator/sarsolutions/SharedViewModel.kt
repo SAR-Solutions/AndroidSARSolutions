@@ -4,7 +4,10 @@ import android.app.Application
 import android.content.ComponentName
 import android.content.ServiceConnection
 import android.os.IBinder
-import androidx.lifecycle.*
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import com.sarcoordinator.sarsolutions.api.Repository
 import com.sarcoordinator.sarsolutions.models.*
 import com.sarcoordinator.sarsolutions.util.CacheDatabase
@@ -33,7 +36,7 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         LocalCacheRepository(CacheDatabase.getDatabase(application).casesDao())
 
     // Number of failed shift syncs in progress
-    var numberOfSyncsInProgress: Int = 0
+    var syncInProgress = false
 
     // To keep track of vehicle names
     var numberOfVehicles: Int = 0
@@ -244,7 +247,7 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         cachedShiftReport: LocationsInShiftReport,
         vehicleTypeArray: List<String>
     ): Job {
-        numberOfSyncsInProgress++
+        syncInProgress = true
         return viewModelScope.launch(IO) {
             val shiftId = cachedShiftReport.shiftReport.shiftId
             try {
@@ -272,7 +275,7 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
             }
         }.apply {
             invokeOnCompletion {
-                numberOfSyncsInProgress--
+                syncInProgress = false
             }
         }
     }

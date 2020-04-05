@@ -5,27 +5,19 @@ import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.view.View
 import android.view.WindowManager
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
-import com.sarcoordinator.sarsolutions.util.CacheDatabase
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
-import com.sarcoordinator.sarsolutions.util.LocalCacheRepository
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
-import kotlin.random.Random
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
@@ -79,13 +71,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 nav.setFragmentStateMap(it as HashMap<String, Fragment.SavedState?>)
             }
 
-        }
-
-        val repo = LocalCacheRepository(CacheDatabase.getDatabase(application).casesDao())
-        repo.allShiftReports.observeForever {
-            it.forEach { obj ->
-                obj.locationList
-            }
         }
 
 //       Black status bar for old android version
@@ -148,8 +133,13 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                     currentFragment.requireView(),
                     "Image upload in progress",
                     Snackbar.LENGTH_LONG
-                )
-                    .show()
+                ).show()
+            } else if (viewModel.syncInProgress) {
+                Snackbar.make(
+                    currentFragment.requireView(),
+                    "Shift sync in progress",
+                    Snackbar.LENGTH_LONG
+                ).show()
             } else if (!nav.popFragment()) {
                 finishAffinity()
             }
