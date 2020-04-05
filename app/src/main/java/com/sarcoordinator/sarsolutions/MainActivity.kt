@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
             // Recover from process death
             savedInstanceState.getSerializable(BACKSTACK)?.let {
-                nav.setBackStack(it as HashMap<Navigation.TabIdentifiers, Stack<String>>)
+                nav.setBackStack(it as HashMap<*, *>)
             }
 
             savedInstanceState.getSerializable(TABSTACK)?.let {

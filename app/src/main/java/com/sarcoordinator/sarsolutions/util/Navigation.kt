@@ -4,9 +4,10 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.sarcoordinator.sarsolutions.*
-import kotlinx.android.synthetic.main.fragment_image_detail.*
-import java.lang.Exception
+import com.sarcoordinator.sarsolutions.CasesTabFragment
+import com.sarcoordinator.sarsolutions.FailedShiftsTabFragment
+import com.sarcoordinator.sarsolutions.R
+import com.sarcoordinator.sarsolutions.SettingsTabFragment
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -263,12 +264,9 @@ object Navigation {
         return tabBackStack
     }
 
-    fun setBackStack(backStack: HashMap<TabIdentifiers, Stack<String>>) {
+    fun setBackStack(backStack: HashMap<*, *>) {
         TabIdentifiers.values().forEach {
-            tabBackStack[it] = Stack<String>()
-            backStack[it]!!.forEach {  stackVal ->
-                tabBackStack[it]!!.push(stackVal)
-            }
+            tabBackStack[it] = backStack[it] as Stack<String>
         }
     }
 
