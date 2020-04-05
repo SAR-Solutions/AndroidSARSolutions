@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
+import com.sarcoordinator.sarsolutions.util.GlobalUtil.THEME_LIGHT
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.GlobalScope
@@ -218,11 +219,21 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     fun enableTransparentSystemBars(enableTransparency: Boolean) {
         window.apply {
             if(enableTransparency) {
-                setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
-                addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION or
-                        WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-                decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR or
-                        View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                setFlags(
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+                )
+                addFlags(
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION or
+                            WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
+                )
+                if (GlobalUtil.getCurrentTheme(
+                        resources,
+                        getPreferences(Context.MODE_PRIVATE)
+                    ) == THEME_LIGHT
+                )
+                    decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR or
+                            View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
             } else {
                 restoreSystemBars()
             }
