@@ -18,14 +18,18 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -69,6 +73,11 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     private lateinit var viewManager: LinearLayoutManager
     private lateinit var viewAdapter: ImagesAdapter
     private var stopLocationTracking = false
+
+    // Strictly only for mapView
+    private val isLocationServiceRunning = MutableLiveData<Boolean>().also {
+        it.postValue(false)
+    }
 
     private var mMapView: MapView? = null
     private lateinit var bottomSheet: BottomSheetBehavior<MaterialCardView>
@@ -193,7 +202,10 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         viewModel.getBinder().observe(viewLifecycleOwner, Observer { binder ->
             // Either service was bound or unbound
             service = binder?.getService()
-            observeService()
+            if (service != null) {
+                isLocationServiceRunning.postValue(true)
+                observeService()
+            }
         })
     }
 
@@ -566,6 +578,36 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
+        GlobalUtil.setGoogleMapsTheme(requireActivity(), googleMap)
+        isLocationServiceRunning.observe(viewLifecycleOwner, Observer {
+            val locSet: MutableSet<LatLng> = mutableSetOf()
+            var lastLocPoint: LatLng? = null
+            if (it) {
+                service?.getAllLocations()?.observe(viewLifecycleOwner, Observer { locationList ->
+                    if (locationList.isNotEmpty()) {
+                        val latLng =
+                            LatLng(locationList.last().latitude, locationList.last().longitude)
+                        if (locSet.add(latLng)) {
+                            // Show starting marker and focus on it
+                            if (lastLocPoint == null) {
+                                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15F))
+                                googleMap.addMarker(
+                                    MarkerOptions().position(latLng)
+                                        .title(getString(R.string.Start))
+                                )
+                            } else {
+                                val polyLine = GlobalUtil.getThemedPolyLineOptions(requireContext())
+                                polyLine.add(lastLocPoint, latLng)
+                                googleMap.addPolyline(polyLine)
+                            }
+                            lastLocPoint = latLng
+                        } else {
+                            Timber.d("Location already exists")
+                        }
+                    }
+                })
+            }
+        })
     }
 
     override fun onResume() {

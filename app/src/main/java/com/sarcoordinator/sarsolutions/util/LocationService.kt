@@ -8,6 +8,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Binder
 import android.os.IBinder
 import android.os.Looper
@@ -22,7 +23,6 @@ import com.sarcoordinator.sarsolutions.MainActivity
 import com.sarcoordinator.sarsolutions.R
 import com.sarcoordinator.sarsolutions.api.Repository
 import com.sarcoordinator.sarsolutions.models.Case
-import com.sarcoordinator.sarsolutions.models.LocationPoint
 import com.sarcoordinator.sarsolutions.models.Shift
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
@@ -61,13 +61,13 @@ class LocationService : Service() {
     private lateinit var addPathsJob: CompletableJob
     private var addPathsJobIsSyncing = false
 
-    private val locationList: MutableLiveData<ArrayList<LocationPoint>> = MutableLiveData()
-    fun getAllLocations(): LiveData<ArrayList<LocationPoint>> = locationList
+    private val locationList: MutableLiveData<ArrayList<Location>> = MutableLiveData()
+    fun getAllLocations(): LiveData<ArrayList<Location>> = locationList
 
     // Locations from this pointer till the end of the list will be synced
     private var locationSyncListPointer = 0
 
-    fun getListOfUnsyncedLocations(): List<LocationPoint> {
+    fun getListOfUnsyncedLocations(): List<Location> {
         return locationList.value!!.subList(locationSyncListPointer, locationList.value!!.size)
             .toList()
     }
@@ -93,8 +93,7 @@ class LocationService : Service() {
                 if (location.accuracy > 20) // Remove outliers for bad data points
                     continue
 
-                location.time
-                locationList.value!!.add(LocationPoint(location.latitude, location.longitude))
+                locationList.value!!.add(location)
                 locationList.notifyObserver()
 
                 serviceInfoText.value = "Last updated at \n" + Calendar.getInstance().time

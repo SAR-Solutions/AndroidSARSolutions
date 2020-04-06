@@ -1,10 +1,7 @@
 package com.sarcoordinator.sarsolutions
 
-import android.content.Context
-import android.content.res.Resources
 import android.os.Bundle
 import android.transition.TransitionManager
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,10 +17,13 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.model.*
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import com.sarcoordinator.sarsolutions.models.LocationsInShiftReport
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
-import com.sarcoordinator.sarsolutions.util.GlobalUtil.THEME_DARK
+import com.sarcoordinator.sarsolutions.util.GlobalUtil.getThemedPolyLineOptions
+import com.sarcoordinator.sarsolutions.util.GlobalUtil.setGoogleMapsTheme
 import com.sarcoordinator.sarsolutions.util.Navigation
 import com.sarcoordinator.sarsolutions.util.setMargins
 import kotlinx.android.synthetic.main.card_shift_details.*
@@ -32,7 +32,6 @@ import kotlinx.android.synthetic.main.fragment_shift_detail.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 class ShiftDetailFragment : Fragment(), OnMapReadyCallback {
 
@@ -212,30 +211,7 @@ class ShiftDetailFragment : Fragment(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
 
-        val isDarkTheme =
-            GlobalUtil.getCurrentTheme(
-                resources,
-                requireActivity().getPreferences(Context.MODE_PRIVATE)
-            ) == THEME_DARK
-
-        // Enable dark map if current theme is dark
-        if (isDarkTheme) {
-            try {
-                // Customise the styling of the base map using a JSON object defined
-                // in a raw resource file.
-                val success = googleMap.setMapStyle(
-                    MapStyleOptions.loadRawResourceStyle(
-                        requireContext(), R.raw.dark_map_theme
-                    )
-                )
-                if (!success) {
-                    Timber.e("Style parsing failed.")
-                }
-            } catch (e: Resources.NotFoundException) {
-                Timber.e("Can't find style. Error: ", e)
-            }
-
-        }
+        setGoogleMapsTheme(requireActivity(), googleMap)
 
         googleMap.uiSettings.isZoomControlsEnabled = true
 
@@ -244,19 +220,13 @@ class ShiftDetailFragment : Fragment(), OnMapReadyCallback {
         // Move camera to first point
         cachedShiftReport.locationList?.let {
             val firstLoc = cachedShiftReport.locationList!![0]
-            googleMap.moveCamera(
-                CameraUpdateFactory.newLatLngZoom(
-                    LatLng(
-                        firstLoc.latitude,
-                        firstLoc.longitude
-                    ), 15F
-                )
-            )
+
         }
 
         val googleLocList = ArrayList<LatLng>()
 
         cachedShiftReport.locationList?.forEachIndexed { index, cacheLocation ->
+
             googleLocList.add(
                 LatLng(
                     cacheLocation.latitude,
@@ -265,31 +235,35 @@ class ShiftDetailFragment : Fragment(), OnMapReadyCallback {
             )
 
             // Set start marker
-            if (index == 0) {
-                googleMap.addMarker(
-                    MarkerOptions().position(googleLocList[index])
-                        .title("Start")
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
-                )
-            }
-
-            // Set start marker
-            if (index == cachedShiftReport.locationList!!.size - 1) {
-                googleMap.addMarker(
-                    MarkerOptions().position(googleLocList[index])
-                        .title("End")
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
-                )
+            when (index) {
+                0 -> {
+                    googleMap.addMarker(
+                        MarkerOptions().position(googleLocList[index])
+                            .title("Start")
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+                    )
+                    // Focus camera on starting point
+                    googleMap.moveCamera(
+                        CameraUpdateFactory.newLatLngZoom(
+                            LatLng(
+                                cacheLocation.latitude,
+                                cacheLocation.longitude
+                            ), 15F
+                        )
+                    )
+                }
+                cachedShiftReport.locationList!!.size - 1 -> {  // Set end marker
+                    googleMap.addMarker(
+                        MarkerOptions().position(googleLocList[index])
+                            .title("End")
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+                    )
+                }
             }
         }
 
         // Set path style options
-        val polyLineOptions = PolylineOptions().apply {
-            endCap(RoundCap())
-            jointType(JointType.ROUND)
-            color(getPrimaryColorFromTheme())
-        }
-
+        val polyLineOptions = getThemedPolyLineOptions(requireContext())
         polyLineOptions.addAll(googleLocList)
 
         googleMap.addPolyline(polyLineOptions)
@@ -328,11 +302,5 @@ class ShiftDetailFragment : Fragment(), OnMapReadyCallback {
     override fun onLowMemory() {
         super.onLowMemory()
         mMapView?.onLowMemory()
-    }
-
-    private fun getPrimaryColorFromTheme(): Int {
-        val value = TypedValue()
-        requireContext().theme.resolveAttribute(android.R.attr.colorPrimary, value, true)
-        return value.data
     }
 }

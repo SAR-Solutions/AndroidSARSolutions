@@ -11,12 +11,18 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.ConnectivityManager
+import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.JointType
+import com.google.android.gms.maps.model.MapStyleOptions
+import com.google.android.gms.maps.model.PolylineOptions
+import com.google.android.gms.maps.model.RoundCap
 import com.google.android.material.snackbar.Snackbar
 import com.sarcoordinator.sarsolutions.R
 import timber.log.Timber
@@ -154,6 +160,12 @@ object GlobalUtil {
         return File.createTempFile("${caseName}_${timeStamp}", ".jpg", storageDir)
     }
 
+    private fun getPrimaryColorFromTheme(context: Context): Int {
+        val value = TypedValue()
+        context.theme.resolveAttribute(android.R.attr.colorPrimary, value, true)
+        return value.data
+    }
+
     // Returns byte array for image after fixing orientation
     fun fixImageOrientation(imagePath: String, orientation: Int): ByteArray {
         var bitmapImage = BitmapFactory.decodeFile(imagePath)
@@ -183,6 +195,39 @@ object GlobalUtil {
         bitmapImage.compress(Bitmap.CompressFormat.JPEG, 100, baos)
         return baos.toByteArray()
     }
+
+    fun setGoogleMapsTheme(activity: Activity, googleMap: GoogleMap) {
+        val isDarkTheme =
+            getCurrentTheme(
+                activity.resources,
+                activity.getPreferences(Context.MODE_PRIVATE)
+            ) == THEME_DARK
+
+        // Enable dark map if current theme is dark
+        if (isDarkTheme) {
+            try {
+                // Customise the styling of the base map using a JSON object defined
+                // in a raw resource file.
+                val success = googleMap.setMapStyle(
+                    MapStyleOptions.loadRawResourceStyle(
+                        activity, R.raw.dark_map_theme
+                    )
+                )
+                if (!success) {
+                    Timber.e("Style parsing failed.")
+                }
+            } catch (e: Resources.NotFoundException) {
+                Timber.e("Can't find style. Error: ", e)
+            }
+        }
+    }
+
+    fun getThemedPolyLineOptions(context: Context): PolylineOptions =
+        PolylineOptions().apply {
+            endCap(RoundCap())
+            jointType(JointType.ROUND)
+            color(getPrimaryColorFromTheme(context))
+        }
 }
 
 // Notify observers of change; adding item to list doesn't notify observers

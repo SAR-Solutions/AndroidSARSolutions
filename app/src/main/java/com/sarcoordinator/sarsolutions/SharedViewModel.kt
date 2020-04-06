@@ -3,6 +3,7 @@ package com.sarcoordinator.sarsolutions
 import android.app.Application
 import android.content.ComponentName
 import android.content.ServiceConnection
+import android.location.Location
 import android.os.IBinder
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -186,9 +187,9 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     fun getAllShiftReports(): LiveData<List<LocationsInShiftReport>> =
         cacheRepo.allShiftReports
 
-    fun addLocationsToCache(locations: List<LocationPoint>) {
+    fun addLocationsToCache(locations: List<Location>) {
         viewModelScope.launch(Default) {
-            while(currentShiftId.isNullOrEmpty())
+            while (currentShiftId.isNullOrEmpty())
                 delay(1000)
 
             val list = ArrayList<CacheLocation>()
@@ -253,7 +254,7 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
             try {
                 // Api calls to submit shift reports
                 cachedShiftReport.locationList?.let {
-                    Repository.putLocations(shiftId, false, cacheLocListToAPILocList(it))
+                    Repository.putLocationPoints(shiftId, false, cacheLocListToAPILocList(it))
                 }
                 cachedShiftReport.shiftReport.endTime?.let {
                     Repository.putEndTime(shiftId, false, it)
