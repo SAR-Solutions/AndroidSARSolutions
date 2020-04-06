@@ -83,13 +83,6 @@ class ImageDetailFragment : Fragment(R.layout.fragment_image_detail), CustomFrag
         outState.putString(IMAGE_PATH, imageFile.absolutePath)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        // Restore view state
-        (requireActivity() as MainActivity).enableTransparentStatusBar(false)
-        nav.hideBottomNavBar?.let { it(false) }
-    }
-
     private fun setupMetaDataEditText() {
         // Load image metadata
         metadata_content.setText(

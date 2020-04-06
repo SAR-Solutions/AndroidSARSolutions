@@ -26,6 +26,8 @@ import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.card.MaterialCardView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.karumi.dexter.Dexter
@@ -67,7 +69,9 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     private lateinit var viewManager: LinearLayoutManager
     private lateinit var viewAdapter: ImagesAdapter
     private var stopLocationTracking = false
+
     private var mMapView: MapView? = null
+    private lateinit var bottomSheet: BottomSheetBehavior<MaterialCardView>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -86,6 +90,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
             .inflateTransition(android.R.transition.move)
 
         nav.hideBottomNavBar?.let { it(true) }
+        (requireActivity() as MainActivity).enableTransparentStatusBar(false)
     }
 
     override fun onCreateView(
@@ -105,6 +110,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         mMapView?.onCreate(mapViewBundle)
         mMapView?.getMapAsync(this)
 
+        bottomSheet = BottomSheetBehavior.from(view.findViewById(R.id.case_info_card))
 
         view.findViewById<FloatingActionButton>(R.id.capture_photo).hide()
         view.findViewById<FloatingActionButton>(R.id.location_service_fab).hide()
@@ -118,6 +124,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
 
         back_button.setOnClickListener { requireActivity().onBackPressed() }
         initFabClickListener()
+        initCaseInfoBottomSheet()
         validateNetworkConnectivity()
     }
 
@@ -134,12 +141,6 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
             outState.putBundle(MAPVIEW_BUNDLE_KEY, mapViewBundle)
         }
         mMapView!!.onSaveInstanceState(mapViewBundle)
-    }
-
-    override fun onPause() {
-        mMapView?.onPause()
-        nav.hideBottomNavBar?.let { it(false) }
-        super.onPause()
     }
 
     private fun validateNetworkConnectivity() {
@@ -214,6 +215,32 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
                 }
             }
         }
+    }
+
+    private fun initCaseInfoBottomSheet() {
+        // Bottom Sheet stuff
+        bottomSheet.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                return
+            }
+
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                if (newState == BottomSheetBehavior.STATE_HIDDEN)
+                    Toast.makeText(
+                        requireContext(),
+                        "Click on the info button to see case information",
+                        Toast.LENGTH_LONG
+                    ).show()
+            }
+        })
+        info_button.setOnClickListener {
+
+            bottomSheet.state = when (bottomSheet.state) {
+                BottomSheetBehavior.STATE_HIDDEN -> BottomSheetBehavior.STATE_HALF_EXPANDED
+                else -> BottomSheetBehavior.STATE_EXPANDED
+            }
+        }
+
     }
 
     private fun completeShiftAndStopService() {
@@ -556,9 +583,12 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         mMapView?.onStop()
     }
 
+    override fun onPause() {
+        mMapView?.onPause()
+        super.onPause()
+    }
+
     override fun onDestroy() {
-        nav.hideBottomNavBar?.let { it(false) }
-        (requireActivity() as MainActivity).enableTransparentSystemBars(false)
         mMapView?.onDestroy()
         mMapView = null
         super.onDestroy()

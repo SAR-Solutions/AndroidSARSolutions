@@ -16,8 +16,6 @@ import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.GlobalUtil.THEME_LIGHT
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import java.util.*
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
@@ -149,19 +147,17 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     // Handle bottom nav bar state change
     private fun hideBottomNavBar(hide: Boolean) {
-        GlobalScope.launch {
-            val currentTheme =
-                GlobalUtil.getCurrentTheme(resources, getPreferences(Context.MODE_PRIVATE))
-            if (currentTheme == GlobalUtil.THEME_DARK) {
-                window.navigationBarColor =
-                    resources.getColor(R.color.lightGray)
-            } else if (currentTheme == GlobalUtil.THEME_LIGHT) {
-                window.navigationBarColor =
-                    resources.getColor(android.R.color.white)
-            }
-            parent_layout.setTransitionDuration(500)
-            parent_layout.transitionToState(if (hide) R.id.hide_nav_bar else R.id.show_nav_bar)
+        val currentTheme =
+            GlobalUtil.getCurrentTheme(resources, getPreferences(Context.MODE_PRIVATE))
+        if (currentTheme == GlobalUtil.THEME_DARK) {
+            window.navigationBarColor =
+                resources.getColor(R.color.lightGray)
+        } else if (currentTheme == GlobalUtil.THEME_LIGHT) {
+            window.navigationBarColor =
+                resources.getColor(android.R.color.white)
         }
+        parent_layout.setTransitionDuration(500)
+        parent_layout.transitionToState(if (hide) R.id.hide_nav_bar else R.id.show_nav_bar)
     }
 
     // Load user preferences using shared preferences
