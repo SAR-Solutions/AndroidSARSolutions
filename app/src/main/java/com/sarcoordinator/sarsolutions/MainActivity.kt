@@ -165,7 +165,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     }
 
     // Load user preferences using shared preferences
-// NOTE: Call before super.onCreate as it sets the app theme
+    // NOTE: Call before super.onCreate as it sets the app theme
     private fun loadUserPreferences() {
         sharedPrefs = getPreferences(Context.MODE_PRIVATE)
 

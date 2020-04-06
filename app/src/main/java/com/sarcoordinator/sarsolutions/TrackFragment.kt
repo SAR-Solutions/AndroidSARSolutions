@@ -23,6 +23,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.MapView
+import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.karumi.dexter.Dexter
@@ -46,13 +49,14 @@ import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.File
 
-class TrackFragment : Fragment() {
+class TrackFragment : Fragment(), OnMapReadyCallback {
 
     companion object ArgsTags {
         const val CASE_ID = "CASE_ID"
         const val LOCATION_TRACKING_STATUS = "LOCATION_TRACKING_STATUS"
     }
 
+    private val MAPVIEW_BUNDLE_KEY = "MapViewBundleKey"
     private val REQUEST_IMAGE_CAPTURE = 1
     private val nav: Navigation by lazy { Navigation.getInstance() }
     private var service: LocationService? = null
@@ -63,6 +67,7 @@ class TrackFragment : Fragment() {
     private lateinit var viewManager: LinearLayoutManager
     private lateinit var viewAdapter: ImagesAdapter
     private var stopLocationTracking = false
+    private var mMapView: MapView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,6 +94,18 @@ class TrackFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_track_map, container, false)
+
+        // Required map setup
+        var mapViewBundle: Bundle? = null
+        if (savedInstanceState != null) {
+            mapViewBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY)
+        }
+
+        mMapView = view.findViewById(R.id.map)
+        mMapView?.onCreate(mapViewBundle)
+        mMapView?.getMapAsync(this)
+
+
         view.findViewById<FloatingActionButton>(R.id.capture_photo).hide()
         view.findViewById<FloatingActionButton>(R.id.location_service_fab).hide()
         return view
@@ -108,11 +125,21 @@ class TrackFragment : Fragment() {
         super.onSaveInstanceState(outState)
         outState.putString(CASE_ID, caseId)
         outState.putBoolean(LOCATION_TRACKING_STATUS, stopLocationTracking)
+
+        // Required Map callback
+        var mapViewBundle =
+            outState.getBundle(MAPVIEW_BUNDLE_KEY)
+        if (mapViewBundle == null) {
+            mapViewBundle = Bundle()
+            outState.putBundle(MAPVIEW_BUNDLE_KEY, mapViewBundle)
+        }
+        mMapView!!.onSaveInstanceState(mapViewBundle)
     }
 
     override fun onPause() {
-        super.onPause()
+        mMapView?.onPause()
         nav.hideBottomNavBar?.let { it(false) }
+        super.onPause()
     }
 
     private fun validateNetworkConnectivity() {
@@ -511,4 +538,34 @@ class TrackFragment : Fragment() {
         }
     }
 
+    override fun onMapReady(googleMap: GoogleMap) {
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mMapView?.onResume()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        mMapView?.onStart()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        mMapView?.onStop()
+    }
+
+    override fun onDestroy() {
+        nav.hideBottomNavBar?.let { it(false) }
+        (requireActivity() as MainActivity).enableTransparentSystemBars(false)
+        mMapView?.onDestroy()
+        mMapView = null
+        super.onDestroy()
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mMapView?.onLowMemory()
+    }
 }
