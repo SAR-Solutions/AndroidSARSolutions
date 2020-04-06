@@ -470,7 +470,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
                         }
                         LocationService.ShiftErrors.PUT_LOCATIONS -> {
                             Timber.e("All locations could not posted")
-                            viewModel.addLocationsToCache(service!!.getSyncList())
+                            viewModel.addLocationsToCache(service!!.getListOfUnsyncedLocations())
                         }
                         LocationService.ShiftErrors.PUT_END_TIME -> {
                             Timber.e("Posting end time failed")

@@ -61,9 +61,16 @@ class LocationService : Service() {
     private lateinit var addPathsJob: CompletableJob
     private var addPathsJobIsSyncing = false
 
-    private val locationList: ArrayList<LocationPoint> = ArrayList()
-    private val pendingSyncList: ArrayList<LocationPoint> = ArrayList()
-    fun getSyncList(): ArrayList<LocationPoint> = pendingSyncList
+    private val locationList: MutableLiveData<ArrayList<LocationPoint>> = MutableLiveData()
+    fun getAllLocations(): LiveData<ArrayList<LocationPoint>> = locationList
+
+    // Locations from this pointer till the end of the list will be synced
+    private var locationSyncListPointer = 0
+
+    fun getListOfUnsyncedLocations(): List<LocationPoint> {
+        return locationList.value!!.subList(locationSyncListPointer, locationList.value!!.size)
+            .toList()
+    }
 
     private var mEndTime: String? = null
     fun getEndTime(): String? = mEndTime
@@ -85,25 +92,45 @@ class LocationService : Service() {
 
                 if (location.accuracy > 20) // Remove outliers for bad data points
                     continue
-                // Don't record if already exists
-                if (locationList.contains(LocationPoint(location.latitude, location.longitude)))
-                    continue
-                locationList.add(LocationPoint(location.latitude, location.longitude))
+
+                location.time
+                locationList.value!!.add(LocationPoint(location.latitude, location.longitude))
+                locationList.notifyObserver()
+
                 serviceInfoText.value = "Last updated at \n" + Calendar.getInstance().time
                 (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
                     .notify(1, getNotification(serviceInfoText.value.toString()))
 
+                Timber.d(
+                    "List size before sync: ${locationList.value!!.size}\n" +
+                            "Pointer: $locationSyncListPointer"
+                )
+
                 // Start addPathsjob if 10 or more locations exist and job isn't running
-                if (locationList.size >= 10 && !addPathsJobIsSyncing) {
+                if (!addPathsJobIsSyncing && getListOfUnsyncedLocations().size >= 10) {
+                    val newPointerValue = locationList.value!!.size - 1
                     addPathsJobIsSyncing = true
-                    val tempList = ArrayList<LocationPoint>()
-                    tempList.addAll(locationList)
-                    locationList.clear()
+                    val locationsToSync = getListOfUnsyncedLocations()
                     CoroutineScope(IO + addPathsJob).launch {
                         try {
-                            Repository.putLocations(shiftId.value!!, mTestMode, tempList)
+                            Timber.d(
+                                "Syncing list size: ${locationsToSync.size}\n" +
+                                        "Pointer: $locationSyncListPointer"
+                            )
+                            if (mTestMode) {
+                                // Emulate network call
+                                Timber.d("Emulating syncing shifts")
+                                delay(2000)
+                            } else {
+                                Repository.putLocations(shiftId.value!!, mTestMode, locationsToSync)
+                            }
+                            locationSyncListPointer = newPointerValue
+
+                            Timber.d(
+                                "List size after sync: ${locationList.value!!.size}\n" +
+                                        "Pointer: $locationSyncListPointer"
+                            )
                         } catch (exception: Exception) {
-                            pendingSyncList.addAll(tempList)
                             Timber.e("No internet connection found, added paths to pendingSyncList")
                         }
                     }.invokeOnCompletion {
@@ -134,6 +161,7 @@ class LocationService : Service() {
         mCase = intent.extras!!.getSerializable(case) as Case
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        locationList.postValue(ArrayList())
 
         // Get and set mShiftId
         CoroutineScope(IO).launch {
@@ -143,7 +171,14 @@ class LocationService : Service() {
             )
 
             try {
-                shiftId.postValue(Repository.postStartShift(shift, mCase.id, mTestMode).shiftId)
+                if (mTestMode) {
+                    // Emulate network call
+                    Timber.d("Emulating getting shift id")
+                    delay(2000)
+                    shiftId.postValue("Test Shift Id")
+                } else {
+                    shiftId.postValue(Repository.postStartShift(shift, mCase.id, mTestMode).shiftId)
+                }
                 Timber.d("Location service started")
                 serviceInfoText.postValue(getString(R.string.started_shift))
             } catch (e: Exception) {
@@ -246,10 +281,21 @@ class LocationService : Service() {
             }
 
             // Sync remaining points
-            if (locationList.isNotEmpty() || pendingSyncList.isNotEmpty()) {
-                pendingSyncList.addAll(locationList)
+            if (getListOfUnsyncedLocations().isNotEmpty()) {
                 try {
-                    Repository.putLocations(shiftId.value!!, mTestMode, pendingSyncList)
+                    if (mTestMode) {
+                        // Emulate network call
+                        Timber.d("Emulating syncing remaining locations")
+                        delay(2000)
+                    } else {
+                        Repository.putLocations(
+                            shiftId.value!!,
+                            mTestMode,
+                            getListOfUnsyncedLocations()
+                        )
+                    }
+                    locationSyncListPointer = locationList.value!!.size
+                    Timber.d("Final location sync pointer: $locationSyncListPointer for list size: ${locationList.value?.size}")
                 } catch (exception: Exception) {
                     Timber.e("Error with network call putting locations\n$exception")
                     shiftEndedWithError.postValue(ShiftErrors.PUT_LOCATIONS)
@@ -258,11 +304,17 @@ class LocationService : Service() {
 
             // Post endtime
             try {
-                Repository.putEndTime(
-                    shiftId.value!!,
-                    mTestMode,
-                    endTime
-                )
+                if (mTestMode) {
+                    // Emulate network call
+                    Timber.d("Emulate posting shift end time")
+                    delay(2000)
+                } else {
+                    Repository.putEndTime(
+                        shiftId.value!!,
+                        mTestMode,
+                        endTime
+                    )
+                }
             } catch (exception: Exception) {
                 Timber.e("Error with network call putting end time\n$exception")
                 mEndTime = endTime
