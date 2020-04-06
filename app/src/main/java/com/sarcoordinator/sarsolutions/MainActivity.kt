@@ -154,7 +154,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 GlobalUtil.getCurrentTheme(resources, getPreferences(Context.MODE_PRIVATE))
             if (currentTheme == GlobalUtil.THEME_DARK) {
                 window.navigationBarColor =
-                    resources.getColor(if (hide) R.color.gray else R.color.lightGray)
+                    resources.getColor(R.color.lightGray)
             } else if (currentTheme == GlobalUtil.THEME_LIGHT) {
                 window.navigationBarColor =
                     resources.getColor(android.R.color.white)

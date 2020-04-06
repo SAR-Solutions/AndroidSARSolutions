@@ -11,7 +11,9 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.provider.Settings
 import android.transition.TransitionInflater
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -22,6 +24,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionDeniedResponse
@@ -33,7 +36,8 @@ import com.sarcoordinator.sarsolutions.models.Case
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.LocationService
 import com.sarcoordinator.sarsolutions.util.Navigation
-import kotlinx.android.synthetic.main.fragment_track.*
+import kotlinx.android.synthetic.main.card_case_details.view.*
+import kotlinx.android.synthetic.main.fragment_track_map.*
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.delay
@@ -42,7 +46,7 @@ import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.File
 
-class TrackFragment : Fragment(R.layout.fragment_track) {
+class TrackFragment : Fragment() {
 
     companion object ArgsTags {
         const val CASE_ID = "CASE_ID"
@@ -75,6 +79,19 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         // Set shared element transition
         sharedElementEnterTransition = TransitionInflater.from(context)
             .inflateTransition(android.R.transition.move)
+
+        nav.hideBottomNavBar?.let { it(true) }
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        val view = inflater.inflate(R.layout.fragment_track_map, container, false)
+        view.findViewById<FloatingActionButton>(R.id.capture_photo).hide()
+        view.findViewById<FloatingActionButton>(R.id.location_service_fab).hide()
+        return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -82,8 +99,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
 
         sharedPrefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
 
-        location_service_fab.hide()
-
+        back_button.setOnClickListener { requireActivity().onBackPressed() }
         initFabClickListener()
         validateNetworkConnectivity()
     }
@@ -92,6 +108,11 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         super.onSaveInstanceState(outState)
         outState.putString(CASE_ID, caseId)
         outState.putBoolean(LOCATION_TRACKING_STATUS, stopLocationTracking)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        nav.hideBottomNavBar?.let { it(false) }
     }
 
     private fun validateNetworkConnectivity() {
@@ -103,8 +124,8 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
             }
         }
         // If coming from retry network fab, change case info card visibility and desc text
-        case_info_material_card.visibility = View.VISIBLE
-        location_desc.text = getString(R.string.start_tracking_desc)
+        case_info_card.visibility = View.VISIBLE
+        shift_info_text_view.text = getString(R.string.start_tracking_desc)
 
         setupInterface()
 
@@ -177,7 +198,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         }
         location_service_fab.setImageDrawable(progressCircle)
         progressCircle.start()
-        location_desc.text = getString(R.string.waiting_for_server)
+        shift_info_text_view.text = getString(R.string.waiting_for_server)
 
         if (service != null) {
             service?.completeShift()?.invokeOnCompletion {
@@ -220,7 +241,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
             nav,
             viewModel.getImageList(externalCaseImageDir).value!!
         )
-        image_recycler_view.apply {
+        case_info_card.image_recycler_view.apply {
             layoutManager = viewManager
             adapter = viewAdapter
         }
@@ -228,7 +249,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         // Observe and populate list on change
         viewModel.getImageList().observe(viewLifecycleOwner, Observer {
             val size = it.size
-            image_number_text_view.text = size.toString()
+            case_info_card.image_number_text_view.text = size.toString()
             viewAdapter.setData(it)
         })
 
@@ -266,18 +287,17 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
     // Disable shimmer, show case info layout; vice-versa
     private fun enableLoadingState(enable: Boolean) {
         if (enable) {
-            track_fragment_shimmer.visibility = View.VISIBLE
-            case_info_material_card.visibility = View.GONE
+            case_info_card.track_fragment_shimmer.visibility = View.VISIBLE
+            case_info_card.case_info_layout.visibility = View.GONE
         } else {
-            track_fragment_shimmer.visibility = View.GONE
-            case_info_material_card.visibility = View.VISIBLE
+            case_info_card.track_fragment_shimmer.visibility = View.GONE
+            case_info_card.case_info_layout.visibility = View.VISIBLE
         }
     }
 
     private fun enableStartTrackingFab() {
         capture_photo.visibility = View.GONE
-
-        location_service_fab.show()
+        location_service_fab.visibility = View.VISIBLE
 
         location_service_fab.setImageDrawable(
             resources.getDrawable(
@@ -312,18 +332,18 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         location_service_fab.backgroundTintList = resources.getColorStateList(R.color.newRed)
         location_service_fab.visibility = View.VISIBLE
 
-        case_info_material_card.visibility = View.GONE
-        location_desc.text = getString(R.string.no_network_desc)
+        case_info_card.case_info_layout.visibility = View.GONE
+        shift_info_text_view.text = getString(R.string.no_network_desc)
     }
 
     // Set case information
     private fun populateViewWithCase(case: Case) {
-        (requireActivity() as MainActivity).supportActionBar?.title = case.id
-        id_value_tv.text = case.id
-        reporter_value_tv.text = case.reporterName
-        missing_person_value_tv.text = listToOrderedListString(case.missingPersonName)
-        equipment_value_tv.text = listToOrderedListString(case.equipmentUsed)
-        toolbar_track.setHeading(case.caseName)
+        enableStartTrackingFab()
+        case_info_card.case_id.text = case.id
+        case_info_card.reporter_name.text = case.reporterName
+        case_info_card.missing_person.text = listToOrderedListString(case.missingPersonName)
+        case_info_card.equipment_used.text = listToOrderedListString(case.equipmentUsed)
+        case_info_card.case_title.text = case.caseName
         setupImagesCardView()
     }
 
@@ -377,7 +397,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
     private fun observeService() {
         service?.let {
             it.getServiceInfo().observe(viewLifecycleOwner, Observer { lastUpdated ->
-                location_desc.text = lastUpdated
+                shift_info_text_view.text = lastUpdated
             })
             it.getShiftId().observe(viewLifecycleOwner, Observer { shiftId ->
                 viewModel.currentShiftId = shiftId
@@ -415,7 +435,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
 
     // Starts service, calls bindService and enableStopTrackingFab
     private fun startLocationService() {
-        location_desc.text = getString(R.string.starting_location_service)
+        shift_info_text_view.text = getString(R.string.starting_location_service)
         // Pass required extras and start location service
         val serviceIntent = Intent(context, LocationService::class.java)
         serviceIntent.putExtra(
@@ -481,7 +501,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         return if (list.count() == 1) {
             list[0]
         } else {
-            missing_person_tv.text = getString(R.string.missing_people)
+            case_info_card.missing_person.text = getString(R.string.missing_people)
             var text = ""
             for (i in 0 until list.count() - 1) {
                 text += "${list[i]}\n"
