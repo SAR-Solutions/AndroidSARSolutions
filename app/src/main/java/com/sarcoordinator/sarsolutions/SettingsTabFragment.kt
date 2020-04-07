@@ -12,9 +12,9 @@ import androidx.fragment.app.Fragment
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.firebase.auth.FirebaseAuth
+import com.sarcoordinator.sarsolutions.util.CustomFragment
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.Navigation
-import com.sarcoordinator.sarsolutions.util.CustomFragment
 import kotlinx.android.synthetic.main.fragment_settings.*
 import timber.log.Timber
 
@@ -54,12 +54,7 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), CustomFragment
             theme_spinner.adapter = it
         }
 
-        testing_mode_switch.setOnClickListener {
-            with(sharedPrefs.edit()) {
-                putBoolean(TESTING_MODE_PREFS, (it as SwitchMaterial).isChecked)
-                commit()
-            }
-        }
+        setupTestingModeUI()
 
         loadPreferences()
 
@@ -93,6 +88,21 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), CustomFragment
                 .replace(R.id.fragment_container, LoginFragment())
                 .commit()
 
+        }
+    }
+
+    private fun setupTestingModeUI() {
+        if (BuildConfig.DEBUG) {
+            testing_mode_switch.setOnClickListener {
+                with(sharedPrefs.edit()) {
+                    putBoolean(TESTING_MODE_PREFS, (it as SwitchMaterial).isChecked)
+                    commit()
+                }
+            }
+        } else {
+            // Release
+            testing_mode_switch.visibility = View.GONE
+            testing_mode_title.visibility = View.GONE
         }
     }
 

@@ -44,6 +44,15 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
         super.onCreate(savedInstanceState)
 
+        // Disable testing mode for release variant
+        if (!BuildConfig.DEBUG) {
+            sharedPrefs = getPreferences(Context.MODE_PRIVATE)
+            with(sharedPrefs.edit()) {
+                putBoolean(SettingsTabFragment.TESTING_MODE_PREFS, false)
+                commit()
+            }
+        }
+
         nav = Navigation.getInstance(
             supportFragmentManager,
             bottom_nav_bar

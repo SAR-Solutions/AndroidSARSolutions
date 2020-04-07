@@ -27,6 +27,12 @@ android {
         resValue 'string', "gmaps_api_key", GOOGLE_MAPS_API_KEY
     }
     buildTypes {
+        release_debug {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            debuggable false
+            signingConfig signingConfigs.debug
+        }
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
