@@ -20,6 +20,7 @@ import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
@@ -48,6 +49,8 @@ import com.sarcoordinator.sarsolutions.models.Case
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.LocationService
 import com.sarcoordinator.sarsolutions.util.Navigation
+import com.sarcoordinator.sarsolutions.util.setMargins
+import dev.chrisbanes.insetter.doOnApplyWindowInsets
 import kotlinx.android.synthetic.main.card_case_details.view.*
 import kotlinx.android.synthetic.main.fragment_track.*
 import kotlinx.coroutines.Dispatchers.IO
@@ -136,9 +139,6 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         // Set shared element transition
         sharedElementEnterTransition = TransitionInflater.from(context)
             .inflateTransition(android.R.transition.move)
-
-        nav.hideBottomNavBar?.let { it(true) }
-        (requireActivity() as MainActivity).enableTransparentStatusBar(false)
     }
 
     override fun onCreateView(
@@ -183,6 +183,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setupViewInsets()
         back_button.setOnClickListener { requireActivity().onBackPressed() }
         initFabClickListener()
         initCaseInfoBottomSheet()
@@ -207,6 +208,49 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
                 outState.putBundle(MAPVIEW_BUNDLE_KEY, mapViewBundle)
             }
             mMapView!!.onSaveInstanceState(mapViewBundle)
+        }
+    }
+
+    private fun setupViewInsets() {
+        back_button.doOnApplyWindowInsets { view, insets, initialState ->
+            view.updatePadding(
+                top = initialState.paddings.top + insets.systemGestureInsets.top,
+                left = initialState.paddings.left + insets.systemGestureInsets.left,
+                bottom = initialState.paddings.bottom + insets.systemGestureInsets.bottom
+            )
+        }
+        info_button.doOnApplyWindowInsets { view, insets, initialState ->
+            view.updatePadding(
+                top = initialState.paddings.top + insets.systemGestureInsets.top,
+                left = initialState.paddings.left + insets.systemGestureInsets.left,
+                right = initialState.paddings.right + insets.systemGestureInsets.right,
+                bottom = initialState.paddings.bottom + insets.systemGestureInsets.bottom
+            )
+        }
+        info_view_layout.doOnApplyWindowInsets { view, insets, initialState ->
+            view.setMargins(
+                initialState.margins.left + insets.systemGestureInsets.left,
+                initialState.margins.top + insets.systemGestureInsets.top,
+                initialState.margins.right + insets.systemGestureInsets.right,
+                initialState.margins.bottom + insets.systemGestureInsets.bottom
+            )
+        }
+        case_info_card.parent_layout.doOnApplyWindowInsets { view, insets, initialState ->
+            bottomSheet.peekHeight = bottomSheet.peekHeight + insets.systemGestureInsets.bottom
+            view.setMargins(
+                initialState.margins.left + insets.systemGestureInsets.left,
+                initialState.margins.top + insets.systemGestureInsets.top,
+                initialState.margins.right + insets.systemGestureInsets.right,
+                initialState.margins.bottom + insets.systemGestureInsets.bottom
+            )
+        }
+        location_service_fab.doOnApplyWindowInsets { view, insets, initialState ->
+            view.setMargins(
+                initialState.margins.left + insets.systemGestureInsets.left,
+                initialState.margins.top + insets.systemGestureInsets.top,
+                initialState.margins.right + insets.systemGestureInsets.right,
+                initialState.margins.bottom + insets.systemGestureInsets.bottom
+            )
         }
     }
 
@@ -687,6 +731,8 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
 
     override fun onStart() {
         super.onStart()
+        nav.hideBottomNavBar?.let { it(true) }
+        (requireActivity() as MainActivity).enableTransparentSystemBars(true)
         if (enableMap)
             mMapView?.onStart()
     }

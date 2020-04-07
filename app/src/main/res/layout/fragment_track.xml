@@ -48,8 +48,11 @@
                 android:id="@+id/shift_info_text_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="center"
+                android:minLines="2"
                 android:fontFamily="@font/catamaran_semibold"
                 android:text="@string/start_tracking_desc"
+                android:padding="4dp"
                 android:textAlignment="center" />
 
         </com.google.android.material.card.MaterialCardView>

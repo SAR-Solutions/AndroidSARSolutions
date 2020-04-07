@@ -66,9 +66,8 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                 return@setOnClickListener
             }
 
-            // Disable buttons
-            it.isEnabled = false
-            forgot_password_button.isEnabled = false
+            // Disable UI elements
+            enableUIElements(false)
 
             // Hide keyboard
             activity?.window?.decorView?.rootView?.let {
@@ -80,14 +79,14 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
             // Validate input is email
             if (!Patterns.EMAIL_ADDRESS.matcher(email_input_text.text.toString()).matches()) {
                 Toast.makeText(context, "Enter valid email", Toast.LENGTH_LONG).show()
-                it.isEnabled = true
+                enableUIElements(true)
                 return@setOnClickListener
             }
 
             // Validate password format
             if (password_input_text.text.isNullOrEmpty()) {
                 Toast.makeText(context, "Password can't be empty", Toast.LENGTH_LONG).show()
-                it.isEnabled = true
+                enableUIElements(true)
                 return@setOnClickListener
             }
 
@@ -105,17 +104,16 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                             nav.hideBottomNavBar?.let { it(false) }
                             nav.selectTab(Navigation.TabIdentifiers.HOME)
                         } else {
-                            it.isEnabled = true
+                            enableUIElements(true)
                             Toast.makeText(
                                 context,
                                 "Invalid credentials. Try again.",
                                 Toast.LENGTH_LONG
                             ).show()
-                            forgot_password_button.isEnabled = true
                         }
                     }
             } catch (e: Exception) {
-                it.isEnabled = true
+                enableUIElements(true)
                 Toast.makeText(context, "Unknown error occurred. Try again", Toast.LENGTH_LONG)
                     .show()
             }
@@ -135,6 +133,13 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         menu.clear()
+    }
+
+    private fun enableUIElements(enable: Boolean) {
+        signin_button.isEnabled = enable
+        forgot_password_button.isEnabled = enable
+        email_input_text.isEnabled = enable
+        password_input_text.isEnabled = enable
     }
 
 }

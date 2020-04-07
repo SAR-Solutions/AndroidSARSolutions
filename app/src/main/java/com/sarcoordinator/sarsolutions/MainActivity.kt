@@ -183,17 +183,8 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         }
     }
 
-    fun enableStatusBarColorForNestedFragment() {
-        //TODO: Compelte implementing this
-        if (GlobalUtil.getThemePreference(
-                getPreferences(Context.MODE_PRIVATE)
-            ) == GlobalUtil.THEME_DARK
-        ) {
-            window.statusBarColor = resources.getColor(R.color.lightGray)
-        }
-    }
-
     fun enableTransparentStatusBar(enableTransparency: Boolean) {
+        restoreSystemBars()
         window.apply {
             val currentTheme =
                 GlobalUtil.getCurrentTheme(resources, getPreferences(Context.MODE_PRIVATE))
@@ -208,10 +199,12 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 statusBarColor = Color.TRANSPARENT
 
                 // If theme is light, show light navigation bar icons
-                if (currentTheme == GlobalUtil.THEME_LIGHT) {
+                if (currentTheme == THEME_LIGHT) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        decorView.systemUiVisibility += View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
                         decorView.systemUiVisibility += View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
                     } else {
+                        statusBarColor = Color.BLACK
                         navigationBarColor = Color.BLACK
                     }
                 }
@@ -222,6 +215,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     }
 
     fun enableTransparentSystemBars(enableTransparency: Boolean) {
+        restoreSystemBars()
         window.apply {
             if(enableTransparency) {
                 setFlags(

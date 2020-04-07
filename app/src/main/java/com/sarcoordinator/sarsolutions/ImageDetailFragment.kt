@@ -49,9 +49,12 @@ class ImageDetailFragment : Fragment(R.layout.fragment_image_detail), CustomFrag
         // Set shared element transition
         sharedElementEnterTransition = TransitionInflater.from(context)
             .inflateTransition(android.R.transition.move)
+    }
 
-        (requireActivity() as MainActivity).enableTransparentStatusBar(true)
+    override fun onStart() {
+        super.onStart()
         nav.hideBottomNavBar?.let { it(true) }
+        (requireActivity() as MainActivity).enableTransparentStatusBar(true)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
