@@ -20,7 +20,6 @@ import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
@@ -53,6 +52,7 @@ import com.sarcoordinator.sarsolutions.util.setMargins
 import dev.chrisbanes.insetter.doOnApplyWindowInsets
 import kotlinx.android.synthetic.main.card_case_details.view.*
 import kotlinx.android.synthetic.main.fragment_track.*
+import kotlinx.android.synthetic.main.view_circular_button.view.*
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.delay
@@ -184,7 +184,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         super.onViewCreated(view, savedInstanceState)
 
         setupViewInsets()
-        back_button.setOnClickListener { requireActivity().onBackPressed() }
+        setupCircularButtons()
         initFabClickListener()
         initCaseInfoBottomSheet()
         validateNetworkConnectivity()
@@ -211,20 +211,33 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
+    private fun setupCircularButtons() {
+        back_button_view.image_button.setImageDrawable(resources.getDrawable(R.drawable.ic_baseline_arrow_back_24))
+        back_button_view.image_button.setOnClickListener { requireActivity().onBackPressed() }
+        info_button_view.image_button.setOnClickListener {
+            bottomSheet.state = when (bottomSheet.state) {
+                BottomSheetBehavior.STATE_HIDDEN -> BottomSheetBehavior.STATE_HALF_EXPANDED
+                BottomSheetBehavior.STATE_EXPANDED -> BottomSheetBehavior.STATE_COLLAPSED
+                else -> BottomSheetBehavior.STATE_EXPANDED
+            }
+        }
+    }
+
     private fun setupViewInsets() {
-        back_button.doOnApplyWindowInsets { view, insets, initialState ->
-            view.updatePadding(
-                top = initialState.paddings.top + insets.systemGestureInsets.top,
-                left = initialState.paddings.left + insets.systemGestureInsets.left,
-                bottom = initialState.paddings.bottom + insets.systemGestureInsets.bottom
+        back_button_view.doOnApplyWindowInsets { view, insets, initialState ->
+            view.setMargins(
+                initialState.margins.left + insets.systemGestureInsets.left,
+                initialState.margins.top + insets.systemGestureInsets.top,
+                initialState.margins.right + insets.systemGestureInsets.right,
+                initialState.margins.bottom + insets.systemGestureInsets.bottom
             )
         }
-        info_button.doOnApplyWindowInsets { view, insets, initialState ->
-            view.updatePadding(
-                top = initialState.paddings.top + insets.systemGestureInsets.top,
-                left = initialState.paddings.left + insets.systemGestureInsets.left,
-                right = initialState.paddings.right + insets.systemGestureInsets.right,
-                bottom = initialState.paddings.bottom + insets.systemGestureInsets.bottom
+        info_button_view.doOnApplyWindowInsets { view, insets, initialState ->
+            view.setMargins(
+                initialState.margins.left + insets.systemGestureInsets.left,
+                initialState.margins.top + insets.systemGestureInsets.top,
+                initialState.margins.right + insets.systemGestureInsets.right,
+                initialState.margins.bottom + insets.systemGestureInsets.bottom
             )
         }
         info_view_layout.doOnApplyWindowInsets { view, insets, initialState ->
@@ -347,14 +360,6 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
                     ).show()
             }
         })
-        info_button.setOnClickListener {
-            bottomSheet.state = when (bottomSheet.state) {
-                BottomSheetBehavior.STATE_HIDDEN -> BottomSheetBehavior.STATE_HALF_EXPANDED
-                BottomSheetBehavior.STATE_EXPANDED -> BottomSheetBehavior.STATE_COLLAPSED
-                else -> BottomSheetBehavior.STATE_EXPANDED
-            }
-        }
-
     }
 
     private fun completeShiftAndStopService() {

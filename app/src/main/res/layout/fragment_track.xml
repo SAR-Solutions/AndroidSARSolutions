@@ -23,13 +23,14 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.sarcoordinator.sarsolutions.custom_views.CustomFloatingButton
-            android:id="@+id/back_button"
+        <include
+            android:id="@+id/back_button_view"
+            layout="@layout/view_circular_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="8dp"
-            app:Icon="@drawable/ic_baseline_arrow_back_24"
-            app:Tint="?colorPrimary"
+            android:layout_margin="8dp"
+            app:layout_constraintEnd_toStartOf="@+id/info_view_layout"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -37,35 +38,34 @@
             android:id="@+id/info_view_layout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            app:cardCornerRadius="50dp"
             android:layout_margin="8dp"
             app:cardElevation="4dp"
-            app:cardCornerRadius="50dp"
-            app:layout_constraintEnd_toStartOf="@id/info_button"
-            app:layout_constraintStart_toEndOf="@id/back_button"
-            app:layout_constraintTop_toTopOf="@id/back_button">
+            app:layout_constraintEnd_toStartOf="@+id/info_button_view"
+            app:layout_constraintStart_toEndOf="@+id/back_button_view"
+            app:layout_constraintTop_toTopOf="parent">
 
             <TextView
                 android:id="@+id/shift_info_text_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/catamaran_semibold"
                 android:gravity="center"
                 android:minLines="2"
-                android:fontFamily="@font/catamaran_semibold"
                 android:text="@string/start_tracking_desc"
-                android:padding="4dp"
                 android:textAlignment="center" />
 
         </com.google.android.material.card.MaterialCardView>
 
-        <com.sarcoordinator.sarsolutions.custom_views.CustomFloatingButton
-            android:id="@+id/info_button"
+        <include
+            android:id="@+id/info_button_view"
+            layout="@layout/view_circular_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:elevation="6dp"
-            android:padding="8dp"
-            app:Icon="@drawable/ic_baseline_info_24"
-            app:Tint="?colorPrimary"
+            android:layout_margin="8dp"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/info_view_layout"
             app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
