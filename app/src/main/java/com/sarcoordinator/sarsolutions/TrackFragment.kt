@@ -15,6 +15,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
@@ -46,7 +47,7 @@ import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.LocationService
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.card_case_details.view.*
-import kotlinx.android.synthetic.main.fragment_track_map.*
+import kotlinx.android.synthetic.main.fragment_track.*
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.delay
@@ -68,6 +69,9 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
 
     private val MAPVIEW_BUNDLE_KEY = "MapViewBundleKey"
     private val REQUEST_IMAGE_CAPTURE = 1
+
+    private var enableMap: Boolean = true
+
     private val nav: Navigation by lazy { Navigation.getInstance() }
     private var service: LocationService? = null
     private lateinit var sharedPrefs: SharedPreferences
@@ -96,6 +100,8 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
             ViewModelProvider(this)[SharedViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
 
+        sharedPrefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
+
         // Get arguments / Restore state
         caseId = arguments?.getString(CASE_ID) ?: savedInstanceState?.getString(CASE_ID)!!
         savedInstanceState?.getBoolean(LOCATION_TRACKING_STATUS)?.let {
@@ -115,25 +121,32 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_track_map, container, false)
-
-        // Required map setup
-        var mapViewBundle: Bundle? = null
-        if (savedInstanceState != null) {
-            mapViewBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY)
-
-            // Map markers/paths restoration
-            syncedListIndexPointer = savedInstanceState.getInt(SYNCED_LIST_POINTER_KEY)
-            lastLocPoint = savedInstanceState.getParcelable(SYNCED_LAST_LOC_KEY)
-            val listToSet = savedInstanceState.getSerializable(SYNCED_LOC_SET_KEY) as List<*>
-            listToSet.forEach {
-                locSet.add(it as LatLng)
-            }
-        }
+        val view = inflater.inflate(R.layout.fragment_track, container, false)
 
         mMapView = view.findViewById(R.id.map)
-        mMapView?.onCreate(mapViewBundle)
-        mMapView?.getMapAsync(this)
+
+        enableMap = !sharedPrefs.getBoolean(SettingsTabFragment.LOW_BANDWIDTH_PREFS, false)
+
+        if (enableMap) {
+            // Required map setup
+            var mapViewBundle: Bundle? = null
+            if (savedInstanceState != null) {
+                mapViewBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY)
+
+                // Map markers/paths restoration
+                syncedListIndexPointer = savedInstanceState.getInt(SYNCED_LIST_POINTER_KEY)
+                lastLocPoint = savedInstanceState.getParcelable(SYNCED_LAST_LOC_KEY)
+                val listToSet = savedInstanceState.getSerializable(SYNCED_LOC_SET_KEY) as List<*>
+                listToSet.forEach {
+                    locSet.add(it as LatLng)
+                }
+            }
+            mMapView?.onCreate(mapViewBundle)
+            mMapView?.getMapAsync(this)
+        } else {
+            mMapView?.visibility = View.GONE
+            view.findViewById<ConstraintLayout>(R.id.low_bandwidth_layout).visibility = View.VISIBLE
+        }
 
         bottomSheet = BottomSheetBehavior.from(view.findViewById(R.id.case_info_card))
 
@@ -144,8 +157,6 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        sharedPrefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
 
         back_button.setOnClickListener { requireActivity().onBackPressed() }
         initFabClickListener()
@@ -162,14 +173,16 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         outState.putParcelable(SYNCED_LAST_LOC_KEY, lastLocPoint)
         outState.putSerializable(SYNCED_LOC_SET_KEY, ArrayList(locSet.toList()))
 
-        // Required Map callback
-        var mapViewBundle =
-            outState.getBundle(MAPVIEW_BUNDLE_KEY)
-        if (mapViewBundle == null) {
-            mapViewBundle = Bundle()
-            outState.putBundle(MAPVIEW_BUNDLE_KEY, mapViewBundle)
+        if (enableMap) {
+            // Required Map callback
+            var mapViewBundle =
+                outState.getBundle(MAPVIEW_BUNDLE_KEY)
+            if (mapViewBundle == null) {
+                mapViewBundle = Bundle()
+                outState.putBundle(MAPVIEW_BUNDLE_KEY, mapViewBundle)
+            }
+            mMapView!!.onSaveInstanceState(mapViewBundle)
         }
-        mMapView!!.onSaveInstanceState(mapViewBundle)
     }
 
     private fun validateNetworkConnectivity() {
@@ -266,9 +279,9 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
             }
         })
         info_button.setOnClickListener {
-
             bottomSheet.state = when (bottomSheet.state) {
                 BottomSheetBehavior.STATE_HIDDEN -> BottomSheetBehavior.STATE_HALF_EXPANDED
+                BottomSheetBehavior.STATE_EXPANDED -> BottomSheetBehavior.STATE_COLLAPSED
                 else -> BottomSheetBehavior.STATE_EXPANDED
             }
         }
@@ -643,32 +656,39 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
 
     override fun onResume() {
         super.onResume()
-        mMapView?.onResume()
+        if (enableMap)
+            mMapView?.onResume()
     }
 
     override fun onStart() {
         super.onStart()
-        mMapView?.onStart()
+        if (enableMap)
+            mMapView?.onStart()
     }
 
     override fun onStop() {
         super.onStop()
-        mMapView?.onStop()
+        if (enableMap)
+            mMapView?.onStop()
     }
 
     override fun onPause() {
-        mMapView?.onPause()
+        if (enableMap)
+            mMapView?.onPause()
         super.onPause()
     }
 
     override fun onDestroy() {
-        mMapView?.onDestroy()
-        mMapView = null
+        if (enableMap) {
+            mMapView?.onDestroy()
+            mMapView = null
+        }
         super.onDestroy()
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        mMapView?.onLowMemory()
+        if (enableMap)
+            mMapView?.onLowMemory()
     }
 }

@@ -88,4 +88,8 @@
     <string name="cached_time">Cached Time</string>
     <string name="search_duration">Search Duration</string>
     <string name="sync_shift">Sync Shift</string>
+    <string name="debug_settings">Debug Settings</string>
+    <string name="low_bandwidth_mode">Low Bandwidth Mode</string>
+    <string name="Low_Bandwidth_Mode">Low Bandwidth Mode</string>
+    <string name="Map_Disabled">Map Disabled</string>
 </resources>

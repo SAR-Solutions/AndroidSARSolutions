@@ -1,26 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/back_button_surface"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="50dp">
 
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/back_button_surface"
+    <ImageButton
+        android:id="@+id/custom_button"
         android:layout_width="wrap_content"
-        android:background="@null"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="50dp"
-        app:cardElevation="0dp">
+        android:layout_gravity="center"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:elevation="4dp"
+        android:padding="8dp"
+        android:src="@drawable/ic_baseline_info_24" />
 
-        <ImageButton
-            android:id="@+id/custom_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="8dp"
-            android:src="@drawable/ic_baseline_info_24" />
-
-    </com.google.android.material.card.MaterialCardView>
-</FrameLayout>
+</com.google.android.material.card.MaterialCardView>
 

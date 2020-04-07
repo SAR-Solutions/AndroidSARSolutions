@@ -24,6 +24,7 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), CustomFragment
 
     companion object {
         const val TESTING_MODE_PREFS = "TESTING_MODE"
+        const val LOW_BANDWIDTH_PREFS = "LOW_BANDWIDTH"
     }
 
     private val auth = FirebaseAuth.getInstance()
@@ -54,10 +55,11 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), CustomFragment
             theme_spinner.adapter = it
         }
 
-        setupTestingModeUI()
+        setupDebugSettingsCard()
 
         loadPreferences()
 
+        // Set onClick listeners for release settings
         theme_spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(p0: AdapterView<*>?) {
                 Timber.d("Nothing selected")
@@ -69,6 +71,13 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), CustomFragment
                     isThemeSelected = true
                 else
                     GlobalUtil.setTheme(sharedPrefs, pos)
+            }
+        }
+
+        low_bandwidth_switch.setOnClickListener {
+            with(sharedPrefs.edit()) {
+                putBoolean(LOW_BANDWIDTH_PREFS, (it as SwitchMaterial).isChecked)
+                commit()
             }
         }
 
@@ -87,11 +96,10 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), CustomFragment
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, LoginFragment())
                 .commit()
-
         }
     }
 
-    private fun setupTestingModeUI() {
+    private fun setupDebugSettingsCard() {
         if (BuildConfig.DEBUG) {
             testing_mode_switch.setOnClickListener {
                 with(sharedPrefs.edit()) {
@@ -101,8 +109,7 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), CustomFragment
             }
         } else {
             // Release
-            testing_mode_switch.visibility = View.GONE
-            testing_mode_title.visibility = View.GONE
+            debug_settings_card.visibility = View.GONE
         }
     }
 
@@ -112,6 +119,9 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), CustomFragment
         GlobalUtil.getThemePreference(sharedPrefs).let {
             theme_spinner.setSelection(it)
         }
+
+        // Low bandwidth mode
+        low_bandwidth_switch.isChecked = sharedPrefs.getBoolean(LOW_BANDWIDTH_PREFS, false)
 
         // Testing mode
         testing_mode_switch.isChecked = sharedPrefs.getBoolean(TESTING_MODE_PREFS, false)

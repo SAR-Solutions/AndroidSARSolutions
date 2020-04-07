@@ -7,8 +7,17 @@
 
     <com.google.android.gms.maps.MapView
         android:id="@+id/map"
+        android:background="?colorSurface"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+    <include
+        android:id="@+id/low_bandwidth_layout"
+        layout="@layout/view_low_bandwidth_mode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -18,7 +27,6 @@
             android:id="@+id/back_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:elevation="6dp"
             android:padding="8dp"
             app:Icon="@drawable/ic_baseline_arrow_back_24"
             app:Tint="?colorPrimary"
@@ -30,7 +38,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:elevation="4sp"
+            app:cardElevation="4dp"
             app:cardCornerRadius="50dp"
             app:layout_constraintEnd_toStartOf="@id/info_button"
             app:layout_constraintStart_toEndOf="@id/back_button"
@@ -41,7 +49,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/catamaran_semibold"
-                android:padding="8dp"
                 android:text="@string/start_tracking_desc"
                 android:textAlignment="center" />
 
