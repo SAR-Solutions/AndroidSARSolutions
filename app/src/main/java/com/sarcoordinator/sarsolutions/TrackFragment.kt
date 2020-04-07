@@ -62,6 +62,10 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         const val LOCATION_TRACKING_STATUS = "LOCATION_TRACKING_STATUS"
     }
 
+    private val SYNCED_LIST_POINTER_KEY = "SyncedListPointerKey"
+    private val SYNCED_LOC_SET_KEY = "SyncedLocSetKey"
+    private val SYNCED_LAST_LOC_KEY = "SyncLastLocKey"
+
     private val MAPVIEW_BUNDLE_KEY = "MapViewBundleKey"
     private val REQUEST_IMAGE_CAPTURE = 1
     private val nav: Navigation by lazy { Navigation.getInstance() }
@@ -78,6 +82,10 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     private val isLocationServiceRunning = MutableLiveData<Boolean>().also {
         it.postValue(false)
     }
+
+    private var syncedListIndexPointer = 0
+    private var locSet: MutableSet<LatLng> = mutableSetOf()
+    private var lastLocPoint: LatLng? = null
 
     private var mMapView: MapView? = null
     private lateinit var bottomSheet: BottomSheetBehavior<MaterialCardView>
@@ -113,6 +121,14 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         var mapViewBundle: Bundle? = null
         if (savedInstanceState != null) {
             mapViewBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY)
+
+            // Map markers/paths restoration
+            syncedListIndexPointer = savedInstanceState.getInt(SYNCED_LIST_POINTER_KEY)
+            lastLocPoint = savedInstanceState.getParcelable(SYNCED_LAST_LOC_KEY)
+            val listToSet = savedInstanceState.getSerializable(SYNCED_LOC_SET_KEY) as List<*>
+            listToSet.forEach {
+                locSet.add(it as LatLng)
+            }
         }
 
         mMapView = view.findViewById(R.id.map)
@@ -141,6 +157,10 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         super.onSaveInstanceState(outState)
         outState.putString(CASE_ID, caseId)
         outState.putBoolean(LOCATION_TRACKING_STATUS, stopLocationTracking)
+
+        outState.putInt(SYNCED_LIST_POINTER_KEY, syncedListIndexPointer)
+        outState.putParcelable(SYNCED_LAST_LOC_KEY, lastLocPoint)
+        outState.putSerializable(SYNCED_LOC_SET_KEY, ArrayList(locSet.toList()))
 
         // Required Map callback
         var mapViewBundle =
@@ -580,29 +600,40 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         GlobalUtil.setGoogleMapsTheme(requireActivity(), googleMap)
         isLocationServiceRunning.observe(viewLifecycleOwner, Observer {
-            val locSet: MutableSet<LatLng> = mutableSetOf()
-            var lastLocPoint: LatLng? = null
+
             if (it) {
                 service?.getAllLocations()?.observe(viewLifecycleOwner, Observer { locationList ->
                     if (locationList.isNotEmpty()) {
-                        val latLng =
-                            LatLng(locationList.last().latitude, locationList.last().longitude)
-                        if (locSet.add(latLng)) {
-                            // Show starting marker and focus on it
-                            if (lastLocPoint == null) {
-                                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15F))
-                                googleMap.addMarker(
-                                    MarkerOptions().position(latLng)
-                                        .title(getString(R.string.Start))
-                                )
+                        val locationListToDraw =
+                            locationList.subList(syncedListIndexPointer, locationList.size)
+                        syncedListIndexPointer = locationList.size
+
+                        locationListToDraw.forEach { location ->
+                            val latLng =
+                                LatLng(location.latitude, location.longitude)
+                            if (locSet.add(latLng)) {
+                                // Show starting marker and focus on it
+                                if (lastLocPoint == null) {
+                                    googleMap.moveCamera(
+                                        CameraUpdateFactory.newLatLngZoom(
+                                            latLng,
+                                            15F
+                                        )
+                                    )
+                                    googleMap.addMarker(
+                                        MarkerOptions().position(latLng)
+                                            .title(getString(R.string.Start))
+                                    )
+                                } else {
+                                    val polyLine =
+                                        GlobalUtil.getThemedPolyLineOptions(requireContext())
+                                    polyLine.add(lastLocPoint, latLng)
+                                    googleMap.addPolyline(polyLine)
+                                }
                             } else {
-                                val polyLine = GlobalUtil.getThemedPolyLineOptions(requireContext())
-                                polyLine.add(lastLocPoint, latLng)
-                                googleMap.addPolyline(polyLine)
+                                Timber.d("Location already exists")
                             }
                             lastLocPoint = latLng
-                        } else {
-                            Timber.d("Location already exists")
                         }
                     }
                 })
