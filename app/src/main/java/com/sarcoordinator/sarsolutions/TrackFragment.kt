@@ -3,8 +3,10 @@ package com.sarcoordinator.sarsolutions
 import android.Manifest
 import android.app.Activity
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
+import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -96,6 +98,29 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Exit if location is not enabled
+        if (!GlobalUtil.isLocationEnabled(requireActivity().getSystemService(Context.LOCATION_SERVICE) as LocationManager)) {
+
+            MaterialAlertDialogBuilder(context)
+                .setIcon(R.drawable.ic_baseline_gps_off_24)
+                .setTitle(getString(R.string.gps_disabled))
+                .setMessage(getString(R.string.enable_gps_prompt))
+                .setNegativeButton(getString(R.string.back)) { dialogInterface: DialogInterface, i: Int ->
+                    dialogInterface.dismiss()
+                    nav.popFragment()
+                }
+                .setPositiveButton(getString(R.string.enable_gps)) { dialogInterface: DialogInterface, i: Int ->
+                    startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                    dialogInterface.dismiss()
+                    nav.popFragment()
+                }
+                .setOnCancelListener {
+                    nav.popFragment()
+                }
+                .show()
+        }
+
         viewModel = activity?.run {
             ViewModelProvider(this)[SharedViewModel::class.java]
         } ?: throw Exception("Invalid Activity")

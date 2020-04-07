@@ -10,6 +10,7 @@ import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
+import android.location.LocationManager
 import android.net.ConnectivityManager
 import android.util.TypedValue
 import android.view.View
@@ -108,9 +109,19 @@ object GlobalUtil {
         }
     }
 
-    // Sets theme based on given string
-    // Also saves theme in shared preferences
-    // String must be one of the THEME_* constants; else an error is thrown
+
+    /**
+     * Returns true and false depending on if location service is enabled
+     */
+    fun isLocationEnabled(locationManager: LocationManager): Boolean {
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+    }
+
+    /**
+     * Sets theme based on given string
+     * Also saves theme in shared preferences
+     * String must be one of the THEME_* constants; else an error is thrown
+     */
     fun setTheme(sharedPref: SharedPreferences?, theme: Int) {
         when (theme) {
             THEME_LIGHT -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)

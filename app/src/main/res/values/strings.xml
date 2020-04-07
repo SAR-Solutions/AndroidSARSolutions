@@ -92,4 +92,8 @@
     <string name="low_bandwidth_mode">Low Bandwidth Mode</string>
     <string name="Low_Bandwidth_Mode">Low Bandwidth Mode</string>
     <string name="Map_Disabled">Map Disabled</string>
+    <string name="gps_disabled">GPS Disabled</string>
+    <string name="enable_gps_prompt">GPS is required to start shift</string>
+    <string name="back">Back</string>
+    <string name="enable_gps">Enable GPS</string>
 </resources>
