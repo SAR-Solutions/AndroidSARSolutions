@@ -7,7 +7,7 @@
     android:layout_marginLeft="@dimen/mtrl_card_spacing"
     android:layout_marginTop="@dimen/mtrl_card_spacing"
     android:layout_marginRight="@dimen/mtrl_card_spacing"
-    app:cardCornerRadius="4dp"
+    app:cardCornerRadius="10dp"
     android:backgroundTint="@color/lightOrange"
     app:cardElevation="4dp">
 

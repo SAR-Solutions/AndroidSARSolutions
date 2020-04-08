@@ -12,18 +12,27 @@
 
     <LinearLayout
         android:id="@+id/parent_layout"
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="50dp"
+            android:layout_height="3dp"
+            android:layout_gravity="top|center"
+            android:layout_marginBottom="8dp"
+            app:cardBackgroundColor="@android:color/darker_gray"
+            app:cardCornerRadius="16dp" />
 
         <com.facebook.shimmer.ShimmerFrameLayout
             android:id="@+id/track_fragment_shimmer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone"
+            android:layout_margin="16dp"
             app:shimmer_auto_start="true">
 
             <include
-                layout="@layout/detailed_material_card_shimmer"
+                layout="@layout/list_view_item_shimmer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 

@@ -104,7 +104,9 @@
                     android:id="@+id/map_light_radio_group"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:padding="8dp"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingBottom="8dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="@id/guideline5"
                     app:layout_constraintTop_toTopOf="@id/light_map_title">
@@ -136,7 +138,9 @@
                     android:id="@+id/map_dark_radio_group"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:padding="8dp"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingBottom="8dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="@id/guideline5"
                     app:layout_constraintTop_toTopOf="@id/dark_map_title">
