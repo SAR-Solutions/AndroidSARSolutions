@@ -84,6 +84,11 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
         outState.putString(SHIFT_ID, shiftId)
     }
 
+    override fun onStart() {
+        super.onStart()
+        (requireActivity() as MainActivity).restoreSystemBars()
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         viewManager = null

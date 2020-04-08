@@ -8,9 +8,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import androidx.core.view.marginBottom
-import androidx.core.view.marginLeft
-import androidx.core.view.marginRight
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -26,9 +23,11 @@ import com.sarcoordinator.sarsolutions.util.GlobalUtil.getThemedPolyLineOptions
 import com.sarcoordinator.sarsolutions.util.GlobalUtil.setGoogleMapsTheme
 import com.sarcoordinator.sarsolutions.util.Navigation
 import com.sarcoordinator.sarsolutions.util.setMargins
+import dev.chrisbanes.insetter.doOnApplyWindowInsets
 import kotlinx.android.synthetic.main.card_shift_details.*
 import kotlinx.android.synthetic.main.card_shift_details.view.*
 import kotlinx.android.synthetic.main.fragment_shift_detail.*
+import kotlinx.android.synthetic.main.view_circular_button.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -136,27 +135,31 @@ class ShiftDetailFragment : Fragment(), OnMapReadyCallback {
         nav.hideBottomNavBar?.let { it(true) }
         (requireActivity() as MainActivity).enableTransparentSystemBars(true)
 
-        back_button.setOnApplyWindowInsetsListener { v, insets ->
-            back_button.setMargins(
-                insets.systemGestureInsets.left, insets.systemGestureInsets.top
-                , v.marginRight, v.marginBottom
+        back_button.image_button.setImageDrawable(resources.getDrawable(R.drawable.ic_baseline_arrow_back_24))
+
+        back_button.doOnApplyWindowInsets { view, insets, initialState ->
+            view.setMargins(
+                initialState.margins.left + insets.systemGestureInsets.left,
+                initialState.margins.top + insets.systemGestureInsets.top,
+                initialState.margins.right + insets.systemGestureInsets.right,
+                initialState.margins.bottom + insets.systemGestureInsets.bottom
             )
-            insets
         }
 
-        info_button.setOnApplyWindowInsetsListener { v, insets ->
-            info_button.setMargins(
-                v.marginLeft, insets.systemGestureInsets.top,
-                insets.systemGestureInsets.right, v.marginBottom
+        info_button.doOnApplyWindowInsets { view, insets, initialState ->
+            view.setMargins(
+                initialState.margins.left + insets.systemGestureInsets.left,
+                initialState.margins.top + insets.systemGestureInsets.top,
+                initialState.margins.right + insets.systemGestureInsets.right,
+                initialState.margins.bottom + insets.systemGestureInsets.bottom
             )
-            insets
         }
 
-        back_button.setOnClickListener {
+        back_button.image_button.setOnClickListener {
             requireActivity().onBackPressed()
         }
 
-        info_button.setOnClickListener {
+        info_button.image_button.setOnClickListener {
             var constraintSet = constraintSet2
             if (isInfoCardVisible) {
                 constraintSet = constraintSet1
@@ -217,13 +220,16 @@ class ShiftDetailFragment : Fragment(), OnMapReadyCallback {
 
         val insets = requireActivity().window.decorView.rootWindowInsets.systemGestureInsets
         googleMap.setPadding(insets.left, insets.top, insets.right, insets.bottom)
-        // Move camera to first point
-        cachedShiftReport.locationList?.let {
-            val firstLoc = cachedShiftReport.locationList!![0]
-
-        }
 
         val googleLocList = ArrayList<LatLng>()
+
+        if (cachedShiftReport.locationList.isNullOrEmpty()) {
+            Toast.makeText(
+                requireContext(),
+                "No locations recorded for this shift",
+                Toast.LENGTH_LONG
+            ).show()
+        }
 
         cachedShiftReport.locationList?.forEachIndexed { index, cacheLocation ->
 
@@ -292,8 +298,6 @@ class ShiftDetailFragment : Fragment(), OnMapReadyCallback {
     }
 
     override fun onDestroy() {
-        nav.hideBottomNavBar?.let { it(false) }
-        (requireActivity() as MainActivity).enableTransparentSystemBars(false)
         mMapView?.onDestroy()
         mMapView = null
         super.onDestroy()

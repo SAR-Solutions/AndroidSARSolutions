@@ -152,6 +152,12 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), CustomFragment {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        (requireActivity() as MainActivity).restoreSystemBars()
+        nav.hideBottomNavBar?.let { it(false) }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         viewManager = null

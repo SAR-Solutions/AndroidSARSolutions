@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.text.method.LinkMovementMethod
 import android.transition.TransitionInflater
 import android.view.View
 import android.widget.AdapterView
@@ -144,6 +145,8 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), CustomFragment
                 .replace(R.id.fragment_container, LoginFragment())
                 .commit()
         }
+
+        privacy_policy_button.movementMethod = LinkMovementMethod.getInstance()
     }
 
     private fun setupDebugSettingsCard() {

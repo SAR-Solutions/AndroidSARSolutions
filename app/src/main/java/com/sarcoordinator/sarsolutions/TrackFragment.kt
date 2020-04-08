@@ -311,6 +311,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         } else {
             // Fetch from cache
             populateViewWithCase(viewModel.currentCase.value!!)
+            enableLoadingState(false)
             enableStartTrackingFab()
         }
 

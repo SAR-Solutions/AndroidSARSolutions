@@ -5,8 +5,6 @@ import android.os.Build
 import android.os.Bundle
 import android.transition.TransitionInflater
 import android.util.Patterns
-import android.view.Menu
-import android.view.MenuInflater
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -23,12 +21,19 @@ class ResetPasswordFragment : Fragment(R.layout.fragment_reset_password) {
         // Set shared element transition
         sharedElementEnterTransition = TransitionInflater.from(context)
             .inflateTransition(android.R.transition.move)
-
-        setHasOptionsMenu(true)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+//        imageView.doOnApplyWindowInsets { view, insets, initialState ->
+//            view.setMargins(
+//                initialState.margins.left + insets.systemGestureInsets.left,
+//                initialState.margins.top + insets.systemGestureInsets.top,
+//                initialState.margins.right + insets.systemGestureInsets.right,
+//                initialState.margins.bottom + insets.systemGestureInsets.bottom
+//            )
+//        }
 
         // Set autofill hint
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -68,7 +73,8 @@ class ResetPasswordFragment : Fragment(R.layout.fragment_reset_password) {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        menu.clear()
+    override fun onStart() {
+        super.onStart()
+        (requireActivity() as MainActivity).enableTransparentSystemBars(true)
     }
 }

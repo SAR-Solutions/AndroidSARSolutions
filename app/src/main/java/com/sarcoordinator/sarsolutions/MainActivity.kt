@@ -239,16 +239,18 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         }
     }
 
-    private fun restoreSystemBars() {
+    fun restoreSystemBars() {
         val currentTheme =
             GlobalUtil.getCurrentTheme(resources, getPreferences(Context.MODE_PRIVATE))
 
         window.apply {
             // Clear previously set flags
             decorView.systemUiVisibility = 0
-            clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION or
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+            clearFlags(
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
+                        WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION or
+                        WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
+            )
 
             // Restore system bar colors
             if (currentTheme == GlobalUtil.THEME_DARK) {

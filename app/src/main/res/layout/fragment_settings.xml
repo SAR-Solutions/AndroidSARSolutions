@@ -104,9 +104,6 @@
                     android:id="@+id/map_light_radio_group"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    android:paddingBottom="8dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="@id/guideline5"
                     app:layout_constraintTop_toTopOf="@id/light_map_title">
@@ -138,9 +135,6 @@
                     android:id="@+id/map_dark_radio_group"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    android:paddingBottom="8dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="@id/guideline5"
                     app:layout_constraintTop_toTopOf="@id/dark_map_title">
@@ -311,6 +305,16 @@
             android:layout_margin="16dp"
             android:text="@string/sign_out"
             android:textStyle="bold" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/privacy_policy_button"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center|bottom"
+            android:padding="8dp"
+            android:text="@string/privacy_policy"
+            android:textSize="12sp" />
     </LinearLayout>
 </ScrollView>
 
