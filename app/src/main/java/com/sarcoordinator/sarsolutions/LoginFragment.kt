@@ -4,8 +4,6 @@ import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.util.Patterns
-import android.view.Menu
-import android.view.MenuInflater
 import android.view.View
 import android.view.autofill.AutofillManager
 import android.view.inputmethod.InputMethodManager
@@ -14,6 +12,8 @@ import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.Navigation
+import com.sarcoordinator.sarsolutions.util.setMargins
+import dev.chrisbanes.insetter.doOnApplyWindowInsets
 import kotlinx.android.synthetic.main.fragment_login.*
 
 class LoginFragment : Fragment(R.layout.fragment_login) {
@@ -24,9 +24,16 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
 
     private val nav: Navigation = Navigation.getInstance()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        imageView.doOnApplyWindowInsets { view, insets, initialState ->
+            view.setMargins(
+                initialState.margins.left + insets.systemGestureInsets.left,
+                initialState.margins.top + insets.systemGestureInsets.top,
+                initialState.margins.right + insets.systemGestureInsets.right,
+                initialState.margins.bottom + insets.systemGestureInsets.bottom
+            )
+        }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -131,8 +138,9 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        menu.clear()
+    override fun onStart() {
+        super.onStart()
+        (requireActivity() as MainActivity).enableTransparentSystemBars(true)
     }
 
     private fun enableUIElements(enable: Boolean) {

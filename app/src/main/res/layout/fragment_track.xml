@@ -29,8 +29,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            app:layout_constraintEnd_toStartOf="@+id/info_view_layout"
-            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -51,6 +49,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/catamaran_semibold"
                 android:gravity="center"
+                android:padding="4dp"
                 android:minLines="2"
                 android:text="@string/start_tracking_desc"
                 android:textAlignment="center" />
@@ -64,8 +63,6 @@
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/info_view_layout"
             app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

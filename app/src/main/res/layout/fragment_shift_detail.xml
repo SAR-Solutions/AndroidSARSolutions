@@ -17,23 +17,21 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
 
-    <com.sarcoordinator.sarsolutions.custom_views.CustomFloatingButton
+    <include
         android:id="@+id/back_button"
+        layout="@layout/view_circular_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:Icon="@drawable/ic_baseline_arrow_back_24"
-        app:Tint="?colorPrimary"
-        android:padding="8dp"
+        android:layout_margin="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.sarcoordinator.sarsolutions.custom_views.CustomFloatingButton
+    <include
         android:id="@+id/info_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="8dp"
-        app:Icon="@drawable/ic_baseline_info_24"
-        app:Tint="?colorPrimary"
+        layout="@layout/view_circular_button"
+        android:layout_margin="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
