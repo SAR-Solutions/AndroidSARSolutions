@@ -264,9 +264,12 @@ object Navigation {
         return tabBackStack
     }
 
-    fun setBackStack(backStack: HashMap<*, *>) {
+    fun setBackStack(backStack: HashMap<*, Collection<String>>) {
         TabIdentifiers.values().forEach {
-            tabBackStack[it] = backStack[it] as Stack<String>
+            tabBackStack[it]?.clear()
+            (backStack[it])?.forEach { frag ->
+                tabBackStack[it]?.add(frag)
+            }
         }
     }
 
