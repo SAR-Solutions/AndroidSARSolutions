@@ -8,13 +8,14 @@ import android.transition.TransitionInflater
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.firebase.auth.FirebaseAuth
+import com.sarcoordinator.sarsolutions.util.CustomFragment
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.Navigation
-import com.sarcoordinator.sarsolutions.util.CustomFragment
 import kotlinx.android.synthetic.main.fragment_settings.*
 import timber.log.Timber
 
@@ -24,6 +25,17 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), CustomFragment
 
     companion object {
         const val TESTING_MODE_PREFS = "TESTING_MODE"
+        const val LOW_BANDWIDTH_PREFS = "LOW_BANDWIDTH"
+        const val MAP_LIGHT_THEME_PREFS = "MAP_LIGHT_THEME"
+        const val MAP_DARK_THEME_PREFS = "MAP_DARK_THEME"
+    }
+
+    enum class MapLightThemes {
+        STANDARD, SNOW
+    }
+
+    enum class MapDarkThemes {
+        STANDARD, Night
     }
 
     private val auth = FirebaseAuth.getInstance()
@@ -54,15 +66,11 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), CustomFragment
             theme_spinner.adapter = it
         }
 
-        testing_mode_switch.setOnClickListener {
-            with(sharedPrefs.edit()) {
-                putBoolean(TESTING_MODE_PREFS, (it as SwitchMaterial).isChecked)
-                commit()
-            }
-        }
+        setupDebugSettingsCard()
 
         loadPreferences()
 
+        // Set onClick listeners for release settings
         theme_spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(p0: AdapterView<*>?) {
                 Timber.d("Nothing selected")
@@ -74,6 +82,49 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), CustomFragment
                     isThemeSelected = true
                 else
                     GlobalUtil.setTheme(sharedPrefs, pos)
+            }
+        }
+
+        low_bandwidth_switch.setOnClickListener {
+            with(sharedPrefs.edit()) {
+                putBoolean(LOW_BANDWIDTH_PREFS, (it as SwitchMaterial).isChecked)
+                commit()
+            }
+        }
+
+        map_light_radio_group.setOnCheckedChangeListener { group, checkedId ->
+            when (checkedId) {
+                R.id.std_light_map_radio -> putStringInSharedPref(
+                    MAP_LIGHT_THEME_PREFS,
+                    MapLightThemes.STANDARD.name
+                )
+                R.id.snow_light_map_radio -> putStringInSharedPref(
+                    MAP_LIGHT_THEME_PREFS,
+                    MapLightThemes.SNOW.name
+                )
+                else -> Toast.makeText(
+                    requireContext(),
+                    "Something went wrong changing light theme",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+
+        map_dark_radio_group.setOnCheckedChangeListener { group, checkedId ->
+            when (checkedId) {
+                R.id.std_dark_map_radio -> putStringInSharedPref(
+                    MAP_DARK_THEME_PREFS,
+                    MapDarkThemes.STANDARD.name
+                )
+                R.id.night_dark_map_radio -> putStringInSharedPref(
+                    MAP_DARK_THEME_PREFS,
+                    MapDarkThemes.Night.name
+                )
+                else -> Toast.makeText(
+                    requireContext(),
+                    "Something went wrong changing dark theme",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
 
@@ -92,7 +143,20 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), CustomFragment
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, LoginFragment())
                 .commit()
+        }
+    }
 
+    private fun setupDebugSettingsCard() {
+        if (BuildConfig.DEBUG) {
+            testing_mode_switch.setOnClickListener {
+                with(sharedPrefs.edit()) {
+                    putBoolean(TESTING_MODE_PREFS, (it as SwitchMaterial).isChecked)
+                    commit()
+                }
+            }
+        } else {
+            // Release
+            debug_settings_card.visibility = View.GONE
         }
     }
 
@@ -103,10 +167,32 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), CustomFragment
             theme_spinner.setSelection(it)
         }
 
+        // Low bandwidth mode
+        low_bandwidth_switch.isChecked = sharedPrefs.getBoolean(LOW_BANDWIDTH_PREFS, false)
+
         // Testing mode
         testing_mode_switch.isChecked = sharedPrefs.getBoolean(TESTING_MODE_PREFS, false)
 
-        // app version
+        // App version
         app_version_value.text = BuildConfig.VERSION_NAME
+
+        // Light map theme
+        when (sharedPrefs.getString(MAP_LIGHT_THEME_PREFS, MapLightThemes.STANDARD.name)) {
+            MapLightThemes.STANDARD.name -> std_light_map_radio.isChecked = true
+            MapLightThemes.SNOW.name -> snow_light_map_radio.isChecked = true
+        }
+
+        // Dark map theme
+        when (sharedPrefs.getString(MAP_DARK_THEME_PREFS, MapDarkThemes.STANDARD.name)) {
+            MapDarkThemes.STANDARD.name -> std_dark_map_radio.isChecked = true
+            MapDarkThemes.Night.name -> night_dark_map_radio.isChecked = true
+        }
+    }
+
+    private fun putStringInSharedPref(key: String, value: String) {
+        with(sharedPrefs.edit()) {
+            putString(key, value)
+            commit()
+        }
     }
 }

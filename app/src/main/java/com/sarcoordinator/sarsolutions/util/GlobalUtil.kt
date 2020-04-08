@@ -1,3 +1,5 @@
+@file:Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+
 package com.sarcoordinator.sarsolutions.util
 
 import android.app.Activity
@@ -8,14 +10,23 @@ import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
+import android.location.LocationManager
 import android.net.ConnectivityManager
+import android.util.TypedValue
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.JointType
+import com.google.android.gms.maps.model.MapStyleOptions
+import com.google.android.gms.maps.model.PolylineOptions
+import com.google.android.gms.maps.model.RoundCap
 import com.google.android.material.snackbar.Snackbar
 import com.sarcoordinator.sarsolutions.R
+import com.sarcoordinator.sarsolutions.SettingsTabFragment
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -99,9 +110,19 @@ object GlobalUtil {
         }
     }
 
-    // Sets theme based on given string
-    // Also saves theme in shared preferences
-    // String must be one of the THEME_* constants; else an error is thrown
+
+    /**
+     * Returns true and false depending on if location service is enabled
+     */
+    fun isLocationEnabled(locationManager: LocationManager): Boolean {
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+    }
+
+    /**
+     * Sets theme based on given string
+     * Also saves theme in shared preferences
+     * String must be one of the THEME_* constants; else an error is thrown
+     */
     fun setTheme(sharedPref: SharedPreferences?, theme: Int) {
         when (theme) {
             THEME_LIGHT -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
@@ -151,6 +172,12 @@ object GlobalUtil {
         return File.createTempFile("${caseName}_${timeStamp}", ".jpg", storageDir)
     }
 
+    private fun getPrimaryColorFromTheme(context: Context): Int {
+        val value = TypedValue()
+        context.theme.resolveAttribute(android.R.attr.colorPrimary, value, true)
+        return value.data
+    }
+
     // Returns byte array for image after fixing orientation
     fun fixImageOrientation(imagePath: String, orientation: Int): ByteArray {
         var bitmapImage = BitmapFactory.decodeFile(imagePath)
@@ -180,9 +207,79 @@ object GlobalUtil {
         bitmapImage.compress(Bitmap.CompressFormat.JPEG, 100, baos)
         return baos.toByteArray()
     }
+
+    fun setGoogleMapsTheme(activity: Activity, googleMap: GoogleMap) {
+        val isDarkTheme =
+            getCurrentTheme(
+                activity.resources,
+                activity.getPreferences(Context.MODE_PRIVATE)
+            ) == THEME_DARK
+
+        val sharedPref = activity.getPreferences(Context.MODE_PRIVATE)
+
+        // Enable dark map if current theme is dark
+        if (isDarkTheme) {
+            when (sharedPref.getString(
+                SettingsTabFragment.MAP_DARK_THEME_PREFS,
+                SettingsTabFragment.MapDarkThemes.STANDARD.name
+            )) {
+                SettingsTabFragment.MapDarkThemes.STANDARD.name -> setMapsTheme(
+                    activity,
+                    googleMap,
+                    R.raw.dark_std_map_theme
+                )
+                SettingsTabFragment.MapDarkThemes.Night.name -> setMapsTheme(
+                    activity,
+                    googleMap,
+                    R.raw.dark_night_map_theme
+                )
+            }
+        } else {
+            val currentLightTheme = sharedPref.getString(
+                SettingsTabFragment.MAP_LIGHT_THEME_PREFS,
+                SettingsTabFragment.MapLightThemes.STANDARD.name
+            )
+            if (currentLightTheme == SettingsTabFragment.MapLightThemes.SNOW.name) {
+                setMapsTheme(activity, googleMap, R.raw.light_snow_map_theme)
+            }
+        }
+    }
+
+    fun getThemedPolyLineOptions(context: Context): PolylineOptions =
+        PolylineOptions().apply {
+            endCap(RoundCap())
+            jointType(JointType.ROUND)
+            color(getPrimaryColorFromTheme(context))
+        }
+
+    private fun setMapsTheme(activity: Activity, googleMap: GoogleMap, themeId: Int) {
+        try {
+            // Customise the styling of the base map using a JSON object defined
+            // in a raw resource file.
+            val success = googleMap.setMapStyle(
+                MapStyleOptions.loadRawResourceStyle(
+                    activity, themeId
+                )
+            )
+            if (!success) {
+                Timber.e("Style parsing failed.")
+            }
+        } catch (e: Resources.NotFoundException) {
+            Timber.e("Can't find style. Error: ", e)
+        }
+    }
 }
 
 // Notify observers of change; adding item to list doesn't notify observers
 fun <T> MutableLiveData<T>.notifyObserver() {
     this.value = this.value
 }
+
+fun View.setMargins(l: Int, t: Int, r: Int, b: Int) {
+    if (layoutParams is ViewGroup.MarginLayoutParams) {
+        val p = layoutParams as ViewGroup.MarginLayoutParams
+        p.setMargins(l, t, r, b)
+        requestLayout()
+    }
+}
+

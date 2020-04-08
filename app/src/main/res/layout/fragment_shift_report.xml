@@ -6,15 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".ShiftReportFragment">
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/shift_report_fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/Widget.MaterialComponents.FloatingActionButton.Standard"
-        android:src="@drawable/ic_baseline_add_24" />
-
     <androidx.constraintlayout.widget.ConstraintLayout
-        app:layout_optimizationLevel="none"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -59,11 +51,10 @@
                     android:id="@+id/vehicle_recycler_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:nestedScrollingEnabled="false"
                     tools:itemCount="1"
                     android:orientation="vertical"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    tools:listitem="@layout/vehicle_material_card" />
+                    tools:listitem="@layout/card_vehicle_material" />
 
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/images_taken_card"
@@ -131,5 +122,12 @@
             app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/shift_report_fab"
+        style="@style/Widget.MaterialComponents.FloatingActionButton.Standard"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_baseline_add_24" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

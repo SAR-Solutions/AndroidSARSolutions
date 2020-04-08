@@ -205,6 +205,7 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
         shift_report_fab.setOnClickListener {
             shift_report_fab.requestFocus()
             addVehicle()
+            requireView().requestLayout()
         }
     }
 

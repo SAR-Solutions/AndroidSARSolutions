@@ -1,6 +1,5 @@
 package com.sarcoordinator.sarsolutions
 
-import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.transition.TransitionInflater
@@ -12,15 +11,12 @@ import androidx.exifinterface.media.ExifInterface
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.Target
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storageMetadata
 import com.sarcoordinator.sarsolutions.util.CustomFragment
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
+import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.fragment_image_detail.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Default
@@ -39,6 +35,7 @@ class ImageDetailFragment : Fragment(R.layout.fragment_image_detail), CustomFrag
     private lateinit var viewModel: SharedViewModel
     private lateinit var imageFile: File
     private lateinit var image: ExifInterface
+    private val nav: Navigation by lazy { Navigation.getInstance() }
 
     override fun getSharedElement(): View = detailed_image_view
 
@@ -52,13 +49,12 @@ class ImageDetailFragment : Fragment(R.layout.fragment_image_detail), CustomFrag
         // Set shared element transition
         sharedElementEnterTransition = TransitionInflater.from(context)
             .inflateTransition(android.R.transition.move)
-
-        (requireActivity() as MainActivity).enableTransparentStatusBar(true)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        (requireActivity() as MainActivity).enableTransparentStatusBar(false)
+    override fun onStart() {
+        super.onStart()
+        nav.hideBottomNavBar?.let { it(true) }
+        (requireActivity() as MainActivity).enableTransparentStatusBar(true)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

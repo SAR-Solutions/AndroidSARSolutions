@@ -4,9 +4,10 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.sarcoordinator.sarsolutions.*
-import kotlinx.android.synthetic.main.fragment_image_detail.*
-import java.lang.Exception
+import com.sarcoordinator.sarsolutions.CasesTabFragment
+import com.sarcoordinator.sarsolutions.FailedShiftsTabFragment
+import com.sarcoordinator.sarsolutions.R
+import com.sarcoordinator.sarsolutions.SettingsTabFragment
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -111,12 +112,13 @@ object Navigation {
     /**
      * fragment: Fragment to put into container
      * saveState: Whether or not to save previous fragment state
-     * tab: Tab to put fragment into
+     * tab: Tab to put fragment into; null will push to current tab
+     * sharedElements: views to be included in shared element transition
      */
-    fun pushFragment(fragment: Fragment, tab: TabIdentifiers, vararg sharedElements: View?) {
+    fun pushFragment(fragment: Fragment, tab: TabIdentifiers? = null, vararg sharedElements: View?) {
 
         // Check to a void making another instance of top fragment
-        if (currentTab == tab) {
+        if(tab != null && currentTab == tab) {
             val currentTabBackstack = tabBackStack[currentTab]!!
             // Nothing to do if current fragment is the same as to-be-replaced fragment
             if (currentTabBackstack.isNotEmpty() &&
@@ -124,9 +126,10 @@ object Navigation {
                 == fragment::class.qualifiedName
             )
                 return
+
+            currentTab = tab
         }
 
-        currentTab = tab
         val backStack = tabBackStack[currentTab]!!
 
         // Save current fragment state
@@ -261,12 +264,9 @@ object Navigation {
         return tabBackStack
     }
 
-    fun setBackStack(backStack: HashMap<TabIdentifiers, Stack<String>>) {
+    fun setBackStack(backStack: HashMap<*, *>) {
         TabIdentifiers.values().forEach {
-            tabBackStack[it] = Stack<String>()
-            backStack[it]!!.forEach {  stackVal ->
-                tabBackStack[it]!!.push(stackVal)
-            }
+            tabBackStack[it] = backStack[it] as Stack<String>
         }
     }
 

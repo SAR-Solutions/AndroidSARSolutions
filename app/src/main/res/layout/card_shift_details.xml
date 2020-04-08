@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:elevation="4dp">
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="10dp"
+        android:indeterminateOnly="true"
+        android:visibility="gone" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true">
+
+            <TextView
+                android:id="@+id/case_title"
+                style="@style/Base.Widget.AppCompat.TextView.Heading"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Case Title"
+                android:textAlignment="center"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/cache_time_title"
+                style="@style/Base.Widget.AppCompat.TextView.Subheading.Info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/cached_time"
+                app:layout_constraintEnd_toEndOf="@id/cache_time"
+                app:layout_constraintStart_toStartOf="@id/cache_time"
+                app:layout_constraintTop_toBottomOf="@id/cache_time" />
+
+            <TextView
+                android:id="@+id/cache_time"
+                style="@style/Base.Widget.AppCompat.TextView.SubHeading"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:padding="0dp"
+                android:text="Shift/Cache/Time"
+                android:textAlignment="center"
+                app:layout_constraintEnd_toEndOf="@id/guideline4"
+                app:layout_constraintStart_toStartOf="@id/case_title"
+                app:layout_constraintTop_toBottomOf="@id/case_title" />
+
+            <TextView
+                android:id="@+id/end_time"
+                style="@style/Base.Widget.AppCompat.TextView.SubHeading"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:padding="0dp"
+                android:text="Shift/End/Time"
+                android:textAlignment="center"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/guideline4"
+                app:layout_constraintTop_toBottomOf="@id/case_title" />
+
+            <TextView
+                android:id="@+id/end_time_title"
+                style="@style/Base.Widget.AppCompat.TextView.Subheading.Info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="End Time"
+                app:layout_constraintEnd_toEndOf="@id/end_time"
+                app:layout_constraintStart_toStartOf="@id/end_time"
+                app:layout_constraintTop_toBottomOf="@id/end_time" />
+
+            <TextView
+                android:id="@+id/search_duration"
+                style="@style/Base.Widget.AppCompat.TextView.SubHeading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="0dp"
+                android:text="Search Duration"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/cache_time_title" />
+
+            <TextView
+                android:id="@+id/search_duration_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="8dp"
+                android:text="@string/search_duration"
+                app:constraintSet="@style/Base.Widget.AppCompat.TextView.Subheading.Info"
+                app:layout_constraintEnd_toEndOf="@id/search_duration"
+                app:layout_constraintStart_toStartOf="@id/search_duration"
+                app:layout_constraintTop_toBottomOf="@id/search_duration" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.5" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/sync_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sync_shift"
+                android:textStyle="bold"
+                app:cornerRadius="20dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/search_duration_title" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ScrollView>
+
+</com.google.android.material.card.MaterialCardView>

@@ -3,25 +3,40 @@ package com.sarcoordinator.sarsolutions
 import android.Manifest
 import android.app.Activity
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
+import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.provider.Settings
 import android.transition.TransitionInflater
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.MapView
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.card.MaterialCardView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionDeniedResponse
@@ -33,7 +48,11 @@ import com.sarcoordinator.sarsolutions.models.Case
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.LocationService
 import com.sarcoordinator.sarsolutions.util.Navigation
+import com.sarcoordinator.sarsolutions.util.setMargins
+import dev.chrisbanes.insetter.doOnApplyWindowInsets
+import kotlinx.android.synthetic.main.card_case_details.view.*
 import kotlinx.android.synthetic.main.fragment_track.*
+import kotlinx.android.synthetic.main.view_circular_button.view.*
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.delay
@@ -42,14 +61,22 @@ import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.File
 
-class TrackFragment : Fragment(R.layout.fragment_track) {
+class TrackFragment : Fragment(), OnMapReadyCallback {
 
     companion object ArgsTags {
         const val CASE_ID = "CASE_ID"
         const val LOCATION_TRACKING_STATUS = "LOCATION_TRACKING_STATUS"
     }
 
+    private val SYNCED_LIST_POINTER_KEY = "SyncedListPointerKey"
+    private val SYNCED_LOC_SET_KEY = "SyncedLocSetKey"
+    private val SYNCED_LAST_LOC_KEY = "SyncLastLocKey"
+
+    private val MAPVIEW_BUNDLE_KEY = "MapViewBundleKey"
     private val REQUEST_IMAGE_CAPTURE = 1
+
+    private var enableMap: Boolean = true
+
     private val nav: Navigation by lazy { Navigation.getInstance() }
     private var service: LocationService? = null
     private lateinit var sharedPrefs: SharedPreferences
@@ -60,11 +87,48 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
     private lateinit var viewAdapter: ImagesAdapter
     private var stopLocationTracking = false
 
+    // Strictly only for mapView
+    private val isLocationServiceRunning = MutableLiveData<Boolean>().also {
+        it.postValue(false)
+    }
+
+    private var syncedListIndexPointer = 0
+    private var locSet: MutableSet<LatLng> = mutableSetOf()
+    private var lastLocPoint: LatLng? = null
+
+    private var mMapView: MapView? = null
+    private lateinit var bottomSheet: BottomSheetBehavior<MaterialCardView>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Exit if location is not enabled
+        if (!GlobalUtil.isLocationEnabled(requireActivity().getSystemService(Context.LOCATION_SERVICE) as LocationManager)) {
+
+            MaterialAlertDialogBuilder(context)
+                .setIcon(R.drawable.ic_baseline_gps_off_24)
+                .setTitle(getString(R.string.gps_disabled))
+                .setMessage(getString(R.string.enable_gps_prompt))
+                .setNegativeButton(getString(R.string.back)) { dialogInterface: DialogInterface, i: Int ->
+                    dialogInterface.dismiss()
+                    nav.popFragment()
+                }
+                .setPositiveButton(getString(R.string.enable_gps)) { dialogInterface: DialogInterface, i: Int ->
+                    startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                    dialogInterface.dismiss()
+                    nav.popFragment()
+                }
+                .setOnCancelListener {
+                    nav.popFragment()
+                }
+                .show()
+        }
+
         viewModel = activity?.run {
             ViewModelProvider(this)[SharedViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
+
+        sharedPrefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
 
         // Get arguments / Restore state
         caseId = arguments?.getString(CASE_ID) ?: savedInstanceState?.getString(CASE_ID)!!
@@ -77,23 +141,130 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
             .inflateTransition(android.R.transition.move)
     }
 
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        val view = inflater.inflate(R.layout.fragment_track, container, false)
+
+        mMapView = view.findViewById(R.id.map)
+
+        enableMap = !sharedPrefs.getBoolean(SettingsTabFragment.LOW_BANDWIDTH_PREFS, false)
+
+        if (enableMap) {
+            // Required map setup
+            var mapViewBundle: Bundle? = null
+            if (savedInstanceState != null) {
+                mapViewBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY)
+
+                // Map markers/paths restoration
+                syncedListIndexPointer = savedInstanceState.getInt(SYNCED_LIST_POINTER_KEY)
+                lastLocPoint = savedInstanceState.getParcelable(SYNCED_LAST_LOC_KEY)
+                val listToSet = savedInstanceState.getSerializable(SYNCED_LOC_SET_KEY) as List<*>
+                listToSet.forEach {
+                    locSet.add(it as LatLng)
+                }
+            }
+            mMapView?.onCreate(mapViewBundle)
+            mMapView?.getMapAsync(this)
+        } else {
+            mMapView?.visibility = View.GONE
+            view.findViewById<ConstraintLayout>(R.id.low_bandwidth_layout).visibility = View.VISIBLE
+        }
+
+        bottomSheet = BottomSheetBehavior.from(view.findViewById(R.id.case_info_card))
+
+        view.findViewById<FloatingActionButton>(R.id.capture_photo).hide()
+        view.findViewById<FloatingActionButton>(R.id.location_service_fab).hide()
+        return view
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        sharedPrefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
-
-        location_service_fab.hide()
-
+        setupViewInsets()
+        setupCircularButtons()
         initFabClickListener()
+        initCaseInfoBottomSheet()
         validateNetworkConnectivity()
-
-        toolbar_track.setBackPressedListener(View.OnClickListener { requireActivity().onBackPressed() })
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putString(CASE_ID, caseId)
         outState.putBoolean(LOCATION_TRACKING_STATUS, stopLocationTracking)
+
+        outState.putInt(SYNCED_LIST_POINTER_KEY, syncedListIndexPointer)
+        outState.putParcelable(SYNCED_LAST_LOC_KEY, lastLocPoint)
+        outState.putSerializable(SYNCED_LOC_SET_KEY, ArrayList(locSet.toList()))
+
+        if (enableMap) {
+            // Required Map callback
+            var mapViewBundle =
+                outState.getBundle(MAPVIEW_BUNDLE_KEY)
+            if (mapViewBundle == null) {
+                mapViewBundle = Bundle()
+                outState.putBundle(MAPVIEW_BUNDLE_KEY, mapViewBundle)
+            }
+            mMapView!!.onSaveInstanceState(mapViewBundle)
+        }
+    }
+
+    private fun setupCircularButtons() {
+        back_button_view.image_button.setImageDrawable(resources.getDrawable(R.drawable.ic_baseline_arrow_back_24))
+        back_button_view.image_button.setOnClickListener { requireActivity().onBackPressed() }
+        info_button_view.image_button.setOnClickListener {
+            bottomSheet.state = when (bottomSheet.state) {
+                BottomSheetBehavior.STATE_HIDDEN -> BottomSheetBehavior.STATE_HALF_EXPANDED
+                BottomSheetBehavior.STATE_EXPANDED -> BottomSheetBehavior.STATE_COLLAPSED
+                else -> BottomSheetBehavior.STATE_EXPANDED
+            }
+        }
+    }
+
+    private fun setupViewInsets() {
+        back_button_view.doOnApplyWindowInsets { view, insets, initialState ->
+            view.setMargins(
+                initialState.margins.left + insets.systemGestureInsets.left,
+                initialState.margins.top + insets.systemGestureInsets.top,
+                initialState.margins.right + insets.systemGestureInsets.right,
+                initialState.margins.bottom + insets.systemGestureInsets.bottom
+            )
+        }
+        info_button_view.doOnApplyWindowInsets { view, insets, initialState ->
+            view.setMargins(
+                initialState.margins.left + insets.systemGestureInsets.left,
+                initialState.margins.top + insets.systemGestureInsets.top,
+                initialState.margins.right + insets.systemGestureInsets.right,
+                initialState.margins.bottom + insets.systemGestureInsets.bottom
+            )
+        }
+        info_view_layout.doOnApplyWindowInsets { view, insets, initialState ->
+            view.setMargins(
+                initialState.margins.left + insets.systemGestureInsets.left,
+                initialState.margins.top + insets.systemGestureInsets.top,
+                initialState.margins.right + insets.systemGestureInsets.right,
+                initialState.margins.bottom + insets.systemGestureInsets.bottom
+            )
+        }
+        case_info_card.parent_layout.doOnApplyWindowInsets { view, insets, initialState ->
+            bottomSheet.peekHeight = bottomSheet.peekHeight + insets.systemGestureInsets.bottom
+            view.setMargins(
+                initialState.margins.left + insets.systemGestureInsets.left,
+                initialState.margins.top + insets.systemGestureInsets.top,
+                initialState.margins.right + insets.systemGestureInsets.right,
+                initialState.margins.bottom + insets.systemGestureInsets.bottom
+            )
+        }
+        location_service_fab.doOnApplyWindowInsets { view, insets, initialState ->
+            view.setMargins(
+                initialState.margins.left + insets.systemGestureInsets.left,
+                initialState.margins.top + insets.systemGestureInsets.top,
+                initialState.margins.right + insets.systemGestureInsets.right,
+                initialState.margins.bottom + insets.systemGestureInsets.bottom
+            )
+        }
     }
 
     private fun validateNetworkConnectivity() {
@@ -105,8 +276,8 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
             }
         }
         // If coming from retry network fab, change case info card visibility and desc text
-        case_info_material_card.visibility = View.VISIBLE
-        location_desc.text = getString(R.string.start_tracking_desc)
+        case_info_card.visibility = View.VISIBLE
+        shift_info_text_view.text = getString(R.string.start_tracking_desc)
 
         setupInterface()
 
@@ -146,7 +317,10 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         viewModel.getBinder().observe(viewLifecycleOwner, Observer { binder ->
             // Either service was bound or unbound
             service = binder?.getService()
-            observeService()
+            if (service != null) {
+                isLocationServiceRunning.postValue(true)
+                observeService()
+            }
         })
     }
 
@@ -170,6 +344,24 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         }
     }
 
+    private fun initCaseInfoBottomSheet() {
+        // Bottom Sheet stuff
+        bottomSheet.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                return
+            }
+
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                if (newState == BottomSheetBehavior.STATE_HIDDEN)
+                    Toast.makeText(
+                        requireContext(),
+                        "Click on the info button to see case information",
+                        Toast.LENGTH_LONG
+                    ).show()
+            }
+        })
+    }
+
     private fun completeShiftAndStopService() {
         // Change view state
         enableStartTrackingFab()
@@ -179,7 +371,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         }
         location_service_fab.setImageDrawable(progressCircle)
         progressCircle.start()
-        location_desc.text = getString(R.string.waiting_for_server)
+        shift_info_text_view.text = getString(R.string.waiting_for_server)
 
         if (service != null) {
             service?.completeShift()?.invokeOnCompletion {
@@ -222,7 +414,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
             nav,
             viewModel.getImageList(externalCaseImageDir).value!!
         )
-        image_recycler_view.apply {
+        case_info_card.image_recycler_view.apply {
             layoutManager = viewManager
             adapter = viewAdapter
         }
@@ -230,7 +422,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         // Observe and populate list on change
         viewModel.getImageList().observe(viewLifecycleOwner, Observer {
             val size = it.size
-            image_number_text_view.text = size.toString()
+            case_info_card.image_number_text_view.text = size.toString()
             viewAdapter.setData(it)
         })
 
@@ -268,18 +460,17 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
     // Disable shimmer, show case info layout; vice-versa
     private fun enableLoadingState(enable: Boolean) {
         if (enable) {
-            track_fragment_shimmer.visibility = View.VISIBLE
-            case_info_material_card.visibility = View.GONE
+            case_info_card.track_fragment_shimmer.visibility = View.VISIBLE
+            case_info_card.case_info_layout.visibility = View.GONE
         } else {
-            track_fragment_shimmer.visibility = View.GONE
-            case_info_material_card.visibility = View.VISIBLE
+            case_info_card.track_fragment_shimmer.visibility = View.GONE
+            case_info_card.case_info_layout.visibility = View.VISIBLE
         }
     }
 
     private fun enableStartTrackingFab() {
         capture_photo.visibility = View.GONE
-
-        location_service_fab.show()
+        location_service_fab.visibility = View.VISIBLE
 
         location_service_fab.setImageDrawable(
             resources.getDrawable(
@@ -314,18 +505,18 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         location_service_fab.backgroundTintList = resources.getColorStateList(R.color.newRed)
         location_service_fab.visibility = View.VISIBLE
 
-        case_info_material_card.visibility = View.GONE
-        location_desc.text = getString(R.string.no_network_desc)
+        case_info_card.case_info_layout.visibility = View.GONE
+        shift_info_text_view.text = getString(R.string.no_network_desc)
     }
 
     // Set case information
     private fun populateViewWithCase(case: Case) {
-        (requireActivity() as MainActivity).supportActionBar?.title = case.id
-        id_value_tv.text = case.id
-        reporter_value_tv.text = case.reporterName
-        missing_person_value_tv.text = listToOrderedListString(case.missingPersonName)
-        equipment_value_tv.text = listToOrderedListString(case.equipmentUsed)
-        toolbar_track.setHeading(case.caseName)
+        enableStartTrackingFab()
+        case_info_card.case_id.text = case.id
+        case_info_card.reporter_name.text = case.reporterName
+        case_info_card.missing_person.text = listToOrderedListString(case.missingPersonName)
+        case_info_card.equipment_used.text = listToOrderedListString(case.equipmentUsed)
+        case_info_card.case_title.text = case.caseName
         setupImagesCardView()
     }
 
@@ -379,7 +570,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
     private fun observeService() {
         service?.let {
             it.getServiceInfo().observe(viewLifecycleOwner, Observer { lastUpdated ->
-                location_desc.text = lastUpdated
+                shift_info_text_view.text = lastUpdated
             })
             it.getShiftId().observe(viewLifecycleOwner, Observer { shiftId ->
                 viewModel.currentShiftId = shiftId
@@ -398,7 +589,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
                         }
                         LocationService.ShiftErrors.PUT_LOCATIONS -> {
                             Timber.e("All locations could not posted")
-                            viewModel.addLocationsToCache(service!!.getSyncList())
+                            viewModel.addLocationsToCache(service!!.getListOfUnsyncedLocations())
                         }
                         LocationService.ShiftErrors.PUT_END_TIME -> {
                             Timber.e("Posting end time failed")
@@ -417,7 +608,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
 
     // Starts service, calls bindService and enableStopTrackingFab
     private fun startLocationService() {
-        location_desc.text = getString(R.string.starting_location_service)
+        shift_info_text_view.text = getString(R.string.starting_location_service)
         // Pass required extras and start location service
         val serviceIntent = Intent(context, LocationService::class.java)
         serviceIntent.putExtra(
@@ -483,7 +674,7 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         return if (list.count() == 1) {
             list[0]
         } else {
-            missing_person_tv.text = getString(R.string.missing_people)
+            case_info_card.missing_person.text = getString(R.string.missing_people)
             var text = ""
             for (i in 0 until list.count() - 1) {
                 text += "${list[i]}\n"
@@ -493,4 +684,87 @@ class TrackFragment : Fragment(R.layout.fragment_track) {
         }
     }
 
+    override fun onMapReady(googleMap: GoogleMap) {
+        GlobalUtil.setGoogleMapsTheme(requireActivity(), googleMap)
+        isLocationServiceRunning.observe(viewLifecycleOwner, Observer {
+
+            if (it) {
+                service?.getAllLocations()?.observe(viewLifecycleOwner, Observer { locationList ->
+                    if (locationList.isNotEmpty()) {
+                        val locationListToDraw =
+                            locationList.subList(syncedListIndexPointer, locationList.size)
+                        syncedListIndexPointer = locationList.size
+
+                        locationListToDraw.forEach { location ->
+                            val latLng =
+                                LatLng(location.latitude, location.longitude)
+                            if (locSet.add(latLng)) {
+                                // Show starting marker and focus on it
+                                if (lastLocPoint == null) {
+                                    googleMap.moveCamera(
+                                        CameraUpdateFactory.newLatLngZoom(
+                                            latLng,
+                                            15F
+                                        )
+                                    )
+                                    googleMap.addMarker(
+                                        MarkerOptions().position(latLng)
+                                            .title(getString(R.string.Start))
+                                    )
+                                } else {
+                                    val polyLine =
+                                        GlobalUtil.getThemedPolyLineOptions(requireContext())
+                                    polyLine.add(lastLocPoint, latLng)
+                                    googleMap.addPolyline(polyLine)
+                                }
+                            } else {
+                                Timber.d("Location already exists")
+                            }
+                            lastLocPoint = latLng
+                        }
+                    }
+                })
+            }
+        })
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (enableMap)
+            mMapView?.onResume()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        nav.hideBottomNavBar?.let { it(true) }
+        (requireActivity() as MainActivity).enableTransparentSystemBars(true)
+        if (enableMap)
+            mMapView?.onStart()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (enableMap)
+            mMapView?.onStop()
+    }
+
+    override fun onPause() {
+        if (enableMap)
+            mMapView?.onPause()
+        super.onPause()
+    }
+
+    override fun onDestroy() {
+        if (enableMap) {
+            mMapView?.onDestroy()
+            mMapView = null
+        }
+        super.onDestroy()
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        if (enableMap)
+            mMapView?.onLowMemory()
+    }
 }

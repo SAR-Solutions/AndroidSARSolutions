@@ -14,9 +14,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sarcoordinator.sarsolutions.models.Case
+import com.sarcoordinator.sarsolutions.util.CustomFragment
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.Navigation
-import com.sarcoordinator.sarsolutions.util.CustomFragment
 import kotlinx.android.synthetic.main.fragment_cases.*
 import kotlinx.android.synthetic.main.list_view_item.view.*
 
@@ -47,6 +47,9 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), CustomFragment {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        nav.hideBottomNavBar?.let { it(false) }
+        (requireActivity() as MainActivity).enableTransparentStatusBar(false)
 
         // Adjust refresh layout progress view offset depending on toolbar height
         toolbar_cases.viewTreeObserver.addOnGlobalLayoutListener(object :

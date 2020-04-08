@@ -20,11 +20,19 @@ android {
         applicationId "com.sarcoordinator.sarsolutions"
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 27
-        versionName "2.0.6"
+        versionCode 28
+        versionName "2.1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        resValue 'string', "gmaps_api_key", GOOGLE_MAPS_API_KEY
     }
     buildTypes {
+        release_debug {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            debuggable false
+            signingConfig signingConfigs.debug
+        }
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
@@ -55,6 +63,9 @@ dependencies {
 
     // GPS Location
     implementation 'com.google.android.gms:play-services-location:17.0.0'
+
+    // Google maps
+    implementation 'com.google.android.gms:play-services-maps:17.0.0'
 
     // Dexter Permissions
     implementation 'com.karumi:dexter:6.0.2'
@@ -107,4 +118,8 @@ dependencies {
 
     // PhotoView
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
+
+    //Insetter
+    implementation "dev.chrisbanes:insetter:0.2.1"
+    implementation "dev.chrisbanes:insetter-ktx:0.2.1"
 }

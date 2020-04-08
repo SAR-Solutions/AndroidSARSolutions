@@ -2,6 +2,7 @@ package com.sarcoordinator.sarsolutions.models
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
+import java.io.Serializable
 
 @Entity
 data class CacheShiftReport(
@@ -10,7 +11,7 @@ data class CacheShiftReport(
     val searchDuration: String? = null,
     var endTime: String? = null,
     val cacheTime: String? = null
-)
+): Serializable
 
 @Entity
 data class CacheLocation(
@@ -19,7 +20,7 @@ data class CacheLocation(
     val shiftId: String,
     val latitude: Double,
     val longitude: Double
-)
+): Serializable
 
 @Entity
 data class CacheVehicle(
@@ -30,7 +31,7 @@ data class CacheVehicle(
     val isPersonalVehicle: Boolean,
     val type: Int,
     val milesTraveled: String
-)
+): Serializable
 
 data class LocationsInShiftReport(
     @Embedded val shiftReport: CacheShiftReport,
@@ -48,7 +49,7 @@ data class LocationsInShiftReport(
         entity = CacheVehicle::class
     )
     val vehicleList: List<CacheVehicle>?
-)
+): Serializable
 
 @Dao
 interface CaseDao {
@@ -77,33 +78,4 @@ interface CaseDao {
 
     @Delete
     suspend fun deleteVehicles(vehicles: List<CacheVehicle>?)
-
-//
-//    @Insert(onConflict = OnConflictStrategy.IGNORE)
-//    suspend fun insertLocationList(locationList: List<CacheLocation>)
-//
-//    @Insert(onConflict = OnConflictStrategy.REPLACE)
-//    suspend fun insertEndTime(endTime: CacheEndTime)
-//
-//    @Insert(onConflict = OnConflictStrategy.REPLACE)
-//    suspend fun insertShiftReport(shiftId: CacheShiftReport)
-//
-//    @Insert(onConflict = OnConflictStrategy.REPLACE)
-//    suspend fun insertAllVehicles(vehicle: List<CacheVehicle>?)
-//
-//    @Delete
-//    suspend fun deleteLocations(locations: List<CacheLocation>)
-//
-//    @Query("SELECT * FROM CacheLocation GROUP BY shiftId")
-//    fun getAllLocationShiftIds(): LiveData<List<CacheLocation>>
-//
-//    @Query("SELECT * FROM CacheLocation WHERE shiftId = :shiftId")
-//    suspend fun getAllLocationsForShift(shiftId: String): List<CacheLocation>
-//
-//    @Query("SELECT * FROM CacheEndTime WHERE shiftId = :shiftId")
-//    suspend fun getEndTimeForShift(shiftId: String): CacheEndTime?
-//
-//    @Query("SELECT * FROM CacheLocation WHERE shiftId = :shiftId")
-//    fun testLocationList(shiftId: String): List<CacheLocation>
-
 }

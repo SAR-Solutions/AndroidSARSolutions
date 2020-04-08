@@ -3,8 +3,12 @@ package com.sarcoordinator.sarsolutions
 import android.app.Application
 import android.content.ComponentName
 import android.content.ServiceConnection
+import android.location.Location
 import android.os.IBinder
-import androidx.lifecycle.*
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import com.sarcoordinator.sarsolutions.api.Repository
 import com.sarcoordinator.sarsolutions.models.*
 import com.sarcoordinator.sarsolutions.util.CacheDatabase
@@ -33,7 +37,7 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         LocalCacheRepository(CacheDatabase.getDatabase(application).casesDao())
 
     // Number of failed shift syncs in progress
-    var numberOfSyncsInProgress: Int = 0
+    var syncInProgress = false
 
     // To keep track of vehicle names
     var numberOfVehicles: Int = 0
@@ -183,9 +187,9 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     fun getAllShiftReports(): LiveData<List<LocationsInShiftReport>> =
         cacheRepo.allShiftReports
 
-    fun addLocationsToCache(locations: List<LocationPoint>) {
+    fun addLocationsToCache(locations: List<Location>) {
         viewModelScope.launch(Default) {
-            while(currentShiftId.isNullOrEmpty())
+            while (currentShiftId.isNullOrEmpty())
                 delay(1000)
 
             val list = ArrayList<CacheLocation>()
@@ -244,13 +248,13 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         cachedShiftReport: LocationsInShiftReport,
         vehicleTypeArray: List<String>
     ): Job {
-        numberOfSyncsInProgress++
+        syncInProgress = true
         return viewModelScope.launch(IO) {
             val shiftId = cachedShiftReport.shiftReport.shiftId
             try {
                 // Api calls to submit shift reports
                 cachedShiftReport.locationList?.let {
-                    Repository.putLocations(shiftId, false, cacheLocListToAPILocList(it))
+                    Repository.putLocationPoints(shiftId, false, cacheLocListToAPILocList(it))
                 }
                 cachedShiftReport.shiftReport.endTime?.let {
                     Repository.putEndTime(shiftId, false, it)
@@ -272,7 +276,7 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
             }
         }.apply {
             invokeOnCompletion {
-                numberOfSyncsInProgress--
+                syncInProgress = false
             }
         }
     }

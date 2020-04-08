@@ -1,5 +1,6 @@
 package com.sarcoordinator.sarsolutions.api
 
+import android.location.Location
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -51,9 +52,21 @@ object Repository {
     suspend fun putLocations(
         shiftId: String,
         isTest: Boolean,
+        paths: List<Location>
+    ) {
+        val parsedLocList = ArrayList<LocationPoint>()
+        paths.forEach {
+            parsedLocList.add(LocationPoint(it.latitude, it.longitude))
+        }
+        service.putLocations(getToken(), shiftId, isTest, LocationBody(parsedLocList))
+    }
+
+    suspend fun putLocationPoints(
+        shiftId: String,
+        isTest: Boolean,
         paths: List<LocationPoint>
-    ) =
-        service.putLocations(getToken(), shiftId, isTest, LocationBody(paths))
+    ) = service.putLocations(getToken(), shiftId, isTest, LocationBody(paths))
+
 
     suspend fun putEndTime(
         shiftId: String,

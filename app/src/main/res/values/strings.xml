@@ -8,7 +8,7 @@
     <string name="sign_out">Sign Out</string>
     <string name="Stop">Stop</string>
     <string name="stop">Stop</string>
-    <string name="start">Start</string>
+    <string name="Start">Start</string>
     <string name="loc_notification_title">Tracking location</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
@@ -75,7 +75,7 @@
     <string name="sync_failure_desc">Shifts will appear here if they fail to sync</string>
     <string name="shift_report">Shift Report</string>
     <string name="image_information">Image Information</string>
-    <string name="number_of_images_taken">Number of images taken:</string>
+    <string name="number_of_images_taken">Number of images taken</string>
     <string name="images">Images:</string>
     <string name="images_taken">Images Taken</string>
     <string name="Metadata">Metadata</string>
@@ -85,4 +85,22 @@
     <string name="delete_confirmation">Are you sure you want to delete this image?</string>
     <string name="delete_image">Delete Image</string>
     <string name="no">No</string>
+    <string name="cached_time">Cached Time</string>
+    <string name="search_duration">Search Duration</string>
+    <string name="sync_shift">Sync Shift</string>
+    <string name="debug_settings">Debug Settings</string>
+    <string name="low_bandwidth_mode">Low Bandwidth Mode</string>
+    <string name="Low_Bandwidth_Mode">Low Bandwidth Mode</string>
+    <string name="Map_Disabled">Map Disabled</string>
+    <string name="gps_disabled">GPS Disabled</string>
+    <string name="enable_gps_prompt">GPS is required to start shift</string>
+    <string name="back">Back</string>
+    <string name="enable_gps">Enable GPS</string>
+    <string name="map">Map</string>
+    <string name="light">Light</string>
+    <string name="standard">Standard</string>
+    <string name="snow">Snow</string>
+    <string name="dark">Dark</string>
+    <string name="night">Night</string>
+    <string name="map_theme">Map Theme</string>
 </resources>
