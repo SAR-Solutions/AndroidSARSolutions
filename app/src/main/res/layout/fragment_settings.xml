@@ -81,6 +81,79 @@
                     app:layout_constraintStart_toStartOf="@+id/guideline5"
                     app:layout_constraintTop_toTopOf="@+id/low_bandwidth_title" />
 
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/map_settings_title"
+                    style="@style/Base.Widget.AppCompat.TextView.SubHeading.Color"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/map_theme"
+                    app:layout_constraintStart_toStartOf="@id/general_heading_text"
+                    app:layout_constraintTop_toBottomOf="@id/low_bandwidth_title" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/light_map_title"
+                    style="@style/Base.Widget.AppCompat.TextView.SubHeading"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/light"
+                    app:layout_constraintEnd_toEndOf="@id/guideline5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/map_settings_title" />
+
+                <RadioGroup
+                    android:id="@+id/map_light_radio_group"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@id/guideline5"
+                    app:layout_constraintTop_toTopOf="@id/light_map_title">
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/std_light_map_radio"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/standard" />
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/snow_light_map_radio"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/snow" />
+                </RadioGroup>
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/dark_map_title"
+                    style="@style/Base.Widget.AppCompat.TextView.SubHeading"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/dark"
+                    app:layout_constraintEnd_toEndOf="@id/light_map_title"
+                    app:layout_constraintStart_toStartOf="@id/light_map_title"
+                    app:layout_constraintTop_toBottomOf="@id/map_light_radio_group" />
+
+                <RadioGroup
+                    android:id="@+id/map_dark_radio_group"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@id/guideline5"
+                    app:layout_constraintTop_toTopOf="@id/dark_map_title">
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/std_dark_map_radio"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/standard" />
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/night_dark_map_radio"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/night" />
+                </RadioGroup>
+
                 <androidx.constraintlayout.widget.Guideline
                     android:id="@+id/guideline5"
                     android:layout_width="wrap_content"

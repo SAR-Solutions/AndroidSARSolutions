@@ -96,4 +96,11 @@
     <string name="enable_gps_prompt">GPS is required to start shift</string>
     <string name="back">Back</string>
     <string name="enable_gps">Enable GPS</string>
+    <string name="map">Map</string>
+    <string name="light">Light</string>
+    <string name="standard">Standard</string>
+    <string name="snow">Snow</string>
+    <string name="dark">Dark</string>
+    <string name="night">Night</string>
+    <string name="map_theme">Map Theme</string>
 </resources>

@@ -26,6 +26,7 @@ import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.gms.maps.model.RoundCap
 import com.google.android.material.snackbar.Snackbar
 import com.sarcoordinator.sarsolutions.R
+import com.sarcoordinator.sarsolutions.SettingsTabFragment
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -214,21 +215,32 @@ object GlobalUtil {
                 activity.getPreferences(Context.MODE_PRIVATE)
             ) == THEME_DARK
 
+        val sharedPref = activity.getPreferences(Context.MODE_PRIVATE)
+
         // Enable dark map if current theme is dark
         if (isDarkTheme) {
-            try {
-                // Customise the styling of the base map using a JSON object defined
-                // in a raw resource file.
-                val success = googleMap.setMapStyle(
-                    MapStyleOptions.loadRawResourceStyle(
-                        activity, R.raw.dark_map_theme
-                    )
+            when (sharedPref.getString(
+                SettingsTabFragment.MAP_DARK_THEME_PREFS,
+                SettingsTabFragment.MapDarkThemes.STANDARD.name
+            )) {
+                SettingsTabFragment.MapDarkThemes.STANDARD.name -> setMapsTheme(
+                    activity,
+                    googleMap,
+                    R.raw.dark_std_map_theme
                 )
-                if (!success) {
-                    Timber.e("Style parsing failed.")
-                }
-            } catch (e: Resources.NotFoundException) {
-                Timber.e("Can't find style. Error: ", e)
+                SettingsTabFragment.MapDarkThemes.Night.name -> setMapsTheme(
+                    activity,
+                    googleMap,
+                    R.raw.dark_night_map_theme
+                )
+            }
+        } else {
+            val currentLightTheme = sharedPref.getString(
+                SettingsTabFragment.MAP_LIGHT_THEME_PREFS,
+                SettingsTabFragment.MapLightThemes.STANDARD.name
+            )
+            if (currentLightTheme == SettingsTabFragment.MapLightThemes.SNOW.name) {
+                setMapsTheme(activity, googleMap, R.raw.light_snow_map_theme)
             }
         }
     }
@@ -239,6 +251,23 @@ object GlobalUtil {
             jointType(JointType.ROUND)
             color(getPrimaryColorFromTheme(context))
         }
+
+    private fun setMapsTheme(activity: Activity, googleMap: GoogleMap, themeId: Int) {
+        try {
+            // Customise the styling of the base map using a JSON object defined
+            // in a raw resource file.
+            val success = googleMap.setMapStyle(
+                MapStyleOptions.loadRawResourceStyle(
+                    activity, themeId
+                )
+            )
+            if (!success) {
+                Timber.e("Style parsing failed.")
+            }
+        } catch (e: Resources.NotFoundException) {
+            Timber.e("Can't find style. Error: ", e)
+        }
+    }
 }
 
 // Notify observers of change; adding item to list doesn't notify observers

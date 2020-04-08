@@ -8,6 +8,7 @@ import android.transition.TransitionInflater
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.google.android.material.switchmaterial.SwitchMaterial
@@ -25,6 +26,16 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), CustomFragment
     companion object {
         const val TESTING_MODE_PREFS = "TESTING_MODE"
         const val LOW_BANDWIDTH_PREFS = "LOW_BANDWIDTH"
+        const val MAP_LIGHT_THEME_PREFS = "MAP_LIGHT_THEME"
+        const val MAP_DARK_THEME_PREFS = "MAP_DARK_THEME"
+    }
+
+    enum class MapLightThemes {
+        STANDARD, SNOW
+    }
+
+    enum class MapDarkThemes {
+        STANDARD, Night
     }
 
     private val auth = FirebaseAuth.getInstance()
@@ -81,6 +92,42 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), CustomFragment
             }
         }
 
+        map_light_radio_group.setOnCheckedChangeListener { group, checkedId ->
+            when (checkedId) {
+                R.id.std_light_map_radio -> putStringInSharedPref(
+                    MAP_LIGHT_THEME_PREFS,
+                    MapLightThemes.STANDARD.name
+                )
+                R.id.snow_light_map_radio -> putStringInSharedPref(
+                    MAP_LIGHT_THEME_PREFS,
+                    MapLightThemes.SNOW.name
+                )
+                else -> Toast.makeText(
+                    requireContext(),
+                    "Something went wrong changing light theme",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+
+        map_dark_radio_group.setOnCheckedChangeListener { group, checkedId ->
+            when (checkedId) {
+                R.id.std_dark_map_radio -> putStringInSharedPref(
+                    MAP_DARK_THEME_PREFS,
+                    MapDarkThemes.STANDARD.name
+                )
+                R.id.night_dark_map_radio -> putStringInSharedPref(
+                    MAP_DARK_THEME_PREFS,
+                    MapDarkThemes.Night.name
+                )
+                else -> Toast.makeText(
+                    requireContext(),
+                    "Something went wrong changing dark theme",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+
         license_button.setOnClickListener {
             OssLicensesMenuActivity.setActivityTitle(getString(R.string.licenses))
             startActivity(Intent(requireContext(), OssLicensesMenuActivity::class.java))
@@ -126,7 +173,26 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), CustomFragment
         // Testing mode
         testing_mode_switch.isChecked = sharedPrefs.getBoolean(TESTING_MODE_PREFS, false)
 
-        // app version
+        // App version
         app_version_value.text = BuildConfig.VERSION_NAME
+
+        // Light map theme
+        when (sharedPrefs.getString(MAP_LIGHT_THEME_PREFS, MapLightThemes.STANDARD.name)) {
+            MapLightThemes.STANDARD.name -> std_light_map_radio.isChecked = true
+            MapLightThemes.SNOW.name -> snow_light_map_radio.isChecked = true
+        }
+
+        // Dark map theme
+        when (sharedPrefs.getString(MAP_DARK_THEME_PREFS, MapDarkThemes.STANDARD.name)) {
+            MapDarkThemes.STANDARD.name -> std_dark_map_radio.isChecked = true
+            MapDarkThemes.Night.name -> night_dark_map_radio.isChecked = true
+        }
+    }
+
+    private fun putStringInSharedPref(key: String, value: String) {
+        with(sharedPrefs.edit()) {
+            putString(key, value)
+            commit()
+        }
     }
 }
