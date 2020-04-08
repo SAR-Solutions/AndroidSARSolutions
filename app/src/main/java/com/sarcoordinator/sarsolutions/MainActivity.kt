@@ -16,6 +16,7 @@ import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.GlobalUtil.THEME_LIGHT
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.activity_main.*
+import timber.log.Timber
 import java.util.*
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
@@ -23,10 +24,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     private val BACKSTACK = "BACKSTACK"
     private val TABSTACK = "TABSTACK"
     private val FRAGMENT_STATES_MAP = "FRAGMENT_STATES_MAP"
-
-    // Required for the navigation the navigation component
-    // to prevent saving fragment state on activity close
-    private var endActivity: Boolean = false
 
     private val auth = FirebaseAuth.getInstance()
     private lateinit var sharedPrefs: SharedPreferences
@@ -38,6 +35,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     private lateinit var nav: Navigation
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Timber.d("Savedinstance state state: ${savedInstanceState != null}")
         // Theme needs to be applied before calling super.onCreate
         // Otherwise a new instance of this activity will be created
         loadUserPreferences()
@@ -66,9 +64,11 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             }
 
             savedInstanceState.getSerializable(TABSTACK)?.let {
-                val temp = Stack<Navigation.TabIdentifiers>()
-                temp.addAll(it as Collection<Navigation.TabIdentifiers>)
-                nav.setTabStack(temp)
+                val stackToAdd = Stack<Navigation.TabIdentifiers>()
+                (it as ArrayList<Navigation.TabIdentifiers>).forEach { tab ->
+                    stackToAdd.add(tab)
+                }
+                nav.setTabStack(stackToAdd)
             }
 
             savedInstanceState.getSerializable(FRAGMENT_STATES_MAP)?.let {
@@ -102,12 +102,12 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         outState.putSerializable(BACKSTACK, nav.getBackStack())
         outState.putSerializable(TABSTACK, nav.getTabStack())
         outState.putSerializable(FRAGMENT_STATES_MAP, nav.getFragmentStateMap())
+        Timber.d("Put state in Bundle...")
     }
 
     override fun onPause() {
         super.onPause()
-        if (!endActivity)
-            nav.saveCurrentFragmentState()
+        nav.saveCurrentFragmentState()
     }
 
     override fun onDestroy() {
