@@ -32,6 +32,12 @@ class FailedShiftsTabFragment : Fragment(R.layout.fragment_failed_shifts), Custo
             .inflateTransition(android.R.transition.move)
     }
 
+    override fun onStart() {
+        super.onStart()
+        (requireActivity() as MainActivity).restoreSystemBars()
+        nav.hideBottomNavBar?.let { it(false) }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 

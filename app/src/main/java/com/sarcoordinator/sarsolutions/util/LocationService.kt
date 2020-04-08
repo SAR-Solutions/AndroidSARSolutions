@@ -284,8 +284,9 @@ class LocationService : Service() {
                 try {
                     if (mTestMode) {
                         // Emulate network call
-                        Timber.d("Emulating syncing remaining locations")
+                        Timber.d("Emulating syncing remaining locations with error")
                         delay(2000)
+                        throw Exception("Emulating failed location sync")
                     } else {
                         Repository.putLocations(
                             shiftId.value!!,
@@ -305,8 +306,9 @@ class LocationService : Service() {
             try {
                 if (mTestMode) {
                     // Emulate network call
-                    Timber.d("Emulate posting shift end time")
+                    Timber.d("Emulating syncing remaining locations with error")
                     delay(2000)
+                    throw Exception("Emulating failed end time sync")
                 } else {
                     Repository.putEndTime(
                         shiftId.value!!,

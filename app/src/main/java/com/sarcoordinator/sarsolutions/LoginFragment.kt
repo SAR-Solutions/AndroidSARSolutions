@@ -3,6 +3,7 @@ package com.sarcoordinator.sarsolutions
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
+import android.text.method.LinkMovementMethod
 import android.util.Patterns
 import android.view.View
 import android.view.autofill.AutofillManager
@@ -34,6 +35,15 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                 initialState.margins.bottom + insets.systemGestureInsets.bottom
             )
         }
+        privacy_policy_text.doOnApplyWindowInsets { view, insets, initialState ->
+            view.setMargins(
+                initialState.margins.left + insets.systemGestureInsets.left,
+                initialState.margins.top + insets.systemGestureInsets.top,
+                initialState.margins.right + insets.systemGestureInsets.right,
+                initialState.margins.bottom + insets.systemGestureInsets.bottom
+            )
+        }
+        privacy_policy_text.movementMethod = LinkMovementMethod.getInstance()
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {

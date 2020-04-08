@@ -86,6 +86,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/signin_button" />
 
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/privacy_policy_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:linksClickable="true"
+        android:padding="8dp"
+        android:text="@string/privacy_policy_disclaimer"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/password_text_layout"
+        app:layout_constraintStart_toStartOf="@id/password_text_layout" />
+
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline2"
         android:layout_width="wrap_content"

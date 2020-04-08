@@ -276,7 +276,8 @@ object Navigation {
 
     fun setTabStack(tabStack: Stack<TabIdentifiers>) {
         this.tabStack = tabStack
-        currentTab = tabStack.peek()
+        if (tabStack.isNotEmpty())
+            currentTab = tabStack.peek()
     }
 
     fun getFragmentStateMap(): HashMap<String, Fragment.SavedState?> {

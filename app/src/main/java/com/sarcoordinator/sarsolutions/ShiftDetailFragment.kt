@@ -298,8 +298,6 @@ class ShiftDetailFragment : Fragment(), OnMapReadyCallback {
     }
 
     override fun onDestroy() {
-        nav.hideBottomNavBar?.let { it(false) }
-        (requireActivity() as MainActivity).enableTransparentSystemBars(false)
         mMapView?.onDestroy()
         mMapView = null
         super.onDestroy()

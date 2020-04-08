@@ -103,4 +103,6 @@
     <string name="dark">Dark</string>
     <string name="night">Night</string>
     <string name="map_theme">Map Theme</string>
+    <string name="privacy_policy_disclaimer">By continuing you agree to our <a href="https://sar-coordinator.flycricket.io/privacy.html">privacy policy</a></string>
+    <string name="privacy_policy"><a href="https://sar-coordinator.flycricket.io/privacy.html">Privacy Policy</a></string>
 </resources>

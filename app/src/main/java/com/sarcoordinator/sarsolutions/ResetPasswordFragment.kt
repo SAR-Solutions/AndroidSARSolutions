@@ -10,8 +10,6 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
-import com.sarcoordinator.sarsolutions.util.setMargins
-import dev.chrisbanes.insetter.doOnApplyWindowInsets
 import kotlinx.android.synthetic.main.fragment_reset_password.*
 
 class ResetPasswordFragment : Fragment(R.layout.fragment_reset_password) {
@@ -28,14 +26,14 @@ class ResetPasswordFragment : Fragment(R.layout.fragment_reset_password) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        imageView.doOnApplyWindowInsets { view, insets, initialState ->
-            view.setMargins(
-                initialState.margins.left + insets.systemGestureInsets.left,
-                initialState.margins.top + insets.systemGestureInsets.top,
-                initialState.margins.right + insets.systemGestureInsets.right,
-                initialState.margins.bottom + insets.systemGestureInsets.bottom
-            )
-        }
+//        imageView.doOnApplyWindowInsets { view, insets, initialState ->
+//            view.setMargins(
+//                initialState.margins.left + insets.systemGestureInsets.left,
+//                initialState.margins.top + insets.systemGestureInsets.top,
+//                initialState.margins.right + insets.systemGestureInsets.right,
+//                initialState.margins.bottom + insets.systemGestureInsets.bottom
+//            )
+//        }
 
         // Set autofill hint
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
