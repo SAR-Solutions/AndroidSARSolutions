@@ -1,6 +1,7 @@
 package com.sarcoordinator.sarsolutions
 
 import android.Manifest
+import android.animation.Animator
 import android.app.Activity
 import android.content.Context
 import android.content.DialogInterface
@@ -95,6 +96,38 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     private var mMapView: MapView? = null
     private lateinit var bottomSheet: BottomSheetBehavior<MaterialCardView>
 
+    private val fabHiddenListener = object : Animator.AnimatorListener {
+        override fun onAnimationRepeat(animation: Animator?) {
+        }
+
+        override fun onAnimationEnd(animation: Animator?) {
+            Timber.d("FAB Hidden")
+        }
+
+        override fun onAnimationCancel(animation: Animator?) {
+        }
+
+        override fun onAnimationStart(animation: Animator?) {
+            capture_photo_fab.hide()
+        }
+    }
+
+    private val fabShownListener = object : Animator.AnimatorListener {
+        override fun onAnimationRepeat(animation: Animator?) {
+        }
+
+        override fun onAnimationEnd(animation: Animator?) {
+            Timber.d("FAB Shown")
+        }
+
+        override fun onAnimationCancel(animation: Animator?) {
+        }
+
+        override fun onAnimationStart(animation: Animator?) {
+            capture_photo_fab.show()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -163,7 +196,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
 
         bottomSheet = BottomSheetBehavior.from(view.findViewById(R.id.case_info_card))
 
-        view.findViewById<FloatingActionButton>(R.id.capture_photo).hide()
+        view.findViewById<FloatingActionButton>(R.id.capture_photo_fab).hide()
         view.findViewById<FloatingActionButton>(R.id.location_service_fab).hide()
         return view
     }
@@ -196,7 +229,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun setupCircularButtons() {
-        back_button_view.image_button.setImageDrawable(resources.getDrawable(R.drawable.ic_baseline_arrow_back_24))
+        back_button_view.image_button.setImageDrawable(requireContext().getDrawable(R.drawable.ic_baseline_arrow_back_24))
         back_button_view.image_button.setOnClickListener { requireActivity().onBackPressed() }
         info_button_view.image_button.setOnClickListener {
             bottomSheet.state = when (bottomSheet.state) {
@@ -236,7 +269,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
 //            bottomSheet.peekHeight = bottomSheet.peekHeight + insets.systemGestureInsets.bottom
             view.setMargins(
                 initialState.margins.left + insets.systemGestureInsets.left,
-                initialState.margins.top + insets.systemGestureInsets.top,
+                initialState.margins.top,
                 initialState.margins.right + insets.systemGestureInsets.right,
                 initialState.margins.bottom + insets.systemGestureInsets.bottom
             )
@@ -327,13 +360,42 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
                 }
             }
         }
+
+        // Capture image
+        capture_photo_fab.setOnClickListener {
+            Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { intent ->
+                intent.resolveActivity(requireActivity().packageManager)?.also {
+
+                    val caseName = viewModel.currentCase.value!!.caseName
+                    // Create intent to request for camera app launch
+                    val photoFile = GlobalUtil.createImageFile(
+                        caseName,
+                        requireActivity().getExternalFilesDir(
+                            Environment.DIRECTORY_PICTURES +
+                                    "/$caseName/"
+                        )!!
+                    )
+
+                    photoFile.also {
+                        val photoURI: Uri = FileProvider.getUriForFile(
+                            requireContext(),
+                            "sarcoordinator.sarsolutions.provider",
+                            it
+                        )
+
+                        viewModel.currentImagePath = photoFile.absolutePath
+                        intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                        startActivityForResult(intent, REQUEST_IMAGE_CAPTURE)
+                    }
+                }
+            }
+        }
     }
 
+    // Bottom Sheet stuff
     private fun initCaseInfoBottomSheet() {
-        // Bottom Sheet stuff
         bottomSheet.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                return
             }
 
             override fun onStateChanged(bottomSheet: View, newState: Int) {
@@ -410,36 +472,6 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
             case_info_card.image_number_text_view.text = size.toString()
             viewAdapter.setData(it)
         })
-
-        // Capture image
-        capture_photo.setOnClickListener {
-            Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { intent ->
-                intent.resolveActivity(requireActivity().packageManager)?.also {
-
-                    val caseName = viewModel.currentCase.value!!.caseName
-                    // Create intent to request for camera app launch
-                    val photoFile = GlobalUtil.createImageFile(
-                        caseName,
-                        requireActivity().getExternalFilesDir(
-                            Environment.DIRECTORY_PICTURES +
-                                    "/$caseName/"
-                        )!!
-                    )
-
-                    photoFile.also {
-                        val photoURI: Uri = FileProvider.getUriForFile(
-                            requireContext(),
-                            "sarcoordinator.sarsolutions.provider",
-                            it
-                        )
-
-                        viewModel.currentImagePath = photoFile.absolutePath
-                        intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
-                        startActivityForResult(intent, REQUEST_IMAGE_CAPTURE)
-                    }
-                }
-            }
-        }
     }
 
     // Disable shimmer, show case info layout; vice-versa
@@ -454,8 +486,10 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun enableStartTrackingFab() {
-        capture_photo.visibility = View.GONE
-        location_service_fab.visibility = View.VISIBLE
+        capture_photo_fab.hide()
+        location_service_fab.show()
+        location_service_fab.removeOnShowAnimationListener(fabShownListener)
+        location_service_fab.removeOnHideAnimationListener(fabHiddenListener)
 
         location_service_fab.setImageDrawable(
             resources.getDrawable(
@@ -468,7 +502,9 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun enableStopTrackingFab() {
-        capture_photo.visibility = View.VISIBLE
+        capture_photo_fab.show()
+        location_service_fab.addOnShowAnimationListener(fabShownListener)
+        location_service_fab.addOnHideAnimationListener(fabHiddenListener)
 
         location_service_fab.setImageDrawable(
             resources.getDrawable(

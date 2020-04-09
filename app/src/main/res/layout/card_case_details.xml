@@ -4,10 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:clickable="true"
+    style="@style/Widget.MaterialComponents.CardView.Standard.RoundedTop"
     app:cardElevation="4dp"
     app:behavior_hideable="true"
-    app:behavior_peekHeight="90dp"
+    app:behavior_peekHeight="100dp"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
     <LinearLayout

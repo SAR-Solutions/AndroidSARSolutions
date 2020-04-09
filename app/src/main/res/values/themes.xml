@@ -51,6 +51,18 @@
         <item name="cardElevation">2dp</item>
     </style>
 
+    <style name="Widget.MaterialComponents.CardView.Standard.RoundedTop" parent="@style/Widget.MaterialComponents.CardView">
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay_card_custom_corners</item>
+    </style>
+
+    <style name="ShapeAppearanceOverlay_card_custom_corners">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopRight">70dp</item>
+        <item name="cornerSizeTopLeft">70dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+    </style>
+
     <style name="Widget.MaterialComponents.FloatingActionButton.Standard">
         <item name="android:layout_margin">16dp</item>
         <item name="android:elevation">6dp</item>
