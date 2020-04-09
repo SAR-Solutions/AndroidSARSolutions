@@ -68,10 +68,6 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         const val LOCATION_TRACKING_STATUS = "LOCATION_TRACKING_STATUS"
     }
 
-    private val SYNCED_LIST_POINTER_KEY = "SyncedListPointerKey"
-    private val SYNCED_LOC_SET_KEY = "SyncedLocSetKey"
-    private val SYNCED_LAST_LOC_KEY = "SyncLastLocKey"
-
     private val MAPVIEW_BUNDLE_KEY = "MapViewBundleKey"
     private val REQUEST_IMAGE_CAPTURE = 1
 
@@ -92,7 +88,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         it.postValue(false)
     }
 
-    private var syncedListIndexPointer = 0
+    private var markedListIndexPointer = 0
     private var locSet: MutableSet<LatLng> = mutableSetOf()
     private var lastLocPoint: LatLng? = null
 
@@ -157,14 +153,6 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
             var mapViewBundle: Bundle? = null
             if (savedInstanceState != null) {
                 mapViewBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY)
-
-                // Map markers/paths restoration
-                syncedListIndexPointer = savedInstanceState.getInt(SYNCED_LIST_POINTER_KEY)
-                lastLocPoint = savedInstanceState.getParcelable(SYNCED_LAST_LOC_KEY)
-                val listToSet = savedInstanceState.getSerializable(SYNCED_LOC_SET_KEY) as List<*>
-                listToSet.forEach {
-                    locSet.add(it as LatLng)
-                }
             }
             mMapView?.onCreate(mapViewBundle)
             mMapView?.getMapAsync(this)
@@ -194,10 +182,6 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         super.onSaveInstanceState(outState)
         outState.putString(CASE_ID, caseId)
         outState.putBoolean(LOCATION_TRACKING_STATUS, stopLocationTracking)
-
-        outState.putInt(SYNCED_LIST_POINTER_KEY, syncedListIndexPointer)
-        outState.putParcelable(SYNCED_LAST_LOC_KEY, lastLocPoint)
-        outState.putSerializable(SYNCED_LOC_SET_KEY, ArrayList(locSet.toList()))
 
         if (enableMap) {
             // Required Map callback
@@ -413,7 +397,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         viewManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         viewAdapter = ImagesAdapter(
             nav,
-            viewModel.getImageList(externalCaseImageDir).value!!
+            viewModel.getImageList(externalCaseImageDir).value ?: ArrayList()
         )
         case_info_card.image_recycler_view.apply {
             layoutManager = viewManager
@@ -693,8 +677,8 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
                 service?.getAllLocations()?.observe(viewLifecycleOwner, Observer { locationList ->
                     if (locationList.isNotEmpty()) {
                         val locationListToDraw =
-                            locationList.subList(syncedListIndexPointer, locationList.size)
-                        syncedListIndexPointer = locationList.size
+                            locationList.subList(markedListIndexPointer, locationList.size)
+                        markedListIndexPointer = locationList.size
 
                         locationListToDraw.forEach { location ->
                             val latLng =
@@ -727,6 +711,11 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
                 })
             }
         })
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        unbindService()
     }
 
     override fun onResume() {

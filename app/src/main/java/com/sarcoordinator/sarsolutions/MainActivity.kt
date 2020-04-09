@@ -12,18 +12,24 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
+import com.sarcoordinator.sarsolutions.models.Case
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.GlobalUtil.THEME_LIGHT
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.activity_main.*
 import timber.log.Timber
 import java.util.*
+import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     private val BACKSTACK = "BACKSTACK"
     private val TABSTACK = "TABSTACK"
     private val FRAGMENT_STATES_MAP = "FRAGMENT_STATES_MAP"
+
+    private val SHIFT_SERVICE_STATUS = "ShiftServiceStatus"
+    private val CURRENT_SHIFT_ID = "CurrentShiftId"
+    private val CURRENT_CASE_ID = "CurrentCaseId"
 
     private val auth = FirebaseAuth.getInstance()
     private lateinit var sharedPrefs: SharedPreferences
@@ -58,11 +64,10 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
         if (savedInstanceState != null) {
 
-            // Recover from process death
+            // Recover Navigation state from process death
             savedInstanceState.getSerializable(BACKSTACK)?.let {
                 nav.setBackStack(it as HashMap<*, Collection<String>>)
             }
-
             savedInstanceState.getSerializable(TABSTACK)?.let {
                 val stackToAdd = Stack<Navigation.TabIdentifiers>()
                 (it as ArrayList<Navigation.TabIdentifiers>).forEach { tab ->
@@ -70,11 +75,17 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 }
                 nav.setTabStack(stackToAdd)
             }
-
             savedInstanceState.getSerializable(FRAGMENT_STATES_MAP)?.let {
                 nav.setFragmentStateMap(it as HashMap<String, Fragment.SavedState?>)
             }
 
+            // Recover current ongoing shift from process death
+            viewModel.isShiftActive = savedInstanceState.getBoolean(SHIFT_SERVICE_STATUS)
+            if (viewModel.isShiftActive) {
+                viewModel.currentCase.value =
+                    savedInstanceState.getSerializable(CURRENT_CASE_ID) as Case
+                viewModel.currentShiftId = savedInstanceState.getString(CURRENT_SHIFT_ID)
+            }
         }
 
 //       Black status bar for old android version
@@ -100,9 +111,13 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putSerializable(BACKSTACK, nav.getBackStack())
-        outState.putSerializable(TABSTACK, nav.getTabStack())
+        outState.putSerializable(TABSTACK, ArrayList(nav.getTabStack().toList()))
         outState.putSerializable(FRAGMENT_STATES_MAP, nav.getFragmentStateMap())
-        Timber.d("Put state in Bundle...")
+
+        // Restore ongoing shift
+        outState.putBoolean(SHIFT_SERVICE_STATUS, viewModel.isShiftActive)
+        outState.putString(CURRENT_SHIFT_ID, viewModel.currentShiftId)
+        outState.putSerializable(CURRENT_CASE_ID, viewModel.currentCase.value)
     }
 
     override fun onPause() {
