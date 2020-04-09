@@ -29,8 +29,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
+            app:layout_constraintBottom_toBottomOf="@+id/info_view_layout"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="@+id/info_view_layout" />
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/info_view_layout"
@@ -62,8 +63,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
+            app:layout_constraintBottom_toBottomOf="@+id/info_view_layout"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="@+id/info_view_layout" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

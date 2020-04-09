@@ -2,20 +2,22 @@ package com.sarcoordinator.sarsolutions
 
 import android.os.Bundle
 import android.view.View
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.card.MaterialCardView
 import com.google.android.material.snackbar.Snackbar
 import com.sarcoordinator.sarsolutions.adapters.ImagesAdapter
 import com.sarcoordinator.sarsolutions.adapters.VehiclesAdapter
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.fragment_shift_report.*
+import kotlinx.android.synthetic.main.card_vehicles.view.*
+import kotlinx.android.synthetic.main.fragment_shift_report_modern.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
@@ -23,7 +25,7 @@ import kotlinx.coroutines.launch
 /**
  * Fragment for volunteer shift report at the end of a shift
  */
-class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
+class ShiftReportFragment : Fragment(R.layout.fragment_shift_report_modern) {
 
     private val nav: Navigation = Navigation.getInstance()
 
@@ -37,6 +39,7 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
     private var viewAdapter: VehiclesAdapter? = null
     private var imagesViewManager: RecyclerView.LayoutManager? = null
     private var imagesViewAdapter: ImagesAdapter? = null
+    private lateinit var bottomSheet: BottomSheetBehavior<MaterialCardView>
 
     // Detect swipe
     private val swipeHelper = ItemTouchHelper(object :
@@ -72,6 +75,8 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        bottomSheet = BottomSheetBehavior.from(view.findViewById(R.id.bottom_sheet))
+
         observeNetworkExceptions()
 
         setupVehicleRecyclerView()
@@ -97,20 +102,10 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
         imagesViewAdapter = null
     }
 
-    private fun hideVehicleSection() {
-        vehicle_heading_text.visibility = View.GONE
-        vehicle_recycler_view.visibility = View.GONE
-    }
-
-    private fun showVehicleSection() {
-        vehicle_heading_text.visibility = View.VISIBLE
-        vehicle_recycler_view.visibility = View.VISIBLE
-    }
-
     private fun setupImagesCardView() {
         // Don't inflate images card view if nothing to show
         if (viewModel.getImageList().value!!.isNullOrEmpty()) {
-            images_taken_card.visibility = View.GONE
+            images_recycler_view.visibility = View.GONE
             return
         }
         imagesViewManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
@@ -130,22 +125,18 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
         viewManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         viewAdapter =
             VehiclesAdapter(viewModel)
-        vehicle_recycler_view.apply {
+        bottom_sheet.vehicle_recycler_view.apply {
             layoutManager = viewManager
             adapter = viewAdapter
         }
-        swipeHelper.attachToRecyclerView(vehicle_recycler_view)
+        swipeHelper.attachToRecyclerView(bottom_sheet.vehicle_recycler_view)
 
         if (viewModel.vehicleList.isNotEmpty())
             viewAdapter?.notifyDataSetChanged()
-        else
-            hideVehicleSection()
     }
 
     private fun addVehicle() {
         viewModel.addVehicle()
-        if (!vehicle_heading_text.isVisible)
-            showVehicleSection()
         viewAdapter?.notifyDataSetChanged()
     }
 

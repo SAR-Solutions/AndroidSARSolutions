@@ -708,8 +708,8 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         GlobalUtil.setGoogleMapsTheme(requireActivity(), googleMap)
         isLocationServiceRunning.observe(viewLifecycleOwner, Observer {
-
             if (it) {
+                // Observe locations
                 service?.getAllLocations()?.observe(viewLifecycleOwner, Observer { locationList ->
                     if (locationList.isNotEmpty()) {
                         val locationListToDraw =
