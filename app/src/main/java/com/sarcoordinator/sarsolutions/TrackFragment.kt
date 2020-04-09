@@ -233,7 +233,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
             )
         }
         case_info_card.parent_layout.doOnApplyWindowInsets { view, insets, initialState ->
-            bottomSheet.peekHeight = bottomSheet.peekHeight + insets.systemGestureInsets.bottom
+//            bottomSheet.peekHeight = bottomSheet.peekHeight + insets.systemGestureInsets.bottom
             view.setMargins(
                 initialState.margins.left + insets.systemGestureInsets.left,
                 initialState.margins.top + insets.systemGestureInsets.top,

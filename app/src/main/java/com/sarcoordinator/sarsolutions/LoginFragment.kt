@@ -9,11 +9,13 @@ import android.view.View
 import android.view.autofill.AutofillManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.Navigation
 import com.sarcoordinator.sarsolutions.util.setMargins
+import dev.chrisbanes.insetter.doOnApplyWindowInsets
 import kotlinx.android.synthetic.main.fragment_login.*
 
 class LoginFragment : Fragment(R.layout.fragment_login) {
@@ -26,24 +28,6 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        imageView.doOnApplyWindowInsets { v, insets, initialState ->
-//            v.setMargins(
-//                initialState.margins.left + insets.systemGestureInsets.left,
-//                initialState.margins.top + insets.systemGestureInsets.top,
-//                initialState.margins.right + insets.systemGestureInsets.right,
-//                initialState.margins.bottom + insets.systemGestureInsets.bottom
-//            )
-//        }
-//
-        privacy_policy_text.setOnApplyWindowInsetsListener { v, insets ->
-            privacy_policy_text.setMargins(
-                insets.systemGestureInsets.left,
-                insets.systemGestureInsets.top,
-                insets.systemGestureInsets.right,
-                insets.systemGestureInsets.bottom
-            )
-            insets
-        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             afm = requireContext().getSystemService(AutofillManager::class.java)
@@ -70,6 +54,20 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             email_input_text.setAutofillHints(View.AUTOFILL_HINT_USERNAME)
             password_input_text.setAutofillHints(View.AUTOFILL_HINT_PASSWORD)
+        }
+
+        // Set insets
+        login_parent_layout.children.forEach { child ->
+            if (child.id != R.id.imageView) {
+                child.doOnApplyWindowInsets { childView, insets, initialState ->
+                    childView.setMargins(
+                        initialState.margins.left + insets.systemGestureInsets.left,
+                        initialState.margins.top + insets.systemGestureInsets.top,
+                        initialState.margins.right + insets.systemGestureInsets.right,
+                        initialState.margins.bottom + insets.systemGestureInsets.bottom
+                    )
+                }
+            }
         }
 
         signin_button.setOnClickListener {

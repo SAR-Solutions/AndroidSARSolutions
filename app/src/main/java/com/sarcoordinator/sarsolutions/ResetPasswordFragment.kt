@@ -7,9 +7,12 @@ import android.transition.TransitionInflater
 import android.util.Patterns
 import android.view.View
 import android.widget.Toast
+import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
+import com.sarcoordinator.sarsolutions.util.setMargins
+import dev.chrisbanes.insetter.doOnApplyWindowInsets
 import kotlinx.android.synthetic.main.fragment_reset_password.*
 
 class ResetPasswordFragment : Fragment(R.layout.fragment_reset_password) {
@@ -26,15 +29,6 @@ class ResetPasswordFragment : Fragment(R.layout.fragment_reset_password) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-//        imageView.doOnApplyWindowInsets { view, insets, initialState ->
-//            view.setMargins(
-//                initialState.margins.left + insets.systemGestureInsets.left,
-//                initialState.margins.top + insets.systemGestureInsets.top,
-//                initialState.margins.right + insets.systemGestureInsets.right,
-//                initialState.margins.bottom + insets.systemGestureInsets.bottom
-//            )
-//        }
-
         // Set autofill hint
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             email_input_text.setAutofillHints(View.AUTOFILL_HINT_EMAIL_ADDRESS)
@@ -46,6 +40,20 @@ class ResetPasswordFragment : Fragment(R.layout.fragment_reset_password) {
             ) == GlobalUtil.THEME_DARK
         )
             imageView.setImageResource(R.mipmap.app_icon_white_text)
+
+        // Set insets
+        reset_password_parent.children.forEach { child ->
+            if (child.id != R.id.imageView) {
+                child.doOnApplyWindowInsets { childView, insets, initialState ->
+                    childView.setMargins(
+                        initialState.margins.left + insets.systemGestureInsets.left,
+                        initialState.margins.top + insets.systemGestureInsets.top,
+                        initialState.margins.right + insets.systemGestureInsets.right,
+                        initialState.margins.bottom + insets.systemGestureInsets.bottom
+                    )
+                }
+            }
+        }
 
         forgot_password_button.setOnClickListener {
             if (!GlobalUtil.isNetworkConnectivityAvailable(requireActivity(), requireView()))
