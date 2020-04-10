@@ -2,6 +2,8 @@ package com.sarcoordinator.sarsolutions
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
+import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -15,8 +17,9 @@ import com.sarcoordinator.sarsolutions.adapters.ImagesAdapter
 import com.sarcoordinator.sarsolutions.adapters.VehiclesAdapter
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.Navigation
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.card_vehicles.view.*
+import com.sarcoordinator.sarsolutions.util.setMargins
+import dev.chrisbanes.insetter.doOnApplyWindowInsets
+import kotlinx.android.synthetic.main.card_images.view.*
 import kotlinx.android.synthetic.main.fragment_shift_report_modern.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Main
@@ -54,10 +57,10 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report_modern) {
         }
 
         override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-            Snackbar.make(
-                requireView(),
+            Toast.makeText(
+                requireContext(),
                 "Removed ${viewModel.vehicleList[viewHolder.adapterPosition].name}",
-                Snackbar.LENGTH_LONG
+                Toast.LENGTH_LONG
             ).show()
             viewModel.vehicleList.removeAt(viewHolder.adapterPosition)
             viewAdapter?.notifyItemRemoved(viewHolder.adapterPosition)
@@ -77,8 +80,19 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report_modern) {
 
         bottomSheet = BottomSheetBehavior.from(view.findViewById(R.id.bottom_sheet))
 
-        observeNetworkExceptions()
+        // Set insets
+        shift_report_parent_layout.children.forEach { child ->
+            child.doOnApplyWindowInsets { childView, insets, initialState ->
+                childView.setMargins(
+                    initialState.margins.left + insets.systemGestureInsets.left,
+                    initialState.margins.top + insets.systemGestureInsets.top,
+                    initialState.margins.right + insets.systemGestureInsets.right,
+                    initialState.margins.bottom + insets.systemGestureInsets.bottom
+                )
+            }
+        }
 
+        observeNetworkExceptions()
         setupVehicleRecyclerView()
         setupImagesCardView()
         initViewListeners()
@@ -91,7 +105,8 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report_modern) {
 
     override fun onStart() {
         super.onStart()
-        (requireActivity() as MainActivity).restoreSystemBars()
+        nav.hideBottomNavBar?.let { it(true) }
+        (requireActivity() as MainActivity).enableTransparentSystemBars(true)
     }
 
     override fun onDestroyView() {
@@ -105,7 +120,7 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report_modern) {
     private fun setupImagesCardView() {
         // Don't inflate images card view if nothing to show
         if (viewModel.getImageList().value!!.isNullOrEmpty()) {
-            images_recycler_view.visibility = View.GONE
+            bottom_sheet.images_recycler_view.visibility = View.GONE
             return
         }
         imagesViewManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
@@ -114,7 +129,7 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report_modern) {
                 nav,
                 viewModel.getImageList().value!!
             )
-        images_recycler_view.apply {
+        bottom_sheet.images_recycler_view.apply {
             setHasFixedSize(true)
             layoutManager = imagesViewManager
             adapter = imagesViewAdapter
@@ -125,11 +140,11 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report_modern) {
         viewManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         viewAdapter =
             VehiclesAdapter(viewModel)
-        bottom_sheet.vehicle_recycler_view.apply {
+        vehicle_recycler_view.apply {
             layoutManager = viewManager
             adapter = viewAdapter
         }
-        swipeHelper.attachToRecyclerView(bottom_sheet.vehicle_recycler_view)
+        swipeHelper.attachToRecyclerView(vehicle_recycler_view)
 
         if (viewModel.vehicleList.isNotEmpty())
             viewAdapter?.notifyDataSetChanged()
@@ -141,23 +156,23 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report_modern) {
     }
 
     private fun initViewListeners() {
-        endShiftButton.setOnClickListener {
-            endShiftButton.requestFocus()
-            endShiftButton.isEnabled = false
+        submit_shift_report_fab.setOnClickListener {
+            submit_shift_report_fab.requestFocus()
+            submit_shift_report_fab.isClickable = false
 
             GlobalUtil.hideKeyboard(requireActivity())
 
             // Validate form input
             if (shift_hours_edit_text.text.isNullOrEmpty() || !areVehicleFormsValid()) {
-                endShiftButton.isEnabled = true
-                Snackbar.make(
-                    requireView(),
+                submit_shift_report_fab.isClickable = true
+                Toast.makeText(
+                    requireContext(),
                     "Complete shift report to proceed",
-                    Snackbar.LENGTH_LONG
+                    Toast.LENGTH_LONG
                 ).show()
             } else {
                 progress_bar.visibility = View.VISIBLE
-                shift_report_fab.hide()
+                add_vehicle_button.isEnabled = false
 
                 // Only submit shift if internet connectivity is available
                 if (GlobalUtil.isNetworkConnectivityAvailable(
@@ -198,8 +213,8 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report_modern) {
             }
         }
 
-        shift_report_fab.setOnClickListener {
-            shift_report_fab.requestFocus()
+        add_vehicle_button.setOnClickListener {
+            add_vehicle_button.requestFocus()
             addVehicle()
             requireView().requestLayout()
         }
@@ -218,10 +233,10 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report_modern) {
         viewModel.getNetworkExceptionObservable().observe(viewLifecycleOwner, Observer { error ->
             if (error != null && error.isNotEmpty())
                 viewModel.clearNetworkExceptions()
-            Snackbar.make(
-                requireActivity().parent_layout,
+            Toast.makeText(
+                requireContext(),
                 "Failed network call. Saving report to cache.",
-                Snackbar.LENGTH_LONG
+                Toast.LENGTH_LONG
             ).show()
 
             viewModel.addShiftReportToCache(

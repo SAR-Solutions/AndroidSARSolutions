@@ -76,7 +76,7 @@
     <string name="shift_report">Shift Report</string>
     <string name="image_information">Image Information</string>
     <string name="number_of_images_taken">Number of images taken</string>
-    <string name="images">Images:</string>
+    <string name="images">Images</string>
     <string name="images_taken">Images Taken</string>
     <string name="Metadata">Metadata</string>
     <string name="upload_image">Upload Image</string>
@@ -106,4 +106,5 @@
     <string name="privacy_policy_disclaimer">By continuing you agree to our <a href="https://sar-coordinator.flycricket.io/privacy.html">privacy policy</a></string>
     <string name="privacy_policy"><a href="https://sar-coordinator.flycricket.io/privacy.html">Privacy Policy</a></string>
     <string name="vehicles">Vehicles</string>
+    <string name="add_vehicle">Add Vehicle</string>
 </resources>
