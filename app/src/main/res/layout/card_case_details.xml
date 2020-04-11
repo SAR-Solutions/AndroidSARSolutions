@@ -144,7 +144,7 @@
                     style="@style/Base.Widget.AppCompat.TextView.Subheading.Info"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/reporter_name"
+                    android:text="@string/equipment_used"
                     app:layout_constraintBottom_toBottomOf="@+id/missing_person_title"
                     app:layout_constraintEnd_toEndOf="@+id/reporter_name_title"
                     app:layout_constraintStart_toStartOf="@+id/reporter_name_title" />

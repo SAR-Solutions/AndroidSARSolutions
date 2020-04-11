@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="LargeInfoView">
+        <attr name="Icon" format="integer" />
+        <attr name="Heading" format="string" />
+        <attr name="Message" format="string" />
+    </declare-styleable>
+</resources>

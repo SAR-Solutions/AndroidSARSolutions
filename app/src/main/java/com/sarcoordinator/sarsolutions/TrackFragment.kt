@@ -18,7 +18,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
@@ -45,6 +44,7 @@ import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
 import com.sarcoordinator.sarsolutions.adapters.ImagesAdapter
+import com.sarcoordinator.sarsolutions.custom_views.LargeInfoView
 import com.sarcoordinator.sarsolutions.models.Case
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.LocationService
@@ -191,7 +191,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
             mMapView?.getMapAsync(this)
         } else {
             mMapView?.visibility = View.GONE
-            view.findViewById<ConstraintLayout>(R.id.low_bandwidth_layout).visibility = View.VISIBLE
+            view.findViewById<LargeInfoView>(R.id.low_bandwidth_layout).visibility = View.VISIBLE
         }
 
         bottomSheet = BottomSheetBehavior.from(view.findViewById(R.id.case_info_card))

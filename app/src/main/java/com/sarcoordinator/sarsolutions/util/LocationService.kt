@@ -173,8 +173,8 @@ class LocationService : Service() {
                 if (mTestMode) {
                     // Emulate network call
                     Timber.d("Emulating getting shift id")
-                    delay(2000)
-                    shiftId.postValue("Test Shift Id")
+                    delay(1000)
+                    shiftId.postValue("Test Shift Id ${Calendar.getInstance().timeInMillis}")
                 } else {
                     shiftId.postValue(Repository.postStartShift(shift, mCase.id, mTestMode).shiftId)
                 }
@@ -285,7 +285,7 @@ class LocationService : Service() {
                     if (mTestMode) {
                         // Emulate network call
                         Timber.d("Emulating syncing remaining locations with error")
-                        delay(2000)
+                        delay(1000)
                         throw Exception("Emulating failed location sync")
                     } else {
                         Repository.putLocations(

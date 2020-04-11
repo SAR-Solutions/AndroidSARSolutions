@@ -11,13 +11,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <include
+    <com.sarcoordinator.sarsolutions.custom_views.LargeInfoView
         android:id="@+id/low_bandwidth_layout"
-        layout="@layout/view_low_bandwidth_mode"
+        android:visibility="gone"
+        app:Heading="@string/Map_Disabled"
+        app:Icon="@drawable/ic_baseline_eco_24"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:visibility="gone" />
+        app:Message="@string/low_bandwidth_desc" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
