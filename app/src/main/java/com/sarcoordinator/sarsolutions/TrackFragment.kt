@@ -63,7 +63,6 @@ import timber.log.Timber
 import java.io.File
 
 class TrackFragment : Fragment(), OnMapReadyCallback {
-
     companion object ArgsTags {
         const val CASE_ID = "CASE_ID"
         const val LOCATION_TRACKING_STATUS = "LOCATION_TRACKING_STATUS"
@@ -287,7 +286,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     private fun validateNetworkConnectivity() {
         // If service is already running, disregard network state
         if (!viewModel.isShiftActive) {
-            if (!GlobalUtil.isNetworkConnectivityAvailable(requireActivity(), requireView())) {
+            if (!GlobalUtil.isNetworkConnectivityAvailable(requireActivity(), case_info_card)) {
                 enableRetryNetworkState()
                 return
             }

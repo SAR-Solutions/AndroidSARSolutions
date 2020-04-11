@@ -2,12 +2,12 @@ package com.sarcoordinator.sarsolutions
 
 import android.os.Bundle
 import android.transition.TransitionInflater
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.widget.Toast
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -122,12 +122,14 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), CustomFragment {
             setHasFixedSize(true)
         }
 
-        swipe_refresh_layout.setColorSchemeColors(
-            ContextCompat.getColor(
-                requireContext(),
-                R.color.newRed
-            )
-        )
+        val primaryColor = TypedValue()
+        val backgroundColor = TypedValue()
+        requireActivity().theme.resolveAttribute(R.attr.colorPrimary, primaryColor, true)
+        requireActivity().theme.resolveAttribute(R.attr.colorOnPrimary, backgroundColor, true)
+
+        swipe_refresh_layout.setColorSchemeColors(primaryColor.data)
+        swipe_refresh_layout.setProgressBackgroundColorSchemeColor(backgroundColor.data)
+
         swipe_refresh_layout.setOnRefreshListener {
             refreshCaseList()
         }

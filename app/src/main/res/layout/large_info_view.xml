@@ -16,6 +16,7 @@
         style="@style/Base.Widget.AppCompat.TextView.Heading"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:textColor="?colorPrimary"
         android:alpha="0"
         android:textAlignment="center"
         android:layout_gravity="center" />

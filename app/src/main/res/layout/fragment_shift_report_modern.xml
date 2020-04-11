@@ -60,7 +60,7 @@
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/vehicle_title"
-                style="@style/Base.Widget.AppCompat.TextView.SubHeading"
+                style="@style/Base.Widget.AppCompat.TextView.SubHeading.Color"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/vehicles"
@@ -91,6 +91,7 @@
                 android:text="@string/add_vehicle"
                 android:textStyle="bold"
                 app:icon="@drawable/ic_baseline_add_24"
+                app:strokeColor="?colorPrimary"
                 app:layout_constraintEnd_toEndOf="@+id/vehicle_title"
                 app:layout_constraintStart_toStartOf="@+id/vehicle_title"
                 app:layout_constraintTop_toBottomOf="@+id/vehicle_title" />
@@ -104,6 +105,7 @@
         android:layout_margin="16dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:backgroundTint="?colorPrimary"
         android:src="@drawable/ic_baseline_send_24"
         app:layout_anchor="@id/bottom_sheet"
         app:layout_anchorGravity="end|top" />
