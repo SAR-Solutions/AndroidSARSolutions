@@ -8,6 +8,7 @@
         android:id="@+id/icon"
         android:layout_width="100dp"
         android:layout_height="50dp"
+        android:alpha="0"
         android:layout_gravity="center|top" />
 
     <com.google.android.material.textview.MaterialTextView
@@ -15,6 +16,8 @@
         style="@style/Base.Widget.AppCompat.TextView.Heading"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:alpha="0"
+        android:textAlignment="center"
         android:layout_gravity="center" />
 
     <com.google.android.material.textview.MaterialTextView
@@ -22,6 +25,8 @@
         style="@style/Base.Widget.AppCompat.TextView.SubHeading"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:alpha="0"
+        android:textAlignment="center"
         android:layout_gravity="center|bottom" />
 
 </LinearLayout>
