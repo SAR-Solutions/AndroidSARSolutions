@@ -17,7 +17,6 @@ import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.GlobalUtil.THEME_LIGHT
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.activity_main.*
-import timber.log.Timber
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -41,7 +40,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     private lateinit var nav: Navigation
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        Timber.d("Savedinstance state state: ${savedInstanceState != null}")
         // Theme needs to be applied before calling super.onCreate
         // Otherwise a new instance of this activity will be created
         loadUserPreferences()
