@@ -460,7 +460,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
             nav,
             viewModel.getImageList(externalCaseImageDir).value ?: ArrayList()
         )
-        case_info_card.image_recycler_view.apply {
+        case_info_card.parent_layout.image_recycler_view.apply {
             layoutManager = viewManager
             adapter = viewAdapter
         }
@@ -468,13 +468,13 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         // Observe and populate list on change
         viewModel.getImageList().observe(viewLifecycleOwner, Observer {
             val size = it.size
-            case_info_card.image_number_text_view.text = size.toString()
+            case_info_card.parent_layout.image_number_text_view.text = size.toString()
             if (size == 0) {
-                case_info_card.image_recycler_view.visibility = View.GONE
-                case_info_card.no_images_view.visibility = View.VISIBLE
+                case_info_card.parent_layout.image_recycler_view.visibility = View.GONE
+                case_info_card.parent_layout.no_images_view.visibility = View.VISIBLE
             } else {
-                case_info_card.image_recycler_view.visibility = View.VISIBLE
-                case_info_card.no_images_view.visibility = View.GONE
+                case_info_card.parent_layout.image_recycler_view.visibility = View.VISIBLE
+                case_info_card.parent_layout.no_images_view.visibility = View.GONE
                 viewAdapter.setData(it)
             }
         })
@@ -483,11 +483,11 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     // Disable shimmer, show case info layout; vice-versa
     private fun enableLoadingState(enable: Boolean) {
         if (enable) {
-            case_info_card.track_fragment_shimmer.visibility = View.VISIBLE
-            case_info_card.case_info_layout.visibility = View.GONE
+            case_info_card.shimmer_parent_layout.visibility = View.VISIBLE
+            case_info_card.parent_layout.visibility = View.GONE
         } else {
-            case_info_card.track_fragment_shimmer.visibility = View.GONE
-            case_info_card.case_info_layout.visibility = View.VISIBLE
+            case_info_card.shimmer_parent_layout.visibility = View.GONE
+            case_info_card.parent_layout.visibility = View.VISIBLE
         }
     }
 
@@ -532,18 +532,20 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         location_service_fab.backgroundTintList = resources.getColorStateList(R.color.newRed)
         location_service_fab.visibility = View.VISIBLE
 
-        case_info_card.case_info_layout.visibility = View.GONE
+        case_info_card.parent_layout.visibility = View.GONE
         shift_info_text_view.text = getString(R.string.no_network_desc)
     }
 
     // Set case information
     private fun populateViewWithCase(case: Case) {
         enableStartTrackingFab()
-        case_info_card.case_id.text = case.id
-        case_info_card.reporter_name.text = case.reporterName
-        case_info_card.missing_person.text = listToOrderedListString(case.missingPersonName)
-        case_info_card.equipment_used.text = listToOrderedListString(case.equipmentUsed)
-        case_info_card.case_title.text = case.caseName
+        case_info_card.parent_layout.case_id.text = case.id
+        case_info_card.parent_layout.reporter_name.text = case.reporterName
+        case_info_card.parent_layout.missing_person.text =
+            listToOrderedListString(case.missingPersonName)
+        case_info_card.parent_layout.equipment_used.text =
+            listToOrderedListString(case.equipmentUsed)
+        case_info_card.parent_layout.case_title.text = case.caseName
         setupImagesCardView()
     }
 
@@ -701,7 +703,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         return if (list.count() == 1) {
             list[0]
         } else {
-            case_info_card.missing_person.text = getString(R.string.missing_people)
+            case_info_card.parent_layout.missing_person.text = getString(R.string.missing_people)
             var text = ""
             for (i in 0 until list.count() - 1) {
                 text += "${list[i]}\n"
