@@ -8,6 +8,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.transition.MaterialFadeThrough
 import com.sarcoordinator.sarsolutions.adapters.CachedShiftAdapter
 import com.sarcoordinator.sarsolutions.util.CustomFragment
 import com.sarcoordinator.sarsolutions.util.Navigation
@@ -30,6 +31,9 @@ class FailedShiftsTabFragment : Fragment(R.layout.fragment_failed_shifts), Custo
 
         sharedElementEnterTransition = TransitionInflater.from(context)
             .inflateTransition(android.R.transition.move)
+
+        enterTransition = MaterialFadeThrough.create(requireContext())
+        exitTransition = MaterialFadeThrough.create(requireContext())
     }
 
     override fun onStart() {

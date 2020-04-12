@@ -7,13 +7,21 @@
     style="@style/Widget.MaterialComponents.CardView.Standard.RoundedTop"
     app:cardElevation="5dp"
     app:behavior_hideable="true"
-    app:behavior_peekHeight="100dp"
+    app:behavior_peekHeight="10dp"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="50dp"
+            android:layout_height="3dp"
+            android:layout_gravity="top|center"
+            android:layout_marginBottom="8dp"
+            app:cardBackgroundColor="@android:color/darker_gray"
+            app:cardCornerRadius="16dp" />
 
         <com.facebook.shimmer.ShimmerFrameLayout
             android:id="@+id/shimmer_parent_layout"
@@ -34,15 +42,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
-
-            <androidx.cardview.widget.CardView
-                android:layout_width="50dp"
-                android:layout_height="3dp"
-                android:layout_gravity="top|center"
-                android:layout_marginBottom="8dp"
-                app:cardBackgroundColor="@android:color/darker_gray"
-                app:cardCornerRadius="16dp" />
-
 
             <androidx.core.widget.NestedScrollView
                 android:layout_width="match_parent"

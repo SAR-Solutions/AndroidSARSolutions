@@ -5,14 +5,6 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <androidx.cardview.widget.CardView
-        android:layout_width="50dp"
-        android:layout_height="3dp"
-        android:layout_gravity="top|center"
-        android:layout_marginBottom="8dp"
-        app:cardBackgroundColor="@android:color/darker_gray"
-        app:cardCornerRadius="16dp" />
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/case_info_layout"
         android:layout_width="match_parent"
