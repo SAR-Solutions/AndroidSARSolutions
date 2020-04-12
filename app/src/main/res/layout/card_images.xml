@@ -38,6 +38,19 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/slide_indicator" />
 
+        <com.sarcoordinator.sarsolutions.custom_views.LargeInfoView
+            android:id="@+id/no_images_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:Heading="@string/no_images_found"
+            app:Icon="@drawable/ic_baseline_photo_library_24"
+            app:Message="@string/no_image_report_desc"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/images_title" />
+
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/images_recycler_view"
             android:layout_width="0dp"

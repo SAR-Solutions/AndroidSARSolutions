@@ -19,6 +19,7 @@ import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.Navigation
 import com.sarcoordinator.sarsolutions.util.setMargins
 import dev.chrisbanes.insetter.doOnApplyWindowInsets
+import kotlinx.android.synthetic.main.card_images.*
 import kotlinx.android.synthetic.main.card_images.view.*
 import kotlinx.android.synthetic.main.fragment_shift_report_modern.*
 import kotlinx.coroutines.CoroutineScope
@@ -121,6 +122,7 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report_modern) {
         // Don't inflate images card view if nothing to show
         if (viewModel.getImageList().value!!.isNullOrEmpty()) {
             bottom_sheet.images_recycler_view.visibility = View.GONE
+            no_images_view.visibility = View.VISIBLE
             return
         }
         imagesViewManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)

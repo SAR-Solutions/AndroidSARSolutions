@@ -41,6 +41,8 @@ class FailedShiftsTabFragment : Fragment(R.layout.fragment_failed_shifts), Custo
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        toolbar_failed_shifts.attachRecyclerView(failed_shifts_recycler_view)
+
         setUpRecyclerView()
 
         viewModel.getAllShiftReports().observe(viewLifecycleOwner, Observer {

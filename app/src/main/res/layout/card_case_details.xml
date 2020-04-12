@@ -189,6 +189,18 @@
                     app:layout_constraintStart_toStartOf="@id/image_number_text_view"
                     app:layout_constraintTop_toBottomOf="@id/image_number_text_view" />
 
+                <com.sarcoordinator.sarsolutions.custom_views.LargeInfoView
+                    android:id="@+id/no_images_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:Heading="@string/no_images_taken"
+                    app:Icon="@drawable/ic_baseline_photo_library_24"
+                    app:Message="@string/no_images_desc"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/image_number_title" />
+
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/image_recycler_view"
                     android:layout_width="0dp"

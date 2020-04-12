@@ -57,6 +57,8 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), CustomFragment
 
         sharedPrefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
 
+        toolbar_settings.attachRecyclerView(parent_scroll_view)
+
         // Init and set adapter for theme spinner
         ArrayAdapter.createFromResource(
             requireContext(),

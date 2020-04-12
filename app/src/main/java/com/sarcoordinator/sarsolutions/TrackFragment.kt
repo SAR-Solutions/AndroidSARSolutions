@@ -469,7 +469,14 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         viewModel.getImageList().observe(viewLifecycleOwner, Observer {
             val size = it.size
             case_info_card.image_number_text_view.text = size.toString()
-            viewAdapter.setData(it)
+            if (size == 0) {
+                case_info_card.image_recycler_view.visibility = View.GONE
+                case_info_card.no_images_view.visibility = View.VISIBLE
+            } else {
+                case_info_card.image_recycler_view.visibility = View.VISIBLE
+                case_info_card.no_images_view.visibility = View.GONE
+                viewAdapter.setData(it)
+            }
         })
     }
 

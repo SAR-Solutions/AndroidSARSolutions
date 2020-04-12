@@ -14,7 +14,16 @@
 
     <ConstraintSet android:id="@+id/start">
         <Constraint
-            android:id="@+id/toolbar_cases"
+            android:id="@id/no_cases_found_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            motion:layout_constraintBottom_toBottomOf="parent"
+            motion:layout_constraintEnd_toEndOf="parent"
+            motion:layout_constraintStart_toStartOf="parent"
+            motion:layout_constraintTop_toBottomOf="@id/toolbar_cases"
+            motion:visibilityMode="ignore" />
+        <Constraint
+            android:id="@id/toolbar_cases"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             motion:layout_constraintEnd_toEndOf="parent"
@@ -22,7 +31,7 @@
             motion:layout_constraintTop_toTopOf="parent"
             motion:visibilityMode="ignore" />
         <Constraint
-            android:id="@+id/try_again_network_button"
+            android:id="@id/try_again_network_button"
             motion:visibilityMode="ignore" />
         <Constraint
             android:id="@+id/list_shimmer_layout"
@@ -32,7 +41,7 @@
             motion:layout_constraintTop_toBottomOf="@+id/toolbar_cases"
             motion:visibilityMode="ignore" />
         <Constraint
-            android:id="@+id/swipe_refresh_layout"
+            android:id="@id/swipe_refresh_layout"
             motion:layout_constraintBottom_toBottomOf="parent"
             motion:layout_constraintEnd_toEndOf="parent"
             motion:layout_constraintStart_toStartOf="parent"
@@ -42,6 +51,15 @@
 
     <ConstraintSet android:id="@+id/end">
         <Constraint
+            android:id="@id/no_cases_found_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            motion:layout_constraintBottom_toBottomOf="parent"
+            motion:layout_constraintEnd_toEndOf="parent"
+            motion:layout_constraintStart_toStartOf="parent"
+            motion:layout_constraintTop_toBottomOf="@id/toolbar_cases"
+            motion:visibilityMode="ignore" />
+        <Constraint
             android:id="@id/toolbar_cases"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -50,14 +68,14 @@
             motion:layout_constraintStart_toStartOf="parent"
             motion:visibilityMode="ignore" />
         <Constraint
-            android:id="@+id/list_shimmer_layout"
+            android:id="@id/list_shimmer_layout"
             motion:layout_constraintBottom_toBottomOf="parent"
             motion:layout_constraintEnd_toEndOf="parent"
             motion:layout_constraintStart_toStartOf="parent"
             motion:layout_constraintTop_toBottomOf="@+id/toolbar_cases"
             motion:visibilityMode="ignore" />
         <Constraint
-            android:id="@+id/swipe_refresh_layout"
+            android:id="@id/swipe_refresh_layout"
             motion:layout_constraintBottom_toBottomOf="parent"
             motion:layout_constraintEnd_toEndOf="parent"
             motion:layout_constraintStart_toStartOf="parent"

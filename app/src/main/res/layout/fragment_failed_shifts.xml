@@ -20,6 +20,7 @@
         app:Heading="@string/no_shifts_to_sync"
         app:Icon="@drawable/ic_baseline_sync_24"
         app:Message="@string/sync_failure_desc"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

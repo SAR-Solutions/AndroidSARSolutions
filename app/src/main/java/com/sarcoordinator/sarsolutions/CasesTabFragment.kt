@@ -48,6 +48,8 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), CustomFragment {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        no_cases_found_view.visibility = View.GONE
+
         nav.hideBottomNavBar?.let { it(false) }
         (requireActivity() as MainActivity).enableTransparentStatusBar(false)
 
@@ -68,9 +70,8 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), CustomFragment {
         setupRecyclerView()
         observeCases()
 
-        if (viewModel.getCases().value.isNullOrEmpty()) {
+        if (viewModel.getCases().value.isNullOrEmpty())
             refreshCaseList()
-        }
     }
 
     // Disables or enables recyclerview depending on network connectivity status
@@ -104,16 +105,27 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), CustomFragment {
     // Makes new network call and observes for case list
     private fun observeCases() {
         viewModel.getCases().observe(viewLifecycleOwner, Observer<ArrayList<Case>> { caseList ->
-            if (list_shimmer_layout.visibility != View.GONE)
+            if (caseList.size == 0) {
+                no_cases_found_view.visibility = View.VISIBLE
                 list_shimmer_layout.visibility = View.GONE
-            if (swipe_refresh_layout.isRefreshing)
-                swipe_refresh_layout.isRefreshing = false
-            viewAdapter?.setCaseList(caseList)
+                if (swipe_refresh_layout.isRefreshing)
+                    swipe_refresh_layout.isRefreshing = false
+            } else {
+                no_cases_found_view.visibility = View.GONE
+                if (list_shimmer_layout.visibility != View.GONE)
+                    list_shimmer_layout.visibility = View.GONE
+                if (swipe_refresh_layout.isRefreshing)
+                    swipe_refresh_layout.isRefreshing = false
+                viewAdapter?.setCaseList(caseList)
+            }
         })
     }
 
     // Sets up recyclerview and refresh layout
     private fun setupRecyclerView() {
+
+        toolbar_cases.attachRecyclerView(cases_recycler_view)
+
         viewManager = LinearLayoutManager(context)
         viewAdapter = Adapter(nav, this)
         cases_recycler_view.apply {
@@ -148,6 +160,7 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), CustomFragment {
 
     private fun refreshCaseList() {
         if (validateNetworkConnectivity()) {
+            no_cases_found_view.visibility = View.GONE
             viewAdapter = Adapter(nav, this)
             cases_recycler_view.adapter = viewAdapter
             viewModel.refreshCases()
