@@ -32,13 +32,10 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
-
+            <include layout="@layout/rv_header_shimmer" />
             <include layout="@layout/list_view_item_shimmer" />
-
             <include layout="@layout/list_view_item_shimmer" />
-
             <include layout="@layout/list_view_item_shimmer" />
-
         </LinearLayout>
 
     </com.facebook.shimmer.ShimmerFrameLayout>

@@ -5,6 +5,7 @@ import android.animation.ObjectAnimator
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
+import android.view.ViewTreeObserver
 import android.widget.LinearLayout
 import com.sarcoordinator.sarsolutions.R
 import kotlinx.android.synthetic.main.large_info_view.view.*
@@ -33,13 +34,13 @@ class LargeInfoView(context: Context, attrs: AttributeSet) : LinearLayout(contex
             }
 
             // Play animation after layout is inflated
-//            viewTreeObserver.addOnGlobalLayoutListener(object :
-//                ViewTreeObserver.OnGlobalLayoutListener {
-//                override fun onGlobalLayout() {
-//                    startAnim()
-//                    viewTreeObserver.removeOnGlobalLayoutListener(this)
-//                }
-//            })
+            viewTreeObserver.addOnGlobalLayoutListener(object :
+                ViewTreeObserver.OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    startAnim()
+                    viewTreeObserver.removeOnGlobalLayoutListener(this)
+                }
+            })
         }
     }
 

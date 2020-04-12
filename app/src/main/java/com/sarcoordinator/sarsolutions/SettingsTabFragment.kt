@@ -13,7 +13,6 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.google.android.material.switchmaterial.SwitchMaterial
-import com.google.android.material.transition.MaterialFadeThrough
 import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.util.CacheDatabase
 import com.sarcoordinator.sarsolutions.util.CustomFragment
@@ -56,8 +55,6 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), CustomFragment
         sharedElementEnterTransition = TransitionInflater.from(context)
             .inflateTransition(android.R.transition.move)
 
-        enterTransition = MaterialFadeThrough.create(requireContext())
-        exitTransition = MaterialFadeThrough.create(requireContext())
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

@@ -20,6 +20,7 @@ import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.fragment_cases.*
 import kotlinx.android.synthetic.main.list_view_item.view.*
+import timber.log.Timber
 
 /**
  * This fragment displays the list of cases for the user
@@ -44,9 +45,6 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), CustomFragment {
         // Set shared element transition
         sharedElementEnterTransition = TransitionInflater.from(context)
             .inflateTransition(android.R.transition.move)
-
-        enterTransition = MaterialFadeThrough.create(requireContext())
-        exitTransition = MaterialFadeThrough.create(requireContext())
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -206,39 +204,66 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), CustomFragment {
                         putString(TrackFragment.CASE_ID, case.id)
                     }
 
-                    nav.pushFragment(trackFragment, Navigation.TabIdentifiers.HOME, parent.getSharedElement())
+                    parent.exitTransition = MaterialFadeThrough.create(parent.requireContext())
+
+                    nav.pushFragment(
+                        trackFragment,
+                        Navigation.TabIdentifiers.HOME,
+                        parent.getSharedElement()
+                    )
                 }
             }
         }
 
         override fun getItemViewType(position: Int): Int {
-            // Header to make space for toolbar
+            // Buffer to make space for toolbar
             if (position == 0) {
                 return 0
             }
-            return 1
+            // Header to show county name
+            if (position == 1) {
+                return 1
+            }
+            return 2
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
             var holder: View = View(parent.context)
 
-            if (viewType == 0) {
-                holder =
-                    LayoutInflater.from(parent.context).inflate(R.layout.rv_header, parent, false)
-            } else if (viewType == 1) {
-                holder =
-                    LayoutInflater.from(parent.context)
-                        .inflate(R.layout.list_view_item, parent, false)
+            when (viewType) {
+                0 -> {
+                    holder =
+                        LayoutInflater.from(parent.context)
+                            .inflate(R.layout.rv_buffer, parent, false)
+                }
+                1 -> {
+                    holder =
+                        LayoutInflater.from(parent.context)
+                            .inflate(R.layout.rv_header, parent, false)
+                }
+                2 -> {
+                    holder =
+                        LayoutInflater.from(parent.context)
+                            .inflate(R.layout.list_view_item, parent, false)
+                }
             }
             return ViewHolder(holder, nav, this.parent)
         }
 
-        override fun getItemCount(): Int = data.size + 1
+        override fun getItemCount(): Int {
+            // Always return size + 1 for buffer; Only return size + 2 if data was found
+            return if (data.isNullOrEmpty())
+                data.size + 1
+            else
+                data.size + 2
+        }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            if (position != 0)
-                holder.bindView(data[position - 1])
+            Timber.d("Binding at position: $position for list size: ${data.size}")
+            if (position == 0 || position == 1)
+                return
+            holder.bindView(data[position - 2])
         }
 
         fun setCaseList(list: ArrayList<Case>) {

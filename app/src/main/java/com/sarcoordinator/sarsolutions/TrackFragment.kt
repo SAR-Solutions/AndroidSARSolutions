@@ -37,6 +37,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.transition.MaterialFade
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionDeniedResponse
@@ -167,6 +168,8 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         // Set shared element transition
         sharedElementEnterTransition = TransitionInflater.from(context)
             .inflateTransition(android.R.transition.move)
+
+        enterTransition = MaterialFade.create(requireContext())
     }
 
     override fun onCreateView(
@@ -176,7 +179,19 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_track, container, false)
 
+        bottomSheet = BottomSheetBehavior.from(view.findViewById(R.id.case_info_card))
+
+        view.findViewById<FloatingActionButton>(R.id.capture_photo_fab).hide()
+        view.findViewById<FloatingActionButton>(R.id.location_service_fab).hide()
+
         mMapView = view.findViewById(R.id.map)
+
+        return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
 
         enableMap = !sharedPrefs.getBoolean(SettingsTabFragment.LOW_BANDWIDTH_PREFS, false)
 
@@ -192,16 +207,6 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
             mMapView?.visibility = View.GONE
             view.findViewById<LargeInfoView>(R.id.low_bandwidth_layout).visibility = View.VISIBLE
         }
-
-        bottomSheet = BottomSheetBehavior.from(view.findViewById(R.id.case_info_card))
-
-        view.findViewById<FloatingActionButton>(R.id.capture_photo_fab).hide()
-        view.findViewById<FloatingActionButton>(R.id.location_service_fab).hide()
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
 
         setupViewInsets()
         setupCircularButtons()
