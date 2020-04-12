@@ -34,7 +34,7 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     lateinit var currentImagePath: String
     private val binder = MutableLiveData<LocationService.LocalBinder>()
     private val cacheRepo: LocalCacheRepository =
-        LocalCacheRepository(CacheDatabase.getDatabase(application).casesDao())
+        LocalCacheRepository(CacheDatabase.getDatabase(getApplication()).casesDao())
 
     // Number of failed shift syncs in progress
     var syncInProgress = false

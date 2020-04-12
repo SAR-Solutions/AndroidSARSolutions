@@ -83,6 +83,6 @@ object Repository {
 
     // Synchronously get user token
     private fun getToken(): String {
-        return Tasks.await(user.getIdToken(true)).token!!
+        return Tasks.await(user.getIdToken(true)).token.toString()
     }
 }

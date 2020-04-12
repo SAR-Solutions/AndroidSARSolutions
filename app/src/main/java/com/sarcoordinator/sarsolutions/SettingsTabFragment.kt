@@ -14,10 +14,14 @@ import androidx.fragment.app.Fragment
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.firebase.auth.FirebaseAuth
+import com.sarcoordinator.sarsolutions.util.CacheDatabase
 import com.sarcoordinator.sarsolutions.util.CustomFragment
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.fragment_settings.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class SettingsTabFragment : Fragment(R.layout.fragment_settings), CustomFragment {
@@ -50,12 +54,15 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), CustomFragment
         // Set shared element transition
         sharedElementEnterTransition = TransitionInflater.from(context)
             .inflateTransition(android.R.transition.move)
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         sharedPrefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
+
+        toolbar_settings.attachRecyclerView(parent_scroll_view)
 
         // Init and set adapter for theme spinner
         ArrayAdapter.createFromResource(
@@ -136,6 +143,12 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), CustomFragment
 
         sign_out_button.setOnClickListener {
             auth.signOut()
+
+            // Clear database
+            CoroutineScope(IO).launch {
+                CacheDatabase.getDatabase(requireActivity().application).clearAllTables()
+            }
+
             nav.hideBottomNavBar?.let { it(true) }
             nav.clearBackstack()
 

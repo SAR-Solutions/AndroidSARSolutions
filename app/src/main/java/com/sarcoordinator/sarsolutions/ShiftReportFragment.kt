@@ -2,20 +2,26 @@ package com.sarcoordinator.sarsolutions
 
 import android.os.Bundle
 import android.view.View
-import androidx.core.view.isVisible
+import android.widget.Toast
+import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.card.MaterialCardView
 import com.google.android.material.snackbar.Snackbar
 import com.sarcoordinator.sarsolutions.adapters.ImagesAdapter
 import com.sarcoordinator.sarsolutions.adapters.VehiclesAdapter
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.Navigation
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.fragment_shift_report.*
+import com.sarcoordinator.sarsolutions.util.setMargins
+import dev.chrisbanes.insetter.doOnApplyWindowInsets
+import kotlinx.android.synthetic.main.card_images.*
+import kotlinx.android.synthetic.main.card_images.view.*
+import kotlinx.android.synthetic.main.fragment_shift_report_modern.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
@@ -23,7 +29,7 @@ import kotlinx.coroutines.launch
 /**
  * Fragment for volunteer shift report at the end of a shift
  */
-class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
+class ShiftReportFragment : Fragment(R.layout.fragment_shift_report_modern) {
 
     private val nav: Navigation = Navigation.getInstance()
 
@@ -37,6 +43,7 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
     private var viewAdapter: VehiclesAdapter? = null
     private var imagesViewManager: RecyclerView.LayoutManager? = null
     private var imagesViewAdapter: ImagesAdapter? = null
+    private lateinit var bottomSheet: BottomSheetBehavior<MaterialCardView>
 
     // Detect swipe
     private val swipeHelper = ItemTouchHelper(object :
@@ -51,10 +58,10 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
         }
 
         override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-            Snackbar.make(
-                requireView(),
+            Toast.makeText(
+                requireContext(),
                 "Removed ${viewModel.vehicleList[viewHolder.adapterPosition].name}",
-                Snackbar.LENGTH_LONG
+                Toast.LENGTH_LONG
             ).show()
             viewModel.vehicleList.removeAt(viewHolder.adapterPosition)
             viewAdapter?.notifyItemRemoved(viewHolder.adapterPosition)
@@ -72,8 +79,21 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        observeNetworkExceptions()
+        bottomSheet = BottomSheetBehavior.from(view.findViewById(R.id.bottom_sheet))
 
+        // Set insets
+        shift_report_parent_layout.children.forEach { child ->
+            child.doOnApplyWindowInsets { childView, insets, initialState ->
+                childView.setMargins(
+                    initialState.margins.left + insets.systemGestureInsets.left,
+                    initialState.margins.top + insets.systemGestureInsets.top,
+                    initialState.margins.right + insets.systemGestureInsets.right,
+                    initialState.margins.bottom + insets.systemGestureInsets.bottom
+                )
+            }
+        }
+
+        observeNetworkExceptions()
         setupVehicleRecyclerView()
         setupImagesCardView()
         initViewListeners()
@@ -86,7 +106,8 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
 
     override fun onStart() {
         super.onStart()
-        (requireActivity() as MainActivity).restoreSystemBars()
+        nav.hideBottomNavBar?.let { it(true) }
+        (requireActivity() as MainActivity).enableTransparentSystemBars(true)
     }
 
     override fun onDestroyView() {
@@ -97,20 +118,11 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
         imagesViewAdapter = null
     }
 
-    private fun hideVehicleSection() {
-        vehicle_heading_text.visibility = View.GONE
-        vehicle_recycler_view.visibility = View.GONE
-    }
-
-    private fun showVehicleSection() {
-        vehicle_heading_text.visibility = View.VISIBLE
-        vehicle_recycler_view.visibility = View.VISIBLE
-    }
-
     private fun setupImagesCardView() {
         // Don't inflate images card view if nothing to show
         if (viewModel.getImageList().value!!.isNullOrEmpty()) {
-            images_taken_card.visibility = View.GONE
+            bottom_sheet.images_recycler_view.visibility = View.GONE
+            no_images_view.visibility = View.VISIBLE
             return
         }
         imagesViewManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
@@ -119,7 +131,7 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
                 nav,
                 viewModel.getImageList().value!!
             )
-        images_recycler_view.apply {
+        bottom_sheet.images_recycler_view.apply {
             setHasFixedSize(true)
             layoutManager = imagesViewManager
             adapter = imagesViewAdapter
@@ -138,35 +150,31 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
 
         if (viewModel.vehicleList.isNotEmpty())
             viewAdapter?.notifyDataSetChanged()
-        else
-            hideVehicleSection()
     }
 
     private fun addVehicle() {
         viewModel.addVehicle()
-        if (!vehicle_heading_text.isVisible)
-            showVehicleSection()
         viewAdapter?.notifyDataSetChanged()
     }
 
     private fun initViewListeners() {
-        endShiftButton.setOnClickListener {
-            endShiftButton.requestFocus()
-            endShiftButton.isEnabled = false
+        submit_shift_report_fab.setOnClickListener {
+            submit_shift_report_fab.requestFocus()
+            submit_shift_report_fab.isClickable = false
 
             GlobalUtil.hideKeyboard(requireActivity())
 
             // Validate form input
             if (shift_hours_edit_text.text.isNullOrEmpty() || !areVehicleFormsValid()) {
-                endShiftButton.isEnabled = true
-                Snackbar.make(
-                    requireView(),
+                submit_shift_report_fab.isClickable = true
+                Toast.makeText(
+                    requireContext(),
                     "Complete shift report to proceed",
-                    Snackbar.LENGTH_LONG
+                    Toast.LENGTH_LONG
                 ).show()
             } else {
                 progress_bar.visibility = View.VISIBLE
-                shift_report_fab.hide()
+                add_vehicle_button.isEnabled = false
 
                 // Only submit shift if internet connectivity is available
                 if (GlobalUtil.isNetworkConnectivityAvailable(
@@ -207,8 +215,8 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
             }
         }
 
-        shift_report_fab.setOnClickListener {
-            shift_report_fab.requestFocus()
+        add_vehicle_button.setOnClickListener {
+            add_vehicle_button.requestFocus()
             addVehicle()
             requireView().requestLayout()
         }
@@ -227,10 +235,10 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report) {
         viewModel.getNetworkExceptionObservable().observe(viewLifecycleOwner, Observer { error ->
             if (error != null && error.isNotEmpty())
                 viewModel.clearNetworkExceptions()
-            Snackbar.make(
-                requireActivity().parent_layout,
+            Toast.makeText(
+                requireContext(),
                 "Failed network call. Saving report to cache.",
-                Snackbar.LENGTH_LONG
+                Toast.LENGTH_LONG
             ).show()
 
             viewModel.addShiftReportToCache(

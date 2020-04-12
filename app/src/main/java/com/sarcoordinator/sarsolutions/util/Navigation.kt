@@ -264,9 +264,13 @@ object Navigation {
         return tabBackStack
     }
 
-    fun setBackStack(backStack: HashMap<*, *>) {
-        TabIdentifiers.values().forEach {
-            tabBackStack[it] = backStack[it] as Stack<String>
+    fun setBackStack(backStack: HashMap<*, Collection<String>>) {
+        TabIdentifiers.values().forEach { tab ->
+            val stackToAdd = Stack<String>()
+            backStack[tab]?.forEach {
+                stackToAdd.add(it)
+            }
+            tabBackStack[tab] = stackToAdd
         }
     }
 
@@ -290,5 +294,4 @@ object Navigation {
             fragmentStateMap[it.key] = it.value
         }
     }
-
 }

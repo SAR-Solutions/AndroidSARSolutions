@@ -31,6 +31,7 @@ import kotlinx.android.synthetic.main.view_circular_button.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class ShiftDetailFragment : Fragment(), OnMapReadyCallback {
 
@@ -213,13 +214,16 @@ class ShiftDetailFragment : Fragment(), OnMapReadyCallback {
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
-
         setGoogleMapsTheme(requireActivity(), googleMap)
 
         googleMap.uiSettings.isZoomControlsEnabled = true
 
-        val insets = requireActivity().window.decorView.rootWindowInsets.systemGestureInsets
-        googleMap.setPadding(insets.left, insets.top, insets.right, insets.bottom)
+        try {
+            val insets = requireActivity().window.decorView.rootWindowInsets.systemGestureInsets
+            googleMap.setPadding(insets.left, insets.top, insets.right, insets.bottom)
+        } catch (e: Exception) {
+            Timber.e("Error applying insets to map")
+        }
 
         val googleLocList = ArrayList<LatLng>()
 

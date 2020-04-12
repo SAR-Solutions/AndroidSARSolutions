@@ -13,15 +13,18 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbar_failed_shifts" />
 
-    <include
+    <com.sarcoordinator.sarsolutions.custom_views.LargeInfoView
         android:id="@+id/no_shifts_to_sync_view"
-        layout="@layout/view_no_failed_syncs"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        app:Heading="@string/no_shifts_to_sync"
+        app:Icon="@drawable/ic_baseline_sync_24"
+        app:Message="@string/sync_failure_desc"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/toolbar_failed_shifts" />
 
     <com.sarcoordinator.sarsolutions.custom_views.CustomToolbar
         android:id="@+id/toolbar_failed_shifts"

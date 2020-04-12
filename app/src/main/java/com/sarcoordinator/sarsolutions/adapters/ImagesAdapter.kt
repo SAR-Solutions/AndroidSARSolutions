@@ -52,7 +52,7 @@ class ImagesAdapter(private val nav: Navigation, private var imageList: ArrayLis
                     putString(ImageDetailFragment.IMAGE_PATH, imagePath)
                 }
 
-                nav.pushFragment(detailedFragment, nav.currentTab, itemView.image_view)
+                nav.pushFragment(detailedFragment, null, itemView.image_view)
             }
 
             val circularProgressDrawable = CircularProgressDrawable(itemView.context)

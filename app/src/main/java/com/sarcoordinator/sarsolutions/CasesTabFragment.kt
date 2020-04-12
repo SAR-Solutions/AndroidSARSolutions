@@ -2,23 +2,25 @@ package com.sarcoordinator.sarsolutions
 
 import android.os.Bundle
 import android.transition.TransitionInflater
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.widget.Toast
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.transition.MaterialFadeThrough
 import com.sarcoordinator.sarsolutions.models.Case
 import com.sarcoordinator.sarsolutions.util.CustomFragment
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.fragment_cases.*
 import kotlinx.android.synthetic.main.list_view_item.view.*
+import timber.log.Timber
 
 /**
  * This fragment displays the list of cases for the user
@@ -48,6 +50,8 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), CustomFragment {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        no_cases_found_view.visibility = View.GONE
+
         nav.hideBottomNavBar?.let { it(false) }
         (requireActivity() as MainActivity).enableTransparentStatusBar(false)
 
@@ -68,9 +72,8 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), CustomFragment {
         setupRecyclerView()
         observeCases()
 
-        if (viewModel.getCases().value.isNullOrEmpty()) {
+        if (viewModel.getCases().value.isNullOrEmpty())
             refreshCaseList()
-        }
     }
 
     // Disables or enables recyclerview depending on network connectivity status
@@ -104,16 +107,27 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), CustomFragment {
     // Makes new network call and observes for case list
     private fun observeCases() {
         viewModel.getCases().observe(viewLifecycleOwner, Observer<ArrayList<Case>> { caseList ->
-            if (list_shimmer_layout.visibility != View.GONE)
+            if (caseList.size == 0) {
+                no_cases_found_view.visibility = View.VISIBLE
                 list_shimmer_layout.visibility = View.GONE
-            if (swipe_refresh_layout.isRefreshing)
-                swipe_refresh_layout.isRefreshing = false
-            viewAdapter?.setCaseList(caseList)
+                if (swipe_refresh_layout.isRefreshing)
+                    swipe_refresh_layout.isRefreshing = false
+            } else {
+                no_cases_found_view.visibility = View.GONE
+                if (list_shimmer_layout.visibility != View.GONE)
+                    list_shimmer_layout.visibility = View.GONE
+                if (swipe_refresh_layout.isRefreshing)
+                    swipe_refresh_layout.isRefreshing = false
+                viewAdapter?.setCaseList(caseList)
+            }
         })
     }
 
     // Sets up recyclerview and refresh layout
     private fun setupRecyclerView() {
+
+        toolbar_cases.attachRecyclerView(cases_recycler_view)
+
         viewManager = LinearLayoutManager(context)
         viewAdapter = Adapter(nav, this)
         cases_recycler_view.apply {
@@ -122,12 +136,14 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), CustomFragment {
             setHasFixedSize(true)
         }
 
-        swipe_refresh_layout.setColorSchemeColors(
-            ContextCompat.getColor(
-                requireContext(),
-                R.color.newRed
-            )
-        )
+        val primaryColor = TypedValue()
+        val backgroundColor = TypedValue()
+        requireActivity().theme.resolveAttribute(R.attr.colorPrimary, primaryColor, true)
+        requireActivity().theme.resolveAttribute(R.attr.colorOnPrimary, backgroundColor, true)
+
+        swipe_refresh_layout.setColorSchemeColors(primaryColor.data)
+        swipe_refresh_layout.setProgressBackgroundColorSchemeColor(backgroundColor.data)
+
         swipe_refresh_layout.setOnRefreshListener {
             refreshCaseList()
         }
@@ -146,6 +162,7 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), CustomFragment {
 
     private fun refreshCaseList() {
         if (validateNetworkConnectivity()) {
+            no_cases_found_view.visibility = View.GONE
             viewAdapter = Adapter(nav, this)
             cases_recycler_view.adapter = viewAdapter
             viewModel.refreshCases()
@@ -187,39 +204,66 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), CustomFragment {
                         putString(TrackFragment.CASE_ID, case.id)
                     }
 
-                    nav.pushFragment(trackFragment, Navigation.TabIdentifiers.HOME, parent.getSharedElement())
+                    parent.exitTransition = MaterialFadeThrough.create(parent.requireContext())
+
+                    nav.pushFragment(
+                        trackFragment,
+                        Navigation.TabIdentifiers.HOME,
+                        parent.getSharedElement()
+                    )
                 }
             }
         }
 
         override fun getItemViewType(position: Int): Int {
-            // Header to make space for toolbar
+            // Buffer to make space for toolbar
             if (position == 0) {
                 return 0
             }
-            return 1
+            // Header to show county name
+            if (position == 1) {
+                return 1
+            }
+            return 2
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
             var holder: View = View(parent.context)
 
-            if (viewType == 0) {
-                holder =
-                    LayoutInflater.from(parent.context).inflate(R.layout.rv_header, parent, false)
-            } else if (viewType == 1) {
-                holder =
-                    LayoutInflater.from(parent.context)
-                        .inflate(R.layout.list_view_item, parent, false)
+            when (viewType) {
+                0 -> {
+                    holder =
+                        LayoutInflater.from(parent.context)
+                            .inflate(R.layout.rv_buffer, parent, false)
+                }
+                1 -> {
+                    holder =
+                        LayoutInflater.from(parent.context)
+                            .inflate(R.layout.rv_header, parent, false)
+                }
+                2 -> {
+                    holder =
+                        LayoutInflater.from(parent.context)
+                            .inflate(R.layout.list_view_item, parent, false)
+                }
             }
             return ViewHolder(holder, nav, this.parent)
         }
 
-        override fun getItemCount(): Int = data.size + 1
+        override fun getItemCount(): Int {
+            // Always return size + 1 for buffer; Only return size + 2 if data was found
+            return if (data.isNullOrEmpty())
+                data.size + 1
+            else
+                data.size + 2
+        }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            if (position != 0)
-                holder.bindView(data[position - 1])
+            Timber.d("Binding at position: $position for list size: ${data.size}")
+            if (position == 0 || position == 1)
+                return
+            holder.bindView(data[position - 2])
         }
 
         fun setCaseList(list: ArrayList<Case>) {

@@ -32,21 +32,10 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
-
+            <include layout="@layout/rv_header_shimmer" />
             <include layout="@layout/list_view_item_shimmer" />
-
             <include layout="@layout/list_view_item_shimmer" />
-
             <include layout="@layout/list_view_item_shimmer" />
-
-            <include layout="@layout/list_view_item_shimmer" />
-
-            <include layout="@layout/list_view_item_shimmer" />
-
-            <include layout="@layout/list_view_item_shimmer" />
-
-            <include layout="@layout/list_view_item_shimmer" />
-
         </LinearLayout>
 
     </com.facebook.shimmer.ShimmerFrameLayout>
@@ -72,6 +61,18 @@
             app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <com.sarcoordinator.sarsolutions.custom_views.LargeInfoView
+        android:id="@+id/no_cases_found_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:Heading="@string/no_cases"
+        app:Icon="@drawable/ic_baseline_directions_walk_24"
+        app:Message="@string/no_cases_desc"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar_cases" />
 
     <com.sarcoordinator.sarsolutions.custom_views.CustomToolbar
         android:id="@+id/toolbar_cases"

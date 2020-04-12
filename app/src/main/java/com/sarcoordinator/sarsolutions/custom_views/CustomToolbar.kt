@@ -1,5 +1,6 @@
 package com.sarcoordinator.sarsolutions.custom_views
 
+import android.animation.ObjectAnimator
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
@@ -44,6 +45,26 @@ class CustomToolbar(context: Context, attrs: AttributeSet) : LinearLayout(contex
             } finally {
                 recycle()
             }
+        }
+    }
+
+    fun attachRecyclerView(scrollView: View) {
+        scrollView.setOnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
+            if (!v.canScrollVertically(-1)) {
+                setToolbarElevation(0F)
+            } else {
+                setToolbarElevation(8F)
+            }
+        }
+    }
+
+    private fun setToolbarElevation(elevation: Float) {
+        if (toolbar_card.elevation != elevation) {
+            ObjectAnimator.ofFloat(toolbar_card, "cardElevation", toolbar_card.elevation, elevation)
+                .apply {
+                    duration = 500
+                    start()
+                }
         }
     }
 

@@ -1,6 +1,7 @@
 package com.sarcoordinator.sarsolutions
 
 import android.Manifest
+import android.animation.Animator
 import android.app.Activity
 import android.content.Context
 import android.content.DialogInterface
@@ -17,7 +18,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
@@ -37,6 +37,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.transition.MaterialFade
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionDeniedResponse
@@ -44,6 +45,7 @@ import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
 import com.sarcoordinator.sarsolutions.adapters.ImagesAdapter
+import com.sarcoordinator.sarsolutions.custom_views.LargeInfoView
 import com.sarcoordinator.sarsolutions.models.Case
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.LocationService
@@ -62,15 +64,10 @@ import timber.log.Timber
 import java.io.File
 
 class TrackFragment : Fragment(), OnMapReadyCallback {
-
     companion object ArgsTags {
         const val CASE_ID = "CASE_ID"
         const val LOCATION_TRACKING_STATUS = "LOCATION_TRACKING_STATUS"
     }
-
-    private val SYNCED_LIST_POINTER_KEY = "SyncedListPointerKey"
-    private val SYNCED_LOC_SET_KEY = "SyncedLocSetKey"
-    private val SYNCED_LAST_LOC_KEY = "SyncLastLocKey"
 
     private val MAPVIEW_BUNDLE_KEY = "MapViewBundleKey"
     private val REQUEST_IMAGE_CAPTURE = 1
@@ -92,12 +89,44 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         it.postValue(false)
     }
 
-    private var syncedListIndexPointer = 0
+    private var markedListIndexPointer = 0
     private var locSet: MutableSet<LatLng> = mutableSetOf()
     private var lastLocPoint: LatLng? = null
 
     private var mMapView: MapView? = null
     private lateinit var bottomSheet: BottomSheetBehavior<MaterialCardView>
+
+    private val fabHiddenListener = object : Animator.AnimatorListener {
+        override fun onAnimationRepeat(animation: Animator?) {
+        }
+
+        override fun onAnimationEnd(animation: Animator?) {
+            Timber.d("FAB Hidden")
+        }
+
+        override fun onAnimationCancel(animation: Animator?) {
+        }
+
+        override fun onAnimationStart(animation: Animator?) {
+            capture_photo_fab.hide()
+        }
+    }
+
+    private val fabShownListener = object : Animator.AnimatorListener {
+        override fun onAnimationRepeat(animation: Animator?) {
+        }
+
+        override fun onAnimationEnd(animation: Animator?) {
+            Timber.d("FAB Shown")
+        }
+
+        override fun onAnimationCancel(animation: Animator?) {
+        }
+
+        override fun onAnimationStart(animation: Animator?) {
+            capture_photo_fab.show()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -139,6 +168,8 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         // Set shared element transition
         sharedElementEnterTransition = TransitionInflater.from(context)
             .inflateTransition(android.R.transition.move)
+
+        enterTransition = MaterialFade.create(requireContext())
     }
 
     override fun onCreateView(
@@ -148,7 +179,19 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_track, container, false)
 
+        bottomSheet = BottomSheetBehavior.from(view.findViewById(R.id.case_info_card))
+
+        view.findViewById<FloatingActionButton>(R.id.capture_photo_fab).hide()
+        view.findViewById<FloatingActionButton>(R.id.location_service_fab).hide()
+
         mMapView = view.findViewById(R.id.map)
+
+        return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
 
         enableMap = !sharedPrefs.getBoolean(SettingsTabFragment.LOW_BANDWIDTH_PREFS, false)
 
@@ -157,31 +200,13 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
             var mapViewBundle: Bundle? = null
             if (savedInstanceState != null) {
                 mapViewBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY)
-
-                // Map markers/paths restoration
-                syncedListIndexPointer = savedInstanceState.getInt(SYNCED_LIST_POINTER_KEY)
-                lastLocPoint = savedInstanceState.getParcelable(SYNCED_LAST_LOC_KEY)
-                val listToSet = savedInstanceState.getSerializable(SYNCED_LOC_SET_KEY) as List<*>
-                listToSet.forEach {
-                    locSet.add(it as LatLng)
-                }
             }
             mMapView?.onCreate(mapViewBundle)
             mMapView?.getMapAsync(this)
         } else {
             mMapView?.visibility = View.GONE
-            view.findViewById<ConstraintLayout>(R.id.low_bandwidth_layout).visibility = View.VISIBLE
+            view.findViewById<LargeInfoView>(R.id.low_bandwidth_layout).visibility = View.VISIBLE
         }
-
-        bottomSheet = BottomSheetBehavior.from(view.findViewById(R.id.case_info_card))
-
-        view.findViewById<FloatingActionButton>(R.id.capture_photo).hide()
-        view.findViewById<FloatingActionButton>(R.id.location_service_fab).hide()
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
 
         setupViewInsets()
         setupCircularButtons()
@@ -194,10 +219,6 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         super.onSaveInstanceState(outState)
         outState.putString(CASE_ID, caseId)
         outState.putBoolean(LOCATION_TRACKING_STATUS, stopLocationTracking)
-
-        outState.putInt(SYNCED_LIST_POINTER_KEY, syncedListIndexPointer)
-        outState.putParcelable(SYNCED_LAST_LOC_KEY, lastLocPoint)
-        outState.putSerializable(SYNCED_LOC_SET_KEY, ArrayList(locSet.toList()))
 
         if (enableMap) {
             // Required Map callback
@@ -212,7 +233,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun setupCircularButtons() {
-        back_button_view.image_button.setImageDrawable(resources.getDrawable(R.drawable.ic_baseline_arrow_back_24))
+        back_button_view.image_button.setImageDrawable(requireContext().getDrawable(R.drawable.ic_baseline_arrow_back_24))
         back_button_view.image_button.setOnClickListener { requireActivity().onBackPressed() }
         info_button_view.image_button.setOnClickListener {
             bottomSheet.state = when (bottomSheet.state) {
@@ -249,10 +270,10 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
             )
         }
         case_info_card.parent_layout.doOnApplyWindowInsets { view, insets, initialState ->
-            bottomSheet.peekHeight = bottomSheet.peekHeight + insets.systemGestureInsets.bottom
+            bottomSheet.peekHeight = insets.systemGestureInsets.bottom + 200
             view.setMargins(
                 initialState.margins.left + insets.systemGestureInsets.left,
-                initialState.margins.top + insets.systemGestureInsets.top,
+                initialState.margins.top,
                 initialState.margins.right + insets.systemGestureInsets.right,
                 initialState.margins.bottom + insets.systemGestureInsets.bottom
             )
@@ -270,7 +291,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     private fun validateNetworkConnectivity() {
         // If service is already running, disregard network state
         if (!viewModel.isShiftActive) {
-            if (!GlobalUtil.isNetworkConnectivityAvailable(requireActivity(), requireView())) {
+            if (!GlobalUtil.isNetworkConnectivityAvailable(requireActivity(), case_info_card)) {
                 enableRetryNetworkState()
                 return
             }
@@ -343,13 +364,42 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
                 }
             }
         }
+
+        // Capture image
+        capture_photo_fab.setOnClickListener {
+            Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { intent ->
+                intent.resolveActivity(requireActivity().packageManager)?.also {
+
+                    val caseName = viewModel.currentCase.value!!.caseName
+                    // Create intent to request for camera app launch
+                    val photoFile = GlobalUtil.createImageFile(
+                        caseName,
+                        requireActivity().getExternalFilesDir(
+                            Environment.DIRECTORY_PICTURES +
+                                    "/$caseName/"
+                        )!!
+                    )
+
+                    photoFile.also {
+                        val photoURI: Uri = FileProvider.getUriForFile(
+                            requireContext(),
+                            "sarcoordinator.sarsolutions.provider",
+                            it
+                        )
+
+                        viewModel.currentImagePath = photoFile.absolutePath
+                        intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                        startActivityForResult(intent, REQUEST_IMAGE_CAPTURE)
+                    }
+                }
+            }
+        }
     }
 
+    // Bottom Sheet stuff
     private fun initCaseInfoBottomSheet() {
-        // Bottom Sheet stuff
         bottomSheet.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                return
             }
 
             override fun onStateChanged(bottomSheet: View, newState: Int) {
@@ -413,9 +463,9 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         viewManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         viewAdapter = ImagesAdapter(
             nav,
-            viewModel.getImageList(externalCaseImageDir).value!!
+            viewModel.getImageList(externalCaseImageDir).value ?: ArrayList()
         )
-        case_info_card.image_recycler_view.apply {
+        case_info_card.parent_layout.image_recycler_view.apply {
             layoutManager = viewManager
             adapter = viewAdapter
         }
@@ -423,55 +473,34 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         // Observe and populate list on change
         viewModel.getImageList().observe(viewLifecycleOwner, Observer {
             val size = it.size
-            case_info_card.image_number_text_view.text = size.toString()
-            viewAdapter.setData(it)
-        })
-
-        // Capture image
-        capture_photo.setOnClickListener {
-            Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { intent ->
-                intent.resolveActivity(requireActivity().packageManager)?.also {
-
-                    val caseName = viewModel.currentCase.value!!.caseName
-                    // Create intent to request for camera app launch
-                    val photoFile = GlobalUtil.createImageFile(
-                        caseName,
-                        requireActivity().getExternalFilesDir(
-                            Environment.DIRECTORY_PICTURES +
-                                    "/$caseName/"
-                        )!!
-                    )
-
-                    photoFile.also {
-                        val photoURI: Uri = FileProvider.getUriForFile(
-                            requireContext(),
-                            "sarcoordinator.sarsolutions.provider",
-                            it
-                        )
-
-                        viewModel.currentImagePath = photoFile.absolutePath
-                        intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
-                        startActivityForResult(intent, REQUEST_IMAGE_CAPTURE)
-                    }
-                }
+            case_info_card.parent_layout.image_number_text_view.text = size.toString()
+            if (size == 0) {
+                case_info_card.parent_layout.image_recycler_view.visibility = View.GONE
+                case_info_card.parent_layout.no_images_view.visibility = View.VISIBLE
+            } else {
+                case_info_card.parent_layout.image_recycler_view.visibility = View.VISIBLE
+                case_info_card.parent_layout.no_images_view.visibility = View.GONE
+                viewAdapter.setData(it)
             }
-        }
+        })
     }
 
     // Disable shimmer, show case info layout; vice-versa
     private fun enableLoadingState(enable: Boolean) {
         if (enable) {
-            case_info_card.track_fragment_shimmer.visibility = View.VISIBLE
-            case_info_card.case_info_layout.visibility = View.GONE
+            case_info_card.shimmer_parent_layout.visibility = View.VISIBLE
+            case_info_card.parent_layout.visibility = View.GONE
         } else {
-            case_info_card.track_fragment_shimmer.visibility = View.GONE
-            case_info_card.case_info_layout.visibility = View.VISIBLE
+            case_info_card.shimmer_parent_layout.visibility = View.GONE
+            case_info_card.parent_layout.visibility = View.VISIBLE
         }
     }
 
     private fun enableStartTrackingFab() {
-        capture_photo.visibility = View.GONE
-        location_service_fab.visibility = View.VISIBLE
+        capture_photo_fab.hide()
+        location_service_fab.show()
+        location_service_fab.removeOnShowAnimationListener(fabShownListener)
+        location_service_fab.removeOnHideAnimationListener(fabHiddenListener)
 
         location_service_fab.setImageDrawable(
             resources.getDrawable(
@@ -484,7 +513,9 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun enableStopTrackingFab() {
-        capture_photo.visibility = View.VISIBLE
+        capture_photo_fab.show()
+        location_service_fab.addOnShowAnimationListener(fabShownListener)
+        location_service_fab.addOnHideAnimationListener(fabHiddenListener)
 
         location_service_fab.setImageDrawable(
             resources.getDrawable(
@@ -506,18 +537,20 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         location_service_fab.backgroundTintList = resources.getColorStateList(R.color.newRed)
         location_service_fab.visibility = View.VISIBLE
 
-        case_info_card.case_info_layout.visibility = View.GONE
+        case_info_card.parent_layout.visibility = View.GONE
         shift_info_text_view.text = getString(R.string.no_network_desc)
     }
 
     // Set case information
     private fun populateViewWithCase(case: Case) {
         enableStartTrackingFab()
-        case_info_card.case_id.text = case.id
-        case_info_card.reporter_name.text = case.reporterName
-        case_info_card.missing_person.text = listToOrderedListString(case.missingPersonName)
-        case_info_card.equipment_used.text = listToOrderedListString(case.equipmentUsed)
-        case_info_card.case_title.text = case.caseName
+        case_info_card.parent_layout.case_id.text = case.id
+        case_info_card.parent_layout.reporter_name.text = case.reporterName
+        case_info_card.parent_layout.missing_person.text =
+            listToOrderedListString(case.missingPersonName)
+        case_info_card.parent_layout.equipment_used.text =
+            listToOrderedListString(case.equipmentUsed)
+        case_info_card.parent_layout.case_title.text = case.caseName
         setupImagesCardView()
     }
 
@@ -675,7 +708,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         return if (list.count() == 1) {
             list[0]
         } else {
-            case_info_card.missing_person.text = getString(R.string.missing_people)
+            case_info_card.parent_layout.missing_person.text = getString(R.string.missing_people)
             var text = ""
             for (i in 0 until list.count() - 1) {
                 text += "${list[i]}\n"
@@ -688,13 +721,13 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         GlobalUtil.setGoogleMapsTheme(requireActivity(), googleMap)
         isLocationServiceRunning.observe(viewLifecycleOwner, Observer {
-
             if (it) {
+                // Observe locations
                 service?.getAllLocations()?.observe(viewLifecycleOwner, Observer { locationList ->
                     if (locationList.isNotEmpty()) {
                         val locationListToDraw =
-                            locationList.subList(syncedListIndexPointer, locationList.size)
-                        syncedListIndexPointer = locationList.size
+                            locationList.subList(markedListIndexPointer, locationList.size)
+                        markedListIndexPointer = locationList.size
 
                         locationListToDraw.forEach { location ->
                             val latLng =
@@ -727,6 +760,11 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
                 })
             }
         })
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        unbindService()
     }
 
     override fun onResume() {
