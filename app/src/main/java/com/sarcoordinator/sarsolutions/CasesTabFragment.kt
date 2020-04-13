@@ -152,6 +152,7 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), CustomFragment {
     private fun observeNetworkErrors() {
         viewModel.getNetworkExceptionObservable().observe(viewLifecycleOwner, Observer { error ->
             if (error != null && error.isNotEmpty()) {
+                Timber.e("Network error: $error")
                 viewModel.clearNetworkExceptions()
                 Toast.makeText(requireContext(), "Internet connection error", Toast.LENGTH_LONG)
                     .show()

@@ -15,9 +15,31 @@
         <com.sarcoordinator.sarsolutions.custom_views.CustomToolbar
             android:id="@+id/toolbar_settings"
             android:transitionName="toolbar"
-            app:Title="@string/settings"
+            app:Title="@string/account"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
+
+        <com.facebook.shimmer.ShimmerFrameLayout
+            android:id="@+id/user_profile_shimmer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:shimmer_auto_start="true">
+
+            <include
+                layout="@layout/view_account_shimmer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp" />
+
+        </com.facebook.shimmer.ShimmerFrameLayout>
+
+        <include
+            android:id="@+id/user_profile"
+            layout="@layout/view_account"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:visibility="gone" />
 
         <com.google.android.material.card.MaterialCardView
             style="@style/Widget.MaterialComponents.CardView.Standard"
@@ -34,7 +56,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="16dp"
-                    android:text="@string/general"
+                    android:text="@string/settings"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 

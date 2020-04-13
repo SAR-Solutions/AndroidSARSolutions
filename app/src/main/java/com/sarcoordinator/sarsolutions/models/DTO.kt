@@ -28,10 +28,11 @@ data class Case(
 ) : Serializable
 
 data class Volunteer(
-    val badeNumber: String,
-    val roles: List<String>,
+    val badgeNumber: String,
+    val role: String,
     val name: String,
-    val userId: String
+    val userId: String,
+    val phoneNumber: String
 ) : Serializable
 
 data class ShiftReport(
