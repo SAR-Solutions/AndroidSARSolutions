@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="orange">#F4511E</color>
+    <color name="orange">#ED1C24</color>
     <color name="lightOrange">#EDB19E</color>
     <color name="darkOrange">#c5282b</color>
-    <color name="blue">#577399</color>
-    <color name="darkBlue">#495867</color>
-    <color name="paleBlue">#CEF4EC</color>
+    <color name="darkBlue">#00193D</color>
     <color name="success">#00C851</color>
     <color name="warning">#ffbb33</color>
     <color name="error">#b00020</color>

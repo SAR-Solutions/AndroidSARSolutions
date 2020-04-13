@@ -45,6 +45,7 @@
             <TextView
                 android:id="@+id/image_title"
                 style="@style/Base.Widget.AppCompat.TextView.Heading"
+                android:textColor="?colorPrimary"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="Image name goes here"
