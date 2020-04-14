@@ -6,6 +6,8 @@
 The SAR Coordinator Application aids volunteers in search and rescue operations by leveraging the phone's GPS to track volunteer location, and enabling volunteers to send shift reports to the county admins.
 
 Built by SAR Solutions
+
+<a href="https://play.google.com/store/apps/details?id=com.sarcoordinator.sarsolutions"><img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" width="25%"></a>
 	
 ## Design Iterations
 This section shows the UI design changes and reasons behind them.All of the changes aren't shown, only the major ones.
@@ -31,9 +33,12 @@ These are the mockups that were made after the hackathon and before any progress
 	<img hspace="20" src="static/Mockups/Mockup%20-%20Shift%20Report.png" width="25%">
 </p>
 
+A lot of the componenets aren't following material guidelines, the cases list isn't user friendly, the buttons are placed poorly, the navbar has no depth and there isn't a lot of depth in the UI overall (except for the cards, which are ready for take off).
+
 With my limited knowledge about design and user interaction at the time, these were nothing more than glorified wireframes.
 
 ### Alpha (12:23:19)
+The inital iteration of the app and the first realiztion of the mockups with a few design improvements.
 
 ## Build Instructions
 - Open project in [Android Studio](https://developer.android.com/studio/index.html)
