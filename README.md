@@ -62,28 +62,28 @@ With my limited knowledge about design and user interaction at the time, these w
 ### Alpha (12:23:19)
 The inital iteration of the app and the first realiztion of the mockups with a few design improvements. There were quit a few additions comapred to the mockups as I hadn't gone over the minute details while designing the mockups.
 
-#### Login Screen
+#### Login
 <p align="center">
 	<img hspace="20" src="static/Alpha%20(12:23:19)/Alpha%20-%20Login.png" width="25%">
 </p>
 
 I reduced the icon size, changed the text boxes to be outlined and rounded the "Sign In" button in order to better follow material guidelines. I also added a "forgot password" button which had been overlooked when making the mockups. 
 
-#### Reset Password Screen
+#### Reset Password
 <p align="center">
 	<img hspace="20" src="static/Alpha%20(12:23:19)/Alpha%20-%20Reset%20Password.png" width="25%">
 </p>
 
 This is more or less the same as the login screen.
 
-#### Cases List Screen
+#### Cases List
 <p align="center">
 	<img hspace="20" src="static/Alpha%20(12:23:19)/Alpha%20-%20Case%20List.png" width="25%">
 </p>
 
 The toolbar is the same color as the theme surface and elevated in order to be less distracting, and the list items are cards in order to make them easier to navigate and read. However, the cards themselves are displeasing to look at, specially with the contrast between them and the text on them.
 
-#### Tracking Screen
+#### Tracking
 <p align="center">
 	<img hspace="20" src="static/Alpha%20(12:23:19)/Alpha%20-%20Tracking.png" width="25%">
 	<img hspace="20" src="static/Alpha%20(12:23:19)/Alpha%20-%20Tracking%20–%201.png" width="25%">
@@ -91,12 +91,43 @@ The toolbar is the same color as the theme surface and elevated in order to be l
 
 The tracking screen is the same as from the hackathon version except for the addition of the toolbar, new material button style and button colors to better indicate the status of the shift.
 
-#### Settings Screen
+#### Settings
 <p align="center">
 	<img hspace="20" src="/static/Alpha%20(12:23:19)/Alpha%20-%20Settings.png" width="25%">
 </p>
 
 Another screen that had been overlooked in the mockups was the settings screen. The settings screen only had the options to select the theme and enable/disable testing mode. The settings screen could be accessed from the droop down menu along with the signout button.
+
+### Beta (1:31:20)
+Since the alpha, the beta included a lot of backend changes and improvements along with existing UI cleanup for the mobile app. While the cases list screen didn't change much, the shift reports functionality was added.
+
+#### Login
+<p align="center">
+	<img hspace="20" src="static/Beta%20(1:31:20)/Beta%20-%20Login.png" width="25%">
+</p>
+
+Other than new logo, the other big change is the color which much less saturated.
+
+#### Settings
+<p align="center">
+	<img hspace="20" src="static/Beta%20(1:31:20)/Beta%20-%20Settings.png" width="25%">
+</p>
+
+The "General" settings card was modernized by getting rid of the orange tint and the "About" section card was added.
+
+#### Tracking
+<p align="center">
+	<img hspace="20" src="static/Beta%20(1:31:20)/Beta%20-%20Tracking.png" width="25%">
+</p>
+
+The "Case Information" card from the mockups was added with a redesign to better go with the rest of the UI. The card also included the case id and a seperate card to see live shift information.
+
+#### Shift Report
+<p align="center">
+	<img hspace="20" src="static/Beta%20(1:31:20)/Beta%20-%20Shift%20Report.png" width="25%">
+</p>
+
+Shift reports where one of the highly sought out features by the Wasatch county. Compared with the mockup, again, there was a major redesign to better accompany the rest of the UI. A input text field was added for the number of hours on search as well as dynamic vehicle cards. In the mockup there were just checkboxes for the activtiy which was a step down from what the county wanted and therefore vehicle cards were added. The fab on the bottom inserts a new vehicle card horizontally, in the "Vehicle section", from where vehicle's information can be filled out. Additionally, the vehicle cards can be swiped up to delete them from the shift report.
 
 ## External Links
 - [Play Store Link](https://play.google.com/store/apps/details?id=com.sarcoordinator.sarsolutions)
