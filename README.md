@@ -129,6 +129,17 @@ The "Case Information" card from the mockups was added with a redesign to better
 
 Shift reports where one of the highly sought out features by the Wasatch county. Compared with the mockup, again, there was a major redesign to better accompany the rest of the UI. A input text field was added for the number of hours on search as well as dynamic vehicle cards. In the mockup there were just checkboxes for the activtiy which was a step down from what the county wanted and therefore vehicle cards were added. The fab on the bottom inserts a new vehicle card horizontally, in the "Vehicle section", from where vehicle's information can be filled out. Additionally, the vehicle cards can be swiped up to delete them from the shift report.
 
+### Beta (2:29:20)
+This iteration included the prcoess of changing UI elements to uniformly match throughout the app as well as an entire navigation redesign with the addtion of a bottom navigation bar.
+
+#### Login
+<p align="center">
+	<img hspace="20" src="static/Beta%20(2:29:20)/Beta%202%20-%20Login.png" width="25%">
+</p>
+
+The colors in the app were intended to go with the old logo. With the new logo, I changed the UI colors to better match it.
+Additionally, the input text fields were changed so that they were only colored when focued to signify better focus.
+
 ## External Links
 - [Play Store Link](https://play.google.com/store/apps/details?id=com.sarcoordinator.sarsolutions)
 - [Landing Page](https://sarcoordinator.com/)
