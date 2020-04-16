@@ -1,13 +1,17 @@
 <p align="center">
   <img src="app/src/main/res/mipmap-xhdpi/app_icon.png" width="25%">
 </p>
+<p align="center">
+	<a href="https://play.google.com/store/apps/details?id=com.sarcoordinator.sarsolutions"><img 		src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" width="25%"></a>
+</p>
 
 # SAR Coordinator
 The SAR Coordinator Application aids volunteers in search and rescue operations by leveraging the phone's GPS to track volunteer location, and enabling volunteers to send shift reports to the county admins.
 
 Built by SAR Solutions
-
-<a href="https://play.google.com/store/apps/details?id=com.sarcoordinator.sarsolutions"><img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" width="25%"></a>
+<p align="center">
+		<img src="static/SAR_Coordinator_Banner_Original.png">
+</p>
 
 ## Build Instructions
 - Open project in [Android Studio](https://developer.android.com/studio/index.html)
@@ -120,7 +124,7 @@ The "General" settings card was modernized by getting rid of the orange tint and
 	<img hspace="20" src="static/Beta%20(1:31:20)/Beta%20-%20Tracking.png" width="25%">
 </p>
 
-The "Case Information" card from the mockups was added with a redesign to better go with the rest of the UI. The card also included the case id and a seperate card to see live shift information.
+The "Case Information" card from the mockups was added with a redesign to better go with the rest of the UI. The card also included the case id and a seperate card to see live shift information. Additionally, the case name was displayed in the nav bar.
 
 #### Shift Report
 <p align="center">
@@ -128,6 +132,46 @@ The "Case Information" card from the mockups was added with a redesign to better
 </p>
 
 Shift reports where one of the highly sought out features by the Wasatch county. Compared with the mockup, again, there was a major redesign to better accompany the rest of the UI. A input text field was added for the number of hours on search as well as dynamic vehicle cards. In the mockup there were just checkboxes for the activtiy which was a step down from what the county wanted and therefore vehicle cards were added. The fab on the bottom inserts a new vehicle card horizontally, in the "Vehicle section", from where vehicle's information can be filled out. Additionally, the vehicle cards can be swiped up to delete them from the shift report.
+
+### Beta (2:29:20)
+This iteration included the prcoess of changing UI elements to uniformly match throughout the app as well as an entire navigation redesign with the addtion of a bottom navigation bar.
+
+#### Login
+<p align="center">
+	<img hspace="20" src="static/Beta%20(2:29:20)/Beta%202%20-%20Login.png" width="25%">
+</p>
+
+The colors in the app were intended to go with the old logo. With the new logo, I changed the UI colors to better match it.
+Additionally, the input text fields were changed so that they were only colored when focued to signify better focus.
+
+#### Cases List
+<p align="center">
+	<img hspace="20" src="static/Beta%20(2:29:20)/Beta%202%20-%20Cases%20List.png" width="25%">
+</p>
+
+With the addition of the bottom nav bar, the drop down menu from the toolbar was removed. The material cards were removed in favor of list items with just two text views indicating the case name and the date of creation for the case. The cards were occupying too much unnecessary space and the contrast between the card surface and the two text views made it tough to read the missing person's name.
+
+#### Failed Shifts
+<p align="center">
+	<img hspace="20" src="static/Beta%20(2:29:20)/Beta%202%20-%20Failed%20Shifts.png" width="25%">
+</p>
+
+This newly added screen looked the same as the Cases List screen, however it functioned differently. Clicking on a case on the Cases List screen would open up the Tracking screen, however, clicking on a case on the Failed Shifts screen would just show a progess bar on top to indicate that the device is attempting to sync the shift with the server.
+
+#### Settings
+<p align="center">
+	<img hspace="20" src="static/Beta%20(2:29:20)/Beta%202%20-%20Settings.png" width="25%">
+</p>
+
+As the drop down menu was removed, the settings page was moved to be accessible via the bottom navigation bar and the "Sign Out" button was moved to the settings page. 
+A text view indicating the app version in the "About" section was added along with changing the "View Licenses" button style to make it more obvious that it was clickable.
+
+#### Tracking
+<p align="center">
+	<img hspace="20" src="static/Beta%20(2:29:20)/Beta%202%20-%20Tracking.png" width="25%">
+</p>
+
+The tracking screen had a minor tweak where the "Start" button was removed and a floating action button was added to take over it's function. With this change, the Tracking page worked much better with the Shift Report screen.
 
 ## External Links
 - [Play Store Link](https://play.google.com/store/apps/details?id=com.sarcoordinator.sarsolutions)
