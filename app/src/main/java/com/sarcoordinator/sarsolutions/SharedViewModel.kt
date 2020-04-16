@@ -105,6 +105,23 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    private val userInfo = MutableLiveData<Volunteer>()
+    fun getUser(userId: String): LiveData<Volunteer> {
+        // Only query endpoint if not in cache
+        if (userInfo.value == null) {
+            viewModelScope.launch(IO + networkException) {
+                try {
+                    userInfo.postValue(Repository.getUser(userId))
+                } catch (e: Exception) {
+                    netWorkExceptionText.postValue(e.toString())
+                }
+            }
+        }
+        return userInfo
+    }
+
+    /************************************************ Tracking **********************************************************/
+
     val currentCase = MutableLiveData<Case>()
 
     fun getCaseDetails(caseId: String): LiveData<Case> {

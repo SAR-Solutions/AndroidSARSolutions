@@ -8,6 +8,13 @@
     app:showPaths="true"
     tools:context=".LoginFragment">
 
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline8"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.75" />
+
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="0dp"
@@ -72,12 +79,14 @@
 
     </LinearLayout>
 
-    <com.google.android.material.button.MaterialButton
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/signin_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        style="@style/SignInButton"
         android:text="@string/common_signin_button_text"
         android:transitionName="button"
+        android:enabled="false"
         app:layout_constraintBottom_toTopOf="@+id/privacy_policy_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -88,9 +97,10 @@
         android:id="@+id/forgot_password_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="@string/forgot_password"
         android:clickable="true"
         android:padding="8dp"
-        android:text="Forgot Password"
+        android:textColor="?colorPrimary"
         app:layout_constraintBottom_toTopOf="@+id/privacy_policy_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -116,7 +126,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.2" />
+        app:layout_constraintGuide_percent="0.35" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

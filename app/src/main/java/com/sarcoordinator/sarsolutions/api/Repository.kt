@@ -81,6 +81,9 @@ object Repository {
     ) =
         service.postShiftReport(getToken(), shiftId, report)
 
+    suspend fun getUser(userId: String): Volunteer =
+        service.getUser(getToken(), userId)
+
     // Synchronously get user token
     private fun getToken(): String {
         return Tasks.await(user.getIdToken(true)).token.toString()

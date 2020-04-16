@@ -248,17 +248,17 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         back_button_view.doOnApplyWindowInsets { view, insets, initialState ->
             view.setMargins(
                 initialState.margins.left + insets.systemGestureInsets.left,
-                initialState.margins.top + insets.systemGestureInsets.top,
+                initialState.margins.top,
                 initialState.margins.right + insets.systemGestureInsets.right,
-                initialState.margins.bottom + insets.systemGestureInsets.bottom
+                initialState.margins.bottom
             )
         }
         info_button_view.doOnApplyWindowInsets { view, insets, initialState ->
             view.setMargins(
                 initialState.margins.left + insets.systemGestureInsets.left,
-                initialState.margins.top + insets.systemGestureInsets.top,
+                initialState.margins.top,
                 initialState.margins.right + insets.systemGestureInsets.right,
-                initialState.margins.bottom + insets.systemGestureInsets.bottom
+                initialState.margins.bottom
             )
         }
         info_view_layout.doOnApplyWindowInsets { view, insets, initialState ->

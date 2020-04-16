@@ -47,4 +47,10 @@ interface API {
         @Query("shiftId") shiftId: String,
         @Body report: ShiftReport
     ): Response<Unit>
+
+    @GET("getUser")
+    suspend fun getUser(
+        @Header("authorization") tokenId: String,
+        @Query("uid") userId: String
+    ): Volunteer
 }

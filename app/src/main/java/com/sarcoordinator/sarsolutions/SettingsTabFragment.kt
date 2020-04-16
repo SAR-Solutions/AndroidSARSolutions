@@ -11,6 +11,8 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.firebase.auth.FirebaseAuth
@@ -19,6 +21,7 @@ import com.sarcoordinator.sarsolutions.util.CustomFragment
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.fragment_settings.*
+import kotlinx.android.synthetic.main.view_account.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
@@ -27,6 +30,7 @@ import timber.log.Timber
 class SettingsTabFragment : Fragment(R.layout.fragment_settings), CustomFragment {
 
     private val nav: Navigation by lazy { Navigation.getInstance() }
+    private lateinit var viewModel: SharedViewModel
 
     companion object {
         const val TESTING_MODE_PREFS = "TESTING_MODE"
@@ -51,10 +55,14 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), CustomFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        viewModel = activity?.run {
+            ViewModelProvider(this)[SharedViewModel::class.java]
+        } ?: throw Exception("Invalid Activity")
+
         // Set shared element transition
         sharedElementEnterTransition = TransitionInflater.from(context)
             .inflateTransition(android.R.transition.move)
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -77,6 +85,8 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), CustomFragment
         setupDebugSettingsCard()
 
         loadPreferences()
+
+        populateUserProfileView()
 
         // Set onClick listeners for release settings
         theme_spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -160,6 +170,18 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), CustomFragment
         }
 
         privacy_policy_button.movementMethod = LinkMovementMethod.getInstance()
+    }
+
+    private fun populateUserProfileView() {
+
+        viewModel.getUser(auth.currentUser!!.uid).observe(viewLifecycleOwner, Observer {
+            user_profile_shimmer.visibility = View.GONE
+            user_profile.visibility = View.VISIBLE
+            user_profile.image.setText(it.name)
+            user_profile.name.text = it.name
+            user_profile.badge_number.text = it.badgeNumber
+            user_profile.email.text = auth.currentUser!!.email
+        })
     }
 
     private fun setupDebugSettingsCard() {
