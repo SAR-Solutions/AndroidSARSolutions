@@ -21,7 +21,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 29
         versionCode 30
-        versionName "2.1.2-beta"
+        versionName "Development Build"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         resValue 'string', "gmaps_api_key", GOOGLE_MAPS_API_KEY
@@ -103,7 +103,7 @@ dependencies {
     implementation 'com.facebook.shimmer:shimmer:0.5.0'
 
     // Firebase Crashlytics
-    implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
+//    implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
 
     // Open Source Notices
     implementation 'com.google.android.gms:play-services-oss-licenses:17.0.0'
