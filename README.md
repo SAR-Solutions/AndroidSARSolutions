@@ -206,6 +206,29 @@ The image is displayed on the entire screen and can be panned and zoomed in as w
 
 If the images aren't dealt with (uploaded or deleted) while the shift is active, the volunteer can defer the task till after the shift and continue in the shift report screen. Clicking on the image on this screen, works the same way and takes the user to the Image Details screen.
 
+### Release Candidate (4:08:20)
+This iteration is the one that is shown in the production video and it includes an addition of a map from the previous iteration.
+
+### Login
+<p align="center">
+	<img src="static/Release%20Candidate%20(4:8:20)/Release%20Candidate%20-%20Login.png" width="25%">
+</p>
+
+Small addition of the privacy policy disclosure on the login screen. The "Forgot Password" button was shifted up as well in order to almost group it with the "Sign In" button but not entirely in order to avoid acidental clicks.
+
+### Tracking
+<p align="center">
+	<img hspace="20" src="static/Release%20Candidate%20(4:8:20)/Release%20Candidate%20-%20Tracking.png" width="25%">
+	<img hspace="20" src="static/Release%20Candidate%20(4:8:20)/Release%20Candidate%20-%20Tracking%20–%201.png" width="25%">
+</p>
+
+A map was added to the tracking screen to show the user their current location and it was added to the Failed Shifts report screen as well to show the path of the shift.
+
+The case information is shown in a card which can be swiped from the bottom as well as swiped down to dismiss completely. To bring it back up, after its dissmisal, the circular "Info" circular button on the top right of the screen can be clicked. The starting marker shows the starting point of the shift and once the shift stops, a red marker will be shown to indicate the ending position as well. 
+
+The current shift information is shown on the top alongside the back and "Info" circular buttons.
+When shift tracking is active, a smaller FAB is shown on top of the primary FAB which enables the user to take an image.
+
 ## External Links
 - [Play Store Link](https://play.google.com/store/apps/details?id=com.sarcoordinator.sarsolutions)
 - [Landing Page](https://sarcoordinator.com/)
