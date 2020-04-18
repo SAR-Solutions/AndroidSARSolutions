@@ -9,7 +9,7 @@
     <androidx.appcompat.widget.AppCompatImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="centerCrop"
+        android:scaleType="fitXY"
         android:src="@drawable/light_onboarding_3" />
 
     <androidx.appcompat.widget.AppCompatTextView

@@ -86,7 +86,6 @@
         style="@style/SignInButton"
         android:text="@string/common_signin_button_text"
         android:transitionName="button"
-        android:enabled="false"
         app:layout_constraintBottom_toTopOf="@+id/privacy_policy_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

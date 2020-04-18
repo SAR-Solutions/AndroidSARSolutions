@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.models.Case
+import com.sarcoordinator.sarsolutions.onboarding.OnboardingFragment
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.GlobalUtil.THEME_LIGHT
 import com.sarcoordinator.sarsolutions.util.Navigation
@@ -96,7 +97,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             hideBottomNavBar(true)
             parent_layout.transitionToState(R.id.hide_nav_bar)
             supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, LoginFragment())
+                .replace(R.id.fragment_container, OnboardingFragment())
                 .commit()
             parent_layout.transitionToState(R.id.hide_nav_bar)
         } else {
