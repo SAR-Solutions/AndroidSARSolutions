@@ -27,11 +27,36 @@ class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
 
         setupInsets()
 
+        button.setOnClickListener {
+            onboarding_view_pager.apply {
+                setCurrentItem(currentItem + 1, true)
+            }
+        }
+
+        onboarding_view_pager.setPageTransformer(ZoomOutPageTransformer())
+
         onboarding_view_pager.registerOnPageChangeCallback(object :
             ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
                 setOnboardingIndicator(position)
+
+                when (position) {
+                    in 0..1 -> {
+                        button.text = getString(R.string.next)
+                        button.visibility = View.VISIBLE
+                        onboarding_indicators_parent.visibility = View.VISIBLE
+                    }
+                    2 -> {
+                        button.text = getString(R.string.login)
+                        button.visibility = View.VISIBLE
+                        onboarding_indicators_parent.visibility = View.VISIBLE
+                    }
+                    3 -> {
+                        button.visibility = View.GONE
+                        onboarding_indicators_parent.visibility = View.GONE
+                    }
+                }
             }
         })
     }
@@ -99,6 +124,48 @@ class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
                 1 -> OnboardingSecondFragment()
                 2 -> OnboardingThirdFragment()
                 else -> LoginFragment()
+            }
+        }
+    }
+
+    private inner class ZoomOutPageTransformer : ViewPager2.PageTransformer {
+
+        private val MIN_SCALE = 0.85f
+        private val MIN_ALPHA = 0.5f
+
+        override fun transformPage(view: View, position: Float) {
+            view.apply {
+                val pageWidth = width
+                val pageHeight = height
+                when {
+                    position < -1 -> { // [-Infinity,-1)
+                        // This page is way off-screen to the left.
+                        alpha = 0f
+                    }
+                    position <= 1 -> { // [-1,1]
+                        // Modify the default slide transition to shrink the page as well
+                        val scaleFactor = Math.max(MIN_SCALE, 1 - Math.abs(position))
+                        val vertMargin = pageHeight * (1 - scaleFactor) / 2
+                        val horzMargin = pageWidth * (1 - scaleFactor) / 2
+                        translationX = if (position < 0) {
+                            horzMargin - vertMargin / 2
+                        } else {
+                            horzMargin + vertMargin / 2
+                        }
+
+                        // Scale the page down (between MIN_SCALE and 1)
+                        scaleX = scaleFactor
+                        scaleY = scaleFactor
+
+                        // Fade the page relative to its size.
+                        alpha = (MIN_ALPHA +
+                                (((scaleFactor - MIN_SCALE) / (1 - MIN_SCALE)) * (1 - MIN_ALPHA)))
+                    }
+                    else -> { // (1,+Infinity]
+                        // This page is way off-screen to the right.
+                        alpha = 0f
+                    }
+                }
             }
         }
     }
