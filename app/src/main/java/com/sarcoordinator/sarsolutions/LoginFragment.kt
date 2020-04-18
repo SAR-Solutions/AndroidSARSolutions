@@ -3,7 +3,6 @@ package com.sarcoordinator.sarsolutions
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
-import android.text.method.LinkMovementMethod
 import android.util.Patterns
 import android.view.View
 import android.view.autofill.AutofillManager
@@ -140,14 +139,6 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                 .addToBackStack(null)
                 .commit()
         }
-
-        privacy_policy_text.movementMethod = LinkMovementMethod.getInstance()
-
-    }
-
-    override fun onStart() {
-        super.onStart()
-        (requireActivity() as MainActivity).enableTransparentSystemBars(true)
     }
 
     private fun enableUIElements(enable: Boolean) {

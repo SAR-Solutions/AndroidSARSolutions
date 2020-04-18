@@ -100,25 +100,11 @@
         android:clickable="true"
         android:padding="8dp"
         android:textColor="?colorPrimary"
-        app:layout_constraintBottom_toTopOf="@+id/privacy_policy_text"
+        app:layout_constraintBottom_toTopOf="@+id/guideline8"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/signin_button"
         app:layout_constraintVertical_bias="0.1" />
-
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/privacy_policy_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fitsSystemWindows="true"
-        android:linksClickable="true"
-        android:padding="8dp"
-        android:text="@string/privacy_policy_disclaimer"
-        android:textAlignment="center"
-        app:layout_constrainedHeight="true"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline2"
