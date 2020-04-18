@@ -116,4 +116,6 @@
     <string name="no_cases_desc">Ask the county sheriff to assign you to a case</string>
     <string name="no_cases">No cases assigned</string>
     <string name="forgot_password">Forgot Password?</string>
+    <string name="next">next</string>
+    <string name="welcome">Welcome</string>
 </resources>
