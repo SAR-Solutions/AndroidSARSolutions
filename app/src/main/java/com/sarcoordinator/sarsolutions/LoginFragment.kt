@@ -8,6 +8,7 @@ import android.view.View
 import android.view.autofill.AutofillManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
@@ -32,13 +33,16 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
             afm = requireContext().getSystemService(AutofillManager::class.java)
         }
 
-        // Set app icon based on app theme
+        // Set app icon and background based on app theme
         if (GlobalUtil.getCurrentTheme(
                 resources,
                 requireActivity().getPreferences(Context.MODE_PRIVATE)
             ) == GlobalUtil.THEME_DARK
-        )
+        ) {
             imageView.setImageResource(R.mipmap.app_icon_white_text)
+            login_parent_layout.background =
+                ContextCompat.getDrawable(requireContext(), R.drawable.dark_login_bg)
+        }
 
         password_text_layout.apply {
             alpha = 0f
