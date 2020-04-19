@@ -9,6 +9,7 @@ import android.view.View
 import android.view.autofill.AutofillManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
@@ -17,6 +18,7 @@ import com.sarcoordinator.sarsolutions.util.Navigation
 import com.sarcoordinator.sarsolutions.util.setMargins
 import dev.chrisbanes.insetter.doOnApplyWindowInsets
 import kotlinx.android.synthetic.main.fragment_login.*
+import kotlinx.android.synthetic.main.view_login_card.*
 
 class LoginFragment : Fragment(R.layout.fragment_login) {
 
@@ -26,6 +28,11 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
 
     private val nav: Navigation = Navigation.getInstance()
 
+    override fun onStart() {
+        super.onStart()
+        (requireActivity() as MainActivity).enableTransparentSystemBars(true)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -33,13 +40,16 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
             afm = requireContext().getSystemService(AutofillManager::class.java)
         }
 
-        // Set app icon based on app theme
+        // Set app icon and background based on app theme
         if (GlobalUtil.getCurrentTheme(
                 resources,
                 requireActivity().getPreferences(Context.MODE_PRIVATE)
             ) == GlobalUtil.THEME_DARK
-        )
+        ) {
             imageView.setImageResource(R.mipmap.app_icon_white_text)
+            login_parent_layout.background =
+                ContextCompat.getDrawable(requireContext(), R.drawable.dark_login_bg)
+        }
 
         password_text_layout.apply {
             alpha = 0f
@@ -134,20 +144,11 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
             requireActivity().supportFragmentManager
                 .beginTransaction()
                 .replace(R.id.fragment_container, ResetPasswordFragment())
-                .addSharedElement(email_text_layout, email_text_layout.transitionName)
-                .addSharedElement(imageView, imageView.transitionName)
-                .addSharedElement(signin_button, signin_button.transitionName)
                 .addToBackStack(null)
                 .commit()
         }
 
         privacy_policy_text.movementMethod = LinkMovementMethod.getInstance()
-
-    }
-
-    override fun onStart() {
-        super.onStart()
-        (requireActivity() as MainActivity).enableTransparentSystemBars(true)
     }
 
     private fun enableUIElements(enable: Boolean) {
