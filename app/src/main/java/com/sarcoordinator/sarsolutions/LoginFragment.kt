@@ -28,6 +28,11 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
 
     private val nav: Navigation = Navigation.getInstance()
 
+    override fun onStart() {
+        super.onStart()
+        (requireActivity() as MainActivity).enableTransparentSystemBars(true)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
