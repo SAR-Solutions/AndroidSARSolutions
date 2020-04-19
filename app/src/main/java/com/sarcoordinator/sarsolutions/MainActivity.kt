@@ -63,6 +63,13 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
         if (savedInstanceState != null) {
 
+            // Only restore navigation component state if user is logged in
+            // If user isn't logged in, navigation component doesn't handle navigation
+            if (auth.currentUser == null) {
+                hideBottomNavBar(true)
+                return
+            }
+
             // Recover Navigation state from process death
             savedInstanceState.getSerializable(BACKSTACK)?.let {
                 nav.setBackStack(it as HashMap<*, Collection<String>>)
@@ -109,6 +116,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
+
         outState.putSerializable(BACKSTACK, nav.getBackStack())
         outState.putSerializable(TABSTACK, ArrayList(nav.getTabStack().toList()))
         outState.putSerializable(FRAGMENT_STATES_MAP, nav.getFragmentStateMap())

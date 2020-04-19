@@ -19,9 +19,21 @@ import kotlinx.android.synthetic.main.fragment_onboarding.*
 
 class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
 
+    private lateinit var adapter: OnboardingAdapter
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt("Current", onboarding_view_pager.currentItem)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        adapter = OnboardingAdapter(this)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        onboarding_view_pager.adapter = OnboardingAdapter(this)
+        onboarding_view_pager.adapter = adapter
 
         setupOnboardingIndicators()
 
@@ -57,6 +69,10 @@ class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
                 }
             }
         })
+
+        savedInstanceState?.let {
+            onboarding_view_pager.setCurrentItem(savedInstanceState.getInt("Current"), false)
+        }
     }
 
     override fun onStart() {
