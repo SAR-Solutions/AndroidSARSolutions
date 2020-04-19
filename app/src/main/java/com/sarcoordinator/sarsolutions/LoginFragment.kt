@@ -3,6 +3,7 @@ package com.sarcoordinator.sarsolutions
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
+import android.text.method.LinkMovementMethod
 import android.util.Patterns
 import android.view.View
 import android.view.autofill.AutofillManager
@@ -138,12 +139,11 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
             requireActivity().supportFragmentManager
                 .beginTransaction()
                 .replace(R.id.fragment_container, ResetPasswordFragment())
-                .addSharedElement(email_text_layout, email_text_layout.transitionName)
-                .addSharedElement(imageView, imageView.transitionName)
-                .addSharedElement(signin_button, signin_button.transitionName)
                 .addToBackStack(null)
                 .commit()
         }
+
+        privacy_policy_text.movementMethod = LinkMovementMethod.getInstance()
     }
 
     private fun enableUIElements(enable: Boolean) {
