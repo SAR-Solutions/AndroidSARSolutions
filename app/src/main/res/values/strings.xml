@@ -119,4 +119,6 @@
     <string name="next">next</string>
     <string name="welcome">Welcome</string>
     <string name="login">login</string>
+    <string name="reset">reset</string>
+    <string name="reset_password_desc">Enter your email associated with an account.\nWe will email you a link to reset your password</string>
 </resources>

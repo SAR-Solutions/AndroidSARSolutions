@@ -39,11 +39,9 @@ class ResetPasswordFragment : Fragment(R.layout.fragment_reset_password) {
                 requireActivity().getPreferences(Context.MODE_PRIVATE)
             ) == GlobalUtil.THEME_DARK
         )
-            imageView.setImageResource(R.mipmap.app_icon_white_text)
 
         // Set insets
-        reset_password_parent.children.forEach { child ->
-            if (child.id != R.id.imageView) {
+            reset_password_parent.children.forEach { child ->
                 child.doOnApplyWindowInsets { childView, insets, initialState ->
                     childView.setMargins(
                         initialState.margins.left + insets.systemGestureInsets.left,
@@ -53,7 +51,8 @@ class ResetPasswordFragment : Fragment(R.layout.fragment_reset_password) {
                     )
                 }
             }
-        }
+
+        back_button.setOnClickListener { requireActivity().onBackPressed() }
 
         forgot_password_button.setOnClickListener {
             if (!GlobalUtil.isNetworkConnectivityAvailable(requireActivity(), requireView()))

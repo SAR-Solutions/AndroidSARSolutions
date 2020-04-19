@@ -8,6 +8,8 @@ import android.widget.LinearLayout
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.sarcoordinator.sarsolutions.LoginFragment
@@ -27,7 +29,8 @@ class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        onboarding_view_pager.adapter = OnboardingAdapter(this)
+        onboarding_view_pager.adapter = OnboardingAdapter(childFragmentManager, lifecycle)
+        onboarding_view_pager.offscreenPageLimit = 4
 
         setupOnboardingIndicators()
 
@@ -120,7 +123,8 @@ class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
         }
     }
 
-    private inner class OnboardingAdapter(fragment: Fragment) : FragmentStateAdapter(fragment) {
+    private inner class OnboardingAdapter(fragmentManager: FragmentManager, lifecycle: Lifecycle) :
+        FragmentStateAdapter(fragmentManager, lifecycle) {
 
         override fun getItemCount(): Int {
             return 4
