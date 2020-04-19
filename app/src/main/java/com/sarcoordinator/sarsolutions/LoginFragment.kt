@@ -17,6 +17,7 @@ import com.sarcoordinator.sarsolutions.util.Navigation
 import com.sarcoordinator.sarsolutions.util.setMargins
 import dev.chrisbanes.insetter.doOnApplyWindowInsets
 import kotlinx.android.synthetic.main.fragment_login.*
+import kotlinx.android.synthetic.main.view_login_card.*
 
 class LoginFragment : Fragment(R.layout.fragment_login) {
 
