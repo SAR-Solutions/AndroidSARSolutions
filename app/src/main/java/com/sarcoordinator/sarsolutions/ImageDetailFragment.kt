@@ -37,6 +37,12 @@ class ImageDetailFragment : Fragment(R.layout.fragment_image_detail), CustomFrag
     private lateinit var image: ExifInterface
     private val nav: Navigation by lazy { Navigation.getInstance() }
 
+    private val metadataContentFocusHandler = View.OnTouchListener { v, event ->
+        if (metadata_content.hasFocus())
+            metadata_content.clearFocus()
+        false
+    }
+
     override fun getSharedElement(): View = detailed_image_view
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -78,6 +84,13 @@ class ImageDetailFragment : Fragment(R.layout.fragment_image_detail), CustomFrag
             .dontTransform()
             .centerCrop()
             .into(detailed_image_view)
+
+        setFocusChangeListeners()
+        image_detail_parent_layout.setOnTouchListener { v, event ->
+            if (metadata_content.hasFocus())
+                metadata_content.clearFocus()
+            false
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -93,16 +106,16 @@ class ImageDetailFragment : Fragment(R.layout.fragment_image_detail), CustomFrag
             TextView.BufferType.EDITABLE
         )
 
+        metadata_content.setOnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus)
+                setImageMetadata()
+        }
+
         // Save metadata on send click
         metadata_content.setOnEditorActionListener { v, actionId, event ->
             return@setOnEditorActionListener when (actionId) {
                 EditorInfo.IME_ACTION_SEND -> {
-                    GlobalUtil.hideKeyboard(requireActivity())
-                    image.setAttribute(
-                        ExifInterface.TAG_IMAGE_DESCRIPTION,
-                        metadata_content.text.toString()
-                    )
-                    image.saveAttributes()
+                    setImageMetadata()
                     true
                 }
                 else -> false
@@ -182,8 +195,25 @@ class ImageDetailFragment : Fragment(R.layout.fragment_image_detail), CustomFrag
         }
     }
 
+    // Sets image metadata based on metadata_content text
+    private fun setImageMetadata() {
+        GlobalUtil.hideKeyboard(requireActivity())
+        image.setAttribute(
+            ExifInterface.TAG_IMAGE_DESCRIPTION,
+            metadata_content.text.toString()
+        )
+        image.saveAttributes()
+    }
+
     private fun deleteImageFile() {
         Timber.d("Image delete result: ${imageFile.delete()}")
         requireActivity().onBackPressed()
+    }
+
+    // On click outside of metadata_content, clear focus from metadata_content
+    private fun setFocusChangeListeners() {
+        image_detail_parent_layout.setOnTouchListener(metadataContentFocusHandler)
+        upload_button.setOnTouchListener(metadataContentFocusHandler)
+        delete_button.setOnTouchListener(metadataContentFocusHandler)
     }
 }
