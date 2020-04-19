@@ -3,7 +3,6 @@ package com.sarcoordinator.sarsolutions.api
 import android.location.Location
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.sarcoordinator.sarsolutions.models.*
 import okhttp3.ConnectionSpec
 import okhttp3.OkHttpClient
@@ -13,8 +12,6 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 
 object Repository {
     private const val SAR_FUNCTIONS_URL = "https://us-central1-sar-solutions.cloudfunctions.net/"
-
-    private val user: FirebaseUser = FirebaseAuth.getInstance().currentUser!!
 
     private var tlsSpecs = listOf(ConnectionSpec.MODERN_TLS)
     private val interceptor: HttpLoggingInterceptor = HttpLoggingInterceptor().apply {
@@ -86,6 +83,7 @@ object Repository {
 
     // Synchronously get user token
     private fun getToken(): String {
-        return Tasks.await(user.getIdToken(true)).token.toString()
+        val currentUser = FirebaseAuth.getInstance().currentUser!!
+        return Tasks.await(currentUser.getIdToken(true)).token.toString()
     }
 }
