@@ -21,7 +21,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 29
         versionCode 31
-        versionName "2.3.0"
+        versionName "2.2.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         resValue 'string', "gmaps_api_key", GOOGLE_MAPS_API_KEY
