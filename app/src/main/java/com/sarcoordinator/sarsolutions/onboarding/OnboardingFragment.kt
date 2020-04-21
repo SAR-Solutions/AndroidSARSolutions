@@ -8,8 +8,6 @@ import android.widget.LinearLayout
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.sarcoordinator.sarsolutions.LoginFragment
@@ -21,22 +19,23 @@ import kotlinx.android.synthetic.main.fragment_onboarding.*
 
 class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putInt("Current", onboarding_view_pager.currentItem)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        onboarding_view_pager.adapter = OnboardingAdapter(childFragmentManager, lifecycle)
-        onboarding_view_pager.offscreenPageLimit = 4
+        onboarding_view_pager.adapter = OnboardingAdapter(this)
+        onboarding_view_pager.offscreenPageLimit = 3
 
         setupOnboardingIndicators()
 
         setupInsets()
 
         button.setOnClickListener {
+            // Navigate to login screen
+            if (button.text == getString(R.string.login))
+                requireActivity().supportFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, LoginFragment())
+                    .commit()
+
             onboarding_view_pager.apply {
                 setCurrentItem(currentItem + 1, true)
             }
@@ -66,10 +65,6 @@ class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
                 }
             }
         })
-
-        savedInstanceState?.let {
-            onboarding_view_pager.setCurrentItem(savedInstanceState.getInt("Current"), false)
-        }
     }
 
     override fun onStart() {
@@ -123,19 +118,18 @@ class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
         }
     }
 
-    private inner class OnboardingAdapter(fragmentManager: FragmentManager, lifecycle: Lifecycle) :
-        FragmentStateAdapter(fragmentManager, lifecycle) {
+    private inner class OnboardingAdapter(fragment: Fragment) :
+        FragmentStateAdapter(fragment) {
 
         override fun getItemCount(): Int {
-            return 4
+            return 3
         }
 
         override fun createFragment(position: Int): Fragment {
             return when (position) {
                 0 -> OnboardingFirstFragment()
                 1 -> OnboardingSecondFragment()
-                2 -> OnboardingThirdFragment()
-                else -> LoginFragment()
+                else -> OnboardingThirdFragment()
             }
         }
     }

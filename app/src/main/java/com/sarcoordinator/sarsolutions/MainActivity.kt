@@ -102,11 +102,9 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         if (auth.currentUser == null) {
             // Hide nav bar in login fragment
             hideBottomNavBar(true)
-            parent_layout.transitionToState(R.id.hide_nav_bar)
             supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, OnboardingFragment())
                 .commit()
-            parent_layout.transitionToState(R.id.hide_nav_bar)
         } else {
             if (savedInstanceState == null) {
                 nav.selectTab(Navigation.TabIdentifiers.HOME)
@@ -179,7 +177,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         if (currentTheme == GlobalUtil.THEME_DARK) {
             window.navigationBarColor =
                 resources.getColor(R.color.lightGray)
-        } else if (currentTheme == GlobalUtil.THEME_LIGHT) {
+        } else if (currentTheme == THEME_LIGHT) {
             window.navigationBarColor =
                 resources.getColor(android.R.color.white)
         }
