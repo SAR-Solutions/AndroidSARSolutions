@@ -105,6 +105,7 @@
         android:layout_margin="16dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        app:borderWidth="0dp"
         android:backgroundTint="?colorPrimary"
         android:src="@drawable/ic_baseline_send_24"
         app:layout_anchor="@id/bottom_sheet"

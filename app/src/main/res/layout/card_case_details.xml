@@ -7,7 +7,7 @@
     style="@style/Widget.MaterialComponents.CardView.Standard.RoundedTop"
     app:cardElevation="5dp"
     app:behavior_hideable="true"
-    app:behavior_peekHeight="10dp"
+    app:behavior_peekHeight="100dp"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
     <LinearLayout
