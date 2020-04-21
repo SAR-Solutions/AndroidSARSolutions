@@ -156,7 +156,7 @@ class SettingsTabFragment : Fragment(R.layout.fragment_settings), CustomFragment
 
             // Clear database
             CoroutineScope(IO).launch {
-                CacheDatabase.getDatabase(requireActivity().application).clearAllTables()
+                CacheDatabase.removeDatabaseInstance()
             }
 
             nav.hideBottomNavBar?.let { it(true) }

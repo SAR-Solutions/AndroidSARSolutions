@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.models.CacheLocation
 import com.sarcoordinator.sarsolutions.models.CacheShiftReport
 import com.sarcoordinator.sarsolutions.models.CacheVehicle
@@ -29,11 +30,16 @@ abstract class CacheDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     CacheDatabase::class.java,
-                    "cases_database"
+                    FirebaseAuth.getInstance().currentUser!!.uid
                 ).build()
                 INSTANCE = instance
                 return instance
             }
+        }
+
+        // Remove current database instance from memory
+        fun removeDatabaseInstance() {
+            INSTANCE = null
         }
     }
 }
