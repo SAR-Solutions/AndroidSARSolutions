@@ -8,7 +8,7 @@ import android.view.View
 import android.view.ViewTreeObserver
 import android.widget.LinearLayout
 import com.sarcoordinator.sarsolutions.R
-import kotlinx.android.synthetic.main.large_info_view.view.*
+import kotlinx.android.synthetic.main.custom_large_info_view.view.*
 
 class LargeInfoView(context: Context, attrs: AttributeSet) : LinearLayout(context, attrs) {
 
@@ -21,7 +21,7 @@ class LargeInfoView(context: Context, attrs: AttributeSet) : LinearLayout(contex
             0, 0
         ).apply {
             try {
-                inflate(context, R.layout.large_info_view, this@LargeInfoView)
+                inflate(context, R.layout.custom_large_info_view, this@LargeInfoView)
 
                 // Set icon
                 val typedArray = context.obtainStyledAttributes(attrs, R.styleable.LargeInfoView)
@@ -49,6 +49,12 @@ class LargeInfoView(context: Context, attrs: AttributeSet) : LinearLayout(contex
     fun setButtonClickListener(clickListener: OnClickListener) {
         enableButton = true
         button.setOnClickListener(clickListener)
+    }
+
+    fun removeButtonClickListener() {
+        enableButton = false
+        button.setOnClickListener(null)
+        button.alpha = 0F
     }
 
     private fun startAnim() {

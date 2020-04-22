@@ -18,7 +18,7 @@
         app:Icon="@drawable/ic_baseline_eco_24"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal|center_vertical"
+        android:layout_gravity="center_vertical"
         app:Message="@string/low_bandwidth_desc" />
 
     <androidx.constraintlayout.widget.ConstraintLayout

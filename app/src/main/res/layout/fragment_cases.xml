@@ -52,7 +52,7 @@
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <com.sarcoordinator.sarsolutions.custom_views.LargeInfoView
-        android:id="@+id/no_cases_found_view"
+        android:id="@+id/info_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:Heading="@string/no_cases"
@@ -78,7 +78,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/try_again_for_network"
-        android:visibility="gone"
+        android:backgroundTint="@color/newRed"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

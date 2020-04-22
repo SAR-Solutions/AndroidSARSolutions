@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -18,6 +19,7 @@ import com.sarcoordinator.sarsolutions.models.Case
 import com.sarcoordinator.sarsolutions.util.CustomFragment
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.Navigation
+import kotlinx.android.synthetic.main.custom_large_info_view.view.*
 import kotlinx.android.synthetic.main.fragment_cases.*
 import kotlinx.android.synthetic.main.list_view_item.view.*
 import timber.log.Timber
@@ -50,7 +52,7 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), CustomFragment {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        no_cases_found_view.visibility = View.GONE
+        info_view.visibility = View.GONE
 
         nav.hideBottomNavBar?.let { it(false) }
         (requireActivity() as MainActivity).enableTransparentStatusBar(false)
@@ -76,23 +78,38 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), CustomFragment {
             refreshCaseList()
     }
 
+    override fun onStart() {
+        super.onStart()
+        (requireActivity() as MainActivity).restoreSystemBars()
+        nav.hideBottomNavBar?.let { it(false) }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        viewManager = null
+        viewAdapter = null
+    }
+
     // Disables or enables recyclerview depending on network connectivity status
     private fun validateNetworkConnectivity(): Boolean {
         return if (GlobalUtil.isNetworkConnectivityAvailable(requireActivity(), requireView())) {
+            enableNoCasesInfoView(true)
             disableRecyclerView(false)
             true
         } else {
+            enableNoCasesInfoView(false)
             disableRecyclerView(true)
             false
         }
     }
 
     // Disabled recyclerview and shows try again button
-// Note: actually disables swipe refresh layout
+    // Note: Disables swipe refresh layout
     private fun disableRecyclerView(toDisable: Boolean) {
         if (toDisable) {
             swipe_refresh_layout.visibility = View.GONE
             list_shimmer_layout.visibility = View.GONE
+            info_view.visibility = View.VISIBLE
             try_again_network_button.visibility = View.VISIBLE
             try_again_network_button.setOnClickListener {
                 refreshCaseList()
@@ -108,12 +125,12 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), CustomFragment {
     private fun observeCases() {
         viewModel.getCases().observe(viewLifecycleOwner, Observer<ArrayList<Case>> { caseList ->
             if (caseList.size == 0) {
-                no_cases_found_view.visibility = View.VISIBLE
+                info_view.visibility = View.VISIBLE
                 list_shimmer_layout.visibility = View.GONE
                 if (swipe_refresh_layout.isRefreshing)
                     swipe_refresh_layout.isRefreshing = false
             } else {
-                no_cases_found_view.visibility = View.GONE
+                info_view.visibility = View.GONE
                 if (list_shimmer_layout.visibility != View.GONE)
                     list_shimmer_layout.visibility = View.GONE
                 if (swipe_refresh_layout.isRefreshing)
@@ -154,32 +171,54 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), CustomFragment {
             if (error != null && error.isNotEmpty()) {
                 Timber.e("Network error: $error")
                 viewModel.clearNetworkExceptions()
-                Toast.makeText(requireContext(), "Internet connection error", Toast.LENGTH_LONG)
-                    .show()
-                disableRecyclerView(true)
+                validateNetworkConnectivity()
             }
         })
     }
 
     private fun refreshCaseList() {
         if (validateNetworkConnectivity()) {
-            no_cases_found_view.visibility = View.GONE
+            info_view.visibility = View.GONE
             viewAdapter = Adapter(nav, this)
             cases_recycler_view.adapter = viewAdapter
             viewModel.refreshCases()
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        (requireActivity() as MainActivity).restoreSystemBars()
-        nav.hideBottomNavBar?.let { it(false) }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        viewManager = null
-        viewAdapter = null
+    /**
+     * true: Enables no cases info view
+     * false: Enables no internet connection info view
+     */
+    private fun enableNoCasesInfoView(enableNoCases: Boolean) {
+        if (enableNoCases) {
+            info_view.removeButtonClickListener()
+            info_view.icon.setImageDrawable(
+                ContextCompat.getDrawable(
+                    requireContext(),
+                    R.drawable.ic_baseline_directions_walk_24
+                )
+            )
+            info_view.heading.text = getString(R.string.no_cases)
+            info_view.message.text = getString(R.string.no_cases_desc)
+        } else {
+            info_view.icon.setImageDrawable(
+                ContextCompat.getDrawable(
+                    requireContext(),
+                    R.drawable.ic_baseline_no_internet_4_bar_24
+                )
+            )
+            info_view.heading.text = "No Network"
+            info_view.message.text =
+                "Click on button to start an offline shift\nOr try again for network connectivity"
+            info_view.button.text = "Start offline shift"
+            info_view.setButtonClickListener(View.OnClickListener {
+                Toast.makeText(
+                    requireContext(),
+                    "TODO",
+                    Toast.LENGTH_LONG
+                ).show()
+            })
+        }
     }
 
     /** Recycler view item stuff **/
