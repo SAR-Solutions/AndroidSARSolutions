@@ -14,6 +14,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.models.Case
 import com.sarcoordinator.sarsolutions.onboarding.OnboardingFragment
+import com.sarcoordinator.sarsolutions.util.CacheDatabase
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.GlobalUtil.THEME_LIGHT
 import com.sarcoordinator.sarsolutions.util.Navigation
@@ -46,6 +47,11 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         loadUserPreferences()
 
         super.onCreate(savedInstanceState)
+
+        auth.addAuthStateListener {
+            if (it.currentUser == null)
+                CacheDatabase.removeDatabaseInstance()
+        }
 
         // Disable testing mode for release variant
         if (!BuildConfig.DEBUG) {
@@ -131,8 +137,8 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     }
 
     override fun onDestroy() {
+        nav.onActivityDestoryed()
         super.onDestroy()
-        nav.onFragmentManagerDestroy()
     }
 
     override fun onBackPressed() {
