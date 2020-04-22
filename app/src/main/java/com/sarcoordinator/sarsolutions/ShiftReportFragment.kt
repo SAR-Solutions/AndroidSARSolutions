@@ -84,12 +84,14 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report_modern) {
         // Set insets
         shift_report_parent_layout.children.forEach { child ->
             child.doOnApplyWindowInsets { childView, insets, initialState ->
-                childView.setMargins(
-                    initialState.margins.left + insets.systemGestureInsets.left,
-                    initialState.margins.top + insets.systemGestureInsets.top,
-                    initialState.margins.right + insets.systemGestureInsets.right,
-                    initialState.margins.bottom + insets.systemGestureInsets.bottom
-                )
+                if (childView.id != R.id.bottom_sheet) {
+                    childView.setMargins(
+                        initialState.margins.left + insets.systemGestureInsets.left,
+                        initialState.margins.top + insets.systemGestureInsets.top,
+                        initialState.margins.right + insets.systemGestureInsets.right,
+                        initialState.margins.bottom + insets.systemGestureInsets.bottom
+                    )
+                }
             }
         }
 

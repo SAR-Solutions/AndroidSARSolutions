@@ -111,7 +111,7 @@
     <string name="low_bandwidth_desc">Disable \'Low bandwidth mode\' in settings to re-enable maps</string>
     <string name="no_images_taken">No images taken</string>
     <string name="no_images_desc">Take an image to see it here</string>
-    <string name="no_images_found">no_images_found</string>
+    <string name="no_images_found">No Images Found</string>
     <string name="no_image_report_desc">Either all images were synced, or none we taken</string>
     <string name="no_cases_desc">Ask the county sheriff to assign you to a case</string>
     <string name="no_cases">No cases assigned</string>

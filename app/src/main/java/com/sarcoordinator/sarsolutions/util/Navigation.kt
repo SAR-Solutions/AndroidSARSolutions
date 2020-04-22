@@ -242,7 +242,7 @@ object Navigation {
 
     // Stores state of current fragment and loses fragmentManager reference
     // To be called from MainActivity
-    fun onFragmentManagerDestroy() {
+    fun onActivityDestoryed() {
         fragmentManager = null
         bottomNavBar = null
         hideBottomNavBar = null

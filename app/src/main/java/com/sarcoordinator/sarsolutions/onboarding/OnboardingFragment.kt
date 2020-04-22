@@ -31,10 +31,12 @@ class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
 
         button.setOnClickListener {
             // Navigate to login screen
-            if (button.text == getString(R.string.login))
-                requireActivity().supportFragmentManager.beginTransaction()
+            if (button.text == getString(R.string.login)) {
+                parentFragmentManager.beginTransaction()
                     .replace(R.id.fragment_container, LoginFragment())
                     .commit()
+                return@setOnClickListener
+            }
 
             onboarding_view_pager.apply {
                 setCurrentItem(currentItem + 1, true)
@@ -57,10 +59,6 @@ class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
                         button.text = getString(R.string.login)
                         button.visibility = View.VISIBLE
                         onboarding_indicators_parent.visibility = View.VISIBLE
-                    }
-                    3 -> {
-                        button.visibility = View.GONE
-                        onboarding_indicators_parent.visibility = View.GONE
                     }
                 }
             }

@@ -14,10 +14,12 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.models.Case
 import com.sarcoordinator.sarsolutions.onboarding.OnboardingFragment
+import com.sarcoordinator.sarsolutions.util.CacheDatabase
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.GlobalUtil.THEME_LIGHT
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.activity_main.*
+import timber.log.Timber
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -46,6 +48,11 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         loadUserPreferences()
 
         super.onCreate(savedInstanceState)
+
+        auth.addAuthStateListener {
+            if (it.currentUser == null)
+                CacheDatabase.removeDatabaseInstance()
+        }
 
         // Disable testing mode for release variant
         if (!BuildConfig.DEBUG) {
@@ -120,9 +127,13 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         outState.putSerializable(FRAGMENT_STATES_MAP, nav.getFragmentStateMap())
 
         // Restore ongoing shift
-        outState.putBoolean(SHIFT_SERVICE_STATUS, viewModel.isShiftActive)
-        outState.putString(CURRENT_SHIFT_ID, viewModel.currentShiftId)
-        outState.putSerializable(CURRENT_CASE_ID, viewModel.currentCase.value)
+        try {
+            outState.putBoolean(SHIFT_SERVICE_STATUS, viewModel.isShiftActive)
+            outState.putString(CURRENT_SHIFT_ID, viewModel.currentShiftId)
+            outState.putSerializable(CURRENT_CASE_ID, viewModel.currentCase.value)
+        } catch (e: Exception) {
+            Timber.e("Error saving shift status $e")
+        }
     }
 
     override fun onPause() {
@@ -131,8 +142,8 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     }
 
     override fun onDestroy() {
+        nav.onActivityDestoryed()
         super.onDestroy()
-        nav.onFragmentManagerDestroy()
     }
 
     override fun onBackPressed() {
