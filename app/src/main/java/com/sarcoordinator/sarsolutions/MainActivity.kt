@@ -19,6 +19,7 @@ import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.GlobalUtil.THEME_LIGHT
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.activity_main.*
+import timber.log.Timber
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -126,9 +127,13 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         outState.putSerializable(FRAGMENT_STATES_MAP, nav.getFragmentStateMap())
 
         // Restore ongoing shift
-        outState.putBoolean(SHIFT_SERVICE_STATUS, viewModel.isShiftActive)
-        outState.putString(CURRENT_SHIFT_ID, viewModel.currentShiftId)
-        outState.putSerializable(CURRENT_CASE_ID, viewModel.currentCase.value)
+        try {
+            outState.putBoolean(SHIFT_SERVICE_STATUS, viewModel.isShiftActive)
+            outState.putString(CURRENT_SHIFT_ID, viewModel.currentShiftId)
+            outState.putSerializable(CURRENT_CASE_ID, viewModel.currentCase.value)
+        } catch (e: Exception) {
+            Timber.e("Error saving shift status $e")
+        }
     }
 
     override fun onPause() {
