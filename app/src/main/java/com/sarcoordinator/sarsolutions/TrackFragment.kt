@@ -159,17 +159,18 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
 
         sharedPrefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
 
+        // Set shared element transition
+        sharedElementEnterTransition = TransitionInflater.from(context)
+            .inflateTransition(android.R.transition.move)
+
+        enterTransition = MaterialFade.create(requireContext())
+
         // Get arguments / Restore state
         caseId = arguments?.getString(CASE_ID) ?: savedInstanceState?.getString(CASE_ID)!!
         savedInstanceState?.getBoolean(LOCATION_TRACKING_STATUS)?.let {
             stopLocationTracking = it
         }
 
-        // Set shared element transition
-        sharedElementEnterTransition = TransitionInflater.from(context)
-            .inflateTransition(android.R.transition.move)
-
-        enterTransition = MaterialFade.create(requireContext())
     }
 
     override fun onCreateView(

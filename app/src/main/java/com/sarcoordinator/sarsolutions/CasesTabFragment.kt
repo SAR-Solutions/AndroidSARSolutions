@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -92,7 +91,12 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), CustomFragment {
 
     // Disables or enables recyclerview depending on network connectivity status
     private fun validateNetworkConnectivity(): Boolean {
-        return if (GlobalUtil.isNetworkConnectivityAvailable(requireActivity(), requireView())) {
+        return if (GlobalUtil.isNetworkConnectivityAvailable(
+                requireActivity(),
+                requireView(),
+                false
+            )
+        ) {
             enableNoCasesInfoView(true)
             disableRecyclerView(false)
             true
@@ -212,11 +216,7 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), CustomFragment {
                 "Click on button to start an offline shift\nOr try again for network connectivity"
             info_view.button.text = "Start offline shift"
             info_view.setButtonClickListener(View.OnClickListener {
-                Toast.makeText(
-                    requireContext(),
-                    "TODO",
-                    Toast.LENGTH_LONG
-                ).show()
+                nav.pushFragment(TrackOfflineFragment())
             })
         }
     }

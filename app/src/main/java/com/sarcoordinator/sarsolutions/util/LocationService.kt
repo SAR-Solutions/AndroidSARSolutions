@@ -37,6 +37,7 @@ class LocationService : Service() {
     companion object {
         const val isTestMode = "TEST_MODE"
         const val case = "CASE"
+        const val isOfflineMode = "OFFLINE_MODE"
     }
 
     enum class ShiftErrors {

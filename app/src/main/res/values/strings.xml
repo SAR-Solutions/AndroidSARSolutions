@@ -121,4 +121,8 @@
     <string name="login">login</string>
     <string name="reset">reset</string>
     <string name="reset_password_desc">Enter your email associated with an account.\nWe will email you a link to reset your password</string>
+    <string name="hey_youre_offline">Hey, you\'re offline!</string>
+    <string name="offline_desc1">But don’t worry, you can still start a shift!</string>
+    <string name="just_start_tracking_desc">Just click on the button in the bottom to get started</string>
+    <string name="take_images_desc">Images will appear here once you take them</string>
 </resources>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/offline_track_parent_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".TrackOfflineFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <include
+            android:id="@+id/back_button_view"
+            layout="@layout/view_circular_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/heading"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:autoSizeTextType="uniform"
+            android:fontFamily="@font/catamaran_semibold"
+            android:text="@string/hey_youre_offline"
+            android:textColor="?colorPrimary"
+            android:textSize="36sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constraintStart_toEndOf="@id/back_button_view"
+            app:layout_constraintTop_toBottomOf="@id/back_button_view" />
+
+        <TextView
+            android:id="@+id/subheading"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:autoSizeTextType="uniform"
+            android:fontFamily="@font/catamaran"
+            android:text="@string/offline_desc1"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/heading"
+            app:layout_constraintTop_toBottomOf="@id/heading" />
+
+        <TextView
+            android:id="@+id/subheading_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/just_start_tracking_desc"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constraintStart_toStartOf="@id/subheading"
+            app:layout_constraintTop_toBottomOf="@id/subheading" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/capture_photo_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
+        android:elevation="4dp"
+        android:src="@drawable/ic_baseline_image_24"
+        app:backgroundTint="?colorSecondary"
+        app:borderWidth="0dp"
+        app:fabSize="mini"
+        app:layout_anchor="@id/location_service_fab"
+        app:layout_anchorGravity="center_horizontal|top" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/location_service_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:backgroundTint="?colorPrimary"
+        android:elevation="6dp"
+        android:src="@drawable/ic_baseline_play_arrow_24"
+        app:borderWidth="0dp"
+        app:layout_anchor="@id/images_card"
+        app:layout_anchorGravity="end|top" />
+
+    <include
+        android:id="@+id/images_card"
+        layout="@layout/bottom_sheet_offline_track" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
