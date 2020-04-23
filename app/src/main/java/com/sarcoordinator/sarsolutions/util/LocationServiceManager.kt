@@ -14,9 +14,11 @@ import com.sarcoordinator.sarsolutions.SharedViewModel
 import com.sarcoordinator.sarsolutions.models.Case
 import timber.log.Timber
 
-class LocationServiceManager(private val activity: AppCompatActivity) {
+object LocationServiceManager {
 
-    private var serviceIntent: Intent = Intent(activity, LocationService::class.java)
+    private lateinit var activity: AppCompatActivity
+
+    private lateinit var serviceIntent: Intent
 
     private val mIsServiceRunning = MutableLiveData<Boolean>().apply {
         this.value = false
@@ -41,6 +43,17 @@ class LocationServiceManager(private val activity: AppCompatActivity) {
         }
     }
 
+    private var instance: LocationServiceManager? = null
+
+    fun getInstance(activity: AppCompatActivity): LocationServiceManager {
+        if (instance == null) {
+            this.activity = activity
+            serviceIntent = Intent(LocationServiceManager.activity, LocationService::class.java)
+            instance = this
+        }
+        return instance!!
+    }
+
     fun startLocationService(isTestMode: Boolean, currentCase: Case) {
         serviceIntent.putExtra(
             LocationService.isTestMode,
@@ -61,7 +74,7 @@ class LocationServiceManager(private val activity: AppCompatActivity) {
         activity.stopService(serviceIntent)
     }
 
-    private fun bindService() {
+    fun bindService() {
         activity.bindService(
             serviceIntent,
             serviceConnection,
@@ -69,7 +82,7 @@ class LocationServiceManager(private val activity: AppCompatActivity) {
         )
     }
 
-    private fun unbindService() {
+    fun unbindService() {
         activity.unbindService(serviceConnection)
         mIsServiceRunning.postValue(false)
     }

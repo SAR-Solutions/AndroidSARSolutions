@@ -131,7 +131,9 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        locationServiceManager = LocationServiceManager(requireActivity() as MainActivity)
+        locationServiceManager =
+            LocationServiceManager.getInstance(requireActivity() as MainActivity)
+
 
         // Exit if location is not enabled
         if (!GlobalUtil.isLocationEnabled(requireActivity().getSystemService(Context.LOCATION_SERVICE) as LocationManager)) {
@@ -356,11 +358,6 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
                 validateNetworkConnectivity()
             } else {
                 // Start new service, if there isn't a service running already
-                if (locationServiceManager.getServiceStatus())
-                    locationServiceManager.stopLocationService()
-                else
-                    locationServiceManager.startLocationService(true, viewModel.currentCase.value!!)
-                return@setOnClickListener
                 if (!viewModel.isShiftActive) {
                     stopLocationTracking = false
                     requestLocPermission()
@@ -650,6 +647,12 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     // Starts service, calls bindService and enableStopTrackingFab
     private fun startLocationService() {
         shift_info_text_view.text = getString(R.string.starting_location_service)
+
+        locationServiceManager.startLocationService(true, viewModel.currentCase.value!!)
+
+        enableStopTrackingFab()
+        return
+
         // Pass required extras and start location service
         val serviceIntent = Intent(context, LocationService::class.java)
         serviceIntent.putExtra(
