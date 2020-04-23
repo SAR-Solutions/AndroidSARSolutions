@@ -47,10 +47,7 @@ import com.karumi.dexter.listener.single.PermissionListener
 import com.sarcoordinator.sarsolutions.adapters.ImagesAdapter
 import com.sarcoordinator.sarsolutions.custom_views.LargeInfoView
 import com.sarcoordinator.sarsolutions.models.Case
-import com.sarcoordinator.sarsolutions.util.GlobalUtil
-import com.sarcoordinator.sarsolutions.util.LocationService
-import com.sarcoordinator.sarsolutions.util.Navigation
-import com.sarcoordinator.sarsolutions.util.setMargins
+import com.sarcoordinator.sarsolutions.util.*
 import dev.chrisbanes.insetter.doOnApplyWindowInsets
 import kotlinx.android.synthetic.main.card_case_details.view.*
 import kotlinx.android.synthetic.main.fragment_track.*
@@ -64,6 +61,9 @@ import timber.log.Timber
 import java.io.File
 
 class TrackFragment : Fragment(), OnMapReadyCallback {
+
+    private lateinit var locationServiceManager: LocationServiceManager
+
     companion object ArgsTags {
         const val CASE_ID = "CASE_ID"
         const val LOCATION_TRACKING_STATUS = "LOCATION_TRACKING_STATUS"
@@ -131,6 +131,8 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        locationServiceManager = LocationServiceManager(requireActivity() as MainActivity)
+
         // Exit if location is not enabled
         if (!GlobalUtil.isLocationEnabled(requireActivity().getSystemService(Context.LOCATION_SERVICE) as LocationManager)) {
 
@@ -170,7 +172,6 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         savedInstanceState?.getBoolean(LOCATION_TRACKING_STATUS)?.let {
             stopLocationTracking = it
         }
-
     }
 
     override fun onCreateView(
@@ -355,6 +356,11 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
                 validateNetworkConnectivity()
             } else {
                 // Start new service, if there isn't a service running already
+                if (locationServiceManager.getServiceStatus())
+                    locationServiceManager.stopLocationService()
+                else
+                    locationServiceManager.startLocationService(true, viewModel.currentCase.value!!)
+                return@setOnClickListener
                 if (!viewModel.isShiftActive) {
                     stopLocationTracking = false
                     requestLocPermission()
