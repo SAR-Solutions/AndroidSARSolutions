@@ -212,6 +212,17 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
             view.findViewById<LargeInfoView>(R.id.low_bandwidth_layout).visibility = View.VISIBLE
         }
 
+        // Observe location service status and update UI accordingly
+        locationServiceManager.getServiceStatusObservable().observe(viewLifecycleOwner, Observer {
+            if (it) {
+                // Active
+                enableStopTrackingFab()
+            } else {
+                // Inactive
+                enableStartTrackingFab()
+            }
+        })
+
         setupViewInsets()
         setupCircularButtons()
         initFabClickListener()
@@ -358,11 +369,12 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
                 validateNetworkConnectivity()
             } else {
                 // Start new service, if there isn't a service running already
-                if (!viewModel.isShiftActive) {
+                if (!locationServiceManager.getServiceStatus()) {
                     stopLocationTracking = false
                     requestLocPermission()
                 } else {
                     // Stop ongoing service
+                    locationServiceManager.stopLocationService()
                     stopLocationTracking = true
                     completeShiftAndStopService()
                 }
@@ -419,7 +431,6 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
 
     private fun completeShiftAndStopService() {
         // Change view state
-        enableStartTrackingFab()
         location_service_fab.isClickable = false
         val progressCircle = CircularProgressDrawable(requireContext()).apply {
             strokeWidth = 10f
@@ -427,6 +438,8 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         location_service_fab.setImageDrawable(progressCircle)
         progressCircle.start()
         shift_info_text_view.text = getString(R.string.waiting_for_server)
+
+        return
 
         if (service != null) {
             service?.completeShift()?.invokeOnCompletion {
@@ -649,8 +662,6 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         shift_info_text_view.text = getString(R.string.starting_location_service)
 
         locationServiceManager.startLocationService(true, viewModel.currentCase.value!!)
-
-        enableStopTrackingFab()
         return
 
         // Pass required extras and start location service
@@ -681,6 +692,8 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
 
     // Attach viewmodel to running service
     private fun bindService() {
+        locationServiceManager.bindService()
+        return
         val serviceIntent = Intent(context, LocationService::class.java)
         activity?.bindService(
             serviceIntent,
@@ -691,6 +704,8 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
 
     // Detach viewmodel from running service
     private fun unbindService() {
+        locationServiceManager.unbindService()
+        return
         if (viewModel.isServiceBound) {
             viewModel.isServiceBound = false
             activity?.unbindService(viewModel.getServiceConnection())

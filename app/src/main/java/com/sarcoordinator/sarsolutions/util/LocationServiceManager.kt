@@ -19,6 +19,7 @@ object LocationServiceManager {
     private lateinit var activity: AppCompatActivity
 
     private lateinit var serviceIntent: Intent
+    private var service: LocationService? = null
 
     private val mIsServiceRunning = MutableLiveData<Boolean>().apply {
         this.value = false
@@ -34,6 +35,8 @@ object LocationServiceManager {
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(p0: ComponentName?, iBinder: IBinder?) {
             mIsServiceRunning.postValue(true)
+            service = (iBinder as LocationService.LocalBinder).getService()
+            observeService()
             Timber.d("Connected to service")
         }
 
@@ -51,6 +54,10 @@ object LocationServiceManager {
             serviceIntent = Intent(LocationServiceManager.activity, LocationService::class.java)
             instance = this
         }
+
+        if (mIsServiceRunning.value!!)
+            bindService()
+
         return instance!!
     }
 
@@ -65,7 +72,7 @@ object LocationServiceManager {
             currentCase
         )
 
-        ContextCompat.startForegroundService(activity, serviceIntent)
+        ContextCompat.startForegroundService(activity.applicationContext, serviceIntent)
         bindService()
     }
 
@@ -74,8 +81,19 @@ object LocationServiceManager {
         activity.stopService(serviceIntent)
     }
 
+    private fun observeService() {
+        service?.let {
+            it.getShiftId().observeForever {
+                Timber.d("Shift id is $it")
+            }
+            it.getServiceInfo().observeForever {
+                Timber.d("Shift info: $it")
+            }
+        }
+    }
+
     fun bindService() {
-        activity.bindService(
+        activity.applicationContext.bindService(
             serviceIntent,
             serviceConnection,
             Context.BIND_AUTO_CREATE
@@ -83,7 +101,11 @@ object LocationServiceManager {
     }
 
     fun unbindService() {
-        activity.unbindService(serviceConnection)
+        try {
+            activity.applicationContext.unbindService(serviceConnection)
+        } catch (exception: Exception) {
+            Timber.e("Error unbinding service: $exception")
+        }
         mIsServiceRunning.postValue(false)
     }
 }
