@@ -1,10 +1,7 @@
 package com.sarcoordinator.sarsolutions
 
 import android.app.Application
-import android.content.ComponentName
-import android.content.ServiceConnection
 import android.location.Location
-import android.os.IBinder
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -13,7 +10,6 @@ import com.sarcoordinator.sarsolutions.api.Repository
 import com.sarcoordinator.sarsolutions.models.*
 import com.sarcoordinator.sarsolutions.util.CacheDatabase
 import com.sarcoordinator.sarsolutions.util.LocalCacheRepository
-import com.sarcoordinator.sarsolutions.util.LocationService
 import com.sarcoordinator.sarsolutions.util.notifyObserver
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.Default
@@ -27,12 +23,10 @@ import kotlin.collections.ArrayList
 class SharedViewModel(application: Application) : AndroidViewModel(application) {
 
     var vehicleList = ArrayList<VehicleCardContent>()
-    var isShiftActive = false
-    var isServiceBound = false
     var isUploadTaskActive = false
     var currentShiftId: String? = null
+    var isShiftActive = false
     lateinit var currentImagePath: String
-    private val binder = MutableLiveData<LocationService.LocalBinder>()
     private val cacheRepo: LocalCacheRepository =
         LocalCacheRepository(CacheDatabase.getDatabase(getApplication()).casesDao())
 
@@ -41,19 +35,6 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
 
     // To keep track of vehicle names
     var numberOfVehicles: Int = 0
-    private val serviceConnection = object : ServiceConnection {
-        override fun onServiceConnected(p0: ComponentName?, iBinder: IBinder?) {
-            Timber.d("Connected to service")
-            binder.postValue(iBinder as LocationService.LocalBinder)
-            isServiceBound = true
-            isShiftActive = true
-        }
-
-        override fun onServiceDisconnected(p0: ComponentName?) {
-            Timber.d("Disconnected from service")
-            binder.postValue(null)
-        }
-    }
 
     // Observe coroutineFailureText to get notified on network failure
     private val networkException = CoroutineExceptionHandler { coroutineContext, throwable ->
@@ -138,18 +119,6 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         return currentCase
     }
 
-    fun getBinder(): LiveData<LocationService.LocalBinder> {
-        return binder
-    }
-
-    fun getServiceConnection(): ServiceConnection {
-        return serviceConnection
-    }
-
-    fun removeService() {
-        binder.postValue(null)
-    }
-
     /************************************************ Shift report **********************************************************/
 
     fun addVehicle() {
@@ -190,8 +159,8 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun completeShiftReportSubmission() {
-        currentShiftId = null
         isShiftActive = false
+        currentShiftId = null
     }
 
     fun addImagePathToList(imagePath: String) {

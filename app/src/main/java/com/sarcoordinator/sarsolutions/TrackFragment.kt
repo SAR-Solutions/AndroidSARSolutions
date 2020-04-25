@@ -18,10 +18,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -83,11 +81,6 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     private lateinit var viewManager: LinearLayoutManager
     private lateinit var viewAdapter: ImagesAdapter
     private var stopLocationTracking = false
-
-    // Strictly only for mapView
-    private val isLocationServiceRunning = MutableLiveData<Boolean>().also {
-        it.postValue(false)
-    }
 
     private var markedListIndexPointer = 0
     private var locSet: MutableSet<LatLng> = mutableSetOf()
@@ -198,7 +191,6 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
         enableMap = !sharedPrefs.getBoolean(SettingsTabFragment.LOW_BANDWIDTH_PREFS, false)
 
         if (enableMap) {
@@ -308,12 +300,16 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
 
     private fun validateNetworkConnectivity() {
         // If service is already running, disregard network state
-        if (!viewModel.isShiftActive) {
+        if (!locationServiceManager.getServiceStatus()) {
             if (!GlobalUtil.isNetworkConnectivityAvailable(requireActivity(), case_info_card)) {
                 enableRetryNetworkState()
                 return
             }
+        } else {
+            // Service is running
+            enableStopTrackingFab()
         }
+
         // If coming from retry network fab, change case info card visibility and desc text
         case_info_card.visibility = View.VISIBLE
         shift_info_text_view.text = getString(R.string.start_tracking_desc)
@@ -322,16 +318,8 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
 
         // Stop fab was clicked already but fragment was detached
         if (stopLocationTracking) {
-            stopLocationService()
             completeShiftAndStopService()
             return
-        }
-
-        // Restore state depending on view model
-        if (viewModel.isShiftActive) {
-            // Service is alive and running but needs to be bound back to activity
-            bindService()
-            enableStopTrackingFab()
         }
     }
 
@@ -353,16 +341,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
             enableLoadingState(false)
             enableStartTrackingFab()
         }
-
         return
-        viewModel.getBinder().observe(viewLifecycleOwner, Observer { binder ->
-            // Either service was bound or unbound
-            service = binder?.getService()
-            if (service != null) {
-                isLocationServiceRunning.postValue(true)
-                observeService()
-            }
-        })
     }
 
     private fun initFabClickListener() {
@@ -377,8 +356,6 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
                     stopLocationTracking = false
                     requestLocPermission()
                 } else {
-                    // Stop ongoing service
-                    locationServiceManager.stopLocationService()
                     stopLocationTracking = true
                     completeShiftAndStopService()
                 }
@@ -434,6 +411,8 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun completeShiftAndStopService() {
+        //TODO: Complete implementing this
+        locationServiceManager.stopLocationService()
         // Change view state
         location_service_fab.isClickable = false
         val progressCircle = CircularProgressDrawable(requireContext()).apply {
@@ -455,7 +434,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
 
                     withContext(Main) {
                         if(context != null) {
-                            stopLocationService()
+//                            stopLocationService()
                             navigateToShiftReportFragment()
                         }
                     }
@@ -636,7 +615,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
                     when (error) {
                         LocationService.ShiftErrors.START_SHIFT -> {
                             Timber.e("Shift failed to start")
-                            stopLocationService()
+                            locationServiceManager.stopLocationService()
                             viewModel.completeShiftReportSubmission()
                             validateNetworkConnectivity()
                         }
@@ -702,60 +681,20 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
+//    private fun removeObserversFromService() {
+//        locationServiceManager.let {
+//            it.getShiftInfoObservable().removeObservers(viewLifecycleOwner)
+//            it.getShiftErrorsObservable().removeObservers(viewLifecycleOwner)
+//            it.getLocationListObservable().removeObservers(viewLifecycleOwner)
+//        }
+//    }
+
     // Starts service, calls bindService and enableStopTrackingFab
     private fun startLocationService() {
+        viewModel.isShiftActive = true
         shift_info_text_view.text = getString(R.string.starting_location_service)
-
         locationServiceManager.startLocationService(true, viewModel.currentCase.value!!)
-
         return
-
-        // Pass required extras and start location service
-        val serviceIntent = Intent(context, LocationService::class.java)
-        serviceIntent.putExtra(
-            LocationService.isTestMode,
-            sharedPrefs.getBoolean(SettingsTabFragment.TESTING_MODE_PREFS, false)
-        )
-        serviceIntent.putExtra(
-            LocationService.case,
-            viewModel.currentCase.value
-        )
-        ContextCompat.startForegroundService(context!!, serviceIntent)
-        bindService()
-        enableStopTrackingFab()
-    }
-
-    // Stops service and calls unbindService
-    private fun stopLocationService() {
-        unbindService()
-        val serviceIntent = Intent(requireContext(), LocationService::class.java)
-        activity?.stopService(serviceIntent)
-        // Deletes reference to binder in viewmodel
-        // Will not be re-bind on configuration change
-        // NOTE: Must call unbindService() before removeService()
-        viewModel.removeService()
-    }
-
-    // Attach viewmodel to running service
-    private fun bindService() {
-        locationServiceManager.bindService()
-        return
-        val serviceIntent = Intent(context, LocationService::class.java)
-        activity?.bindService(
-            serviceIntent,
-            viewModel.getServiceConnection(),
-            Context.BIND_AUTO_CREATE
-        )
-    }
-
-    // Detach viewmodel from running service
-    private fun unbindService() {
-        locationServiceManager.unbindService()
-        return
-        if (viewModel.isServiceBound) {
-            viewModel.isServiceBound = false
-            activity?.unbindService(viewModel.getServiceConnection())
-        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -796,7 +735,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        unbindService()
+        locationServiceManager.unbindService()
     }
 
     override fun onResume() {
