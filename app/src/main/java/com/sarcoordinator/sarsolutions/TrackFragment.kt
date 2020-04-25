@@ -94,6 +94,8 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     private var lastLocPoint: LatLng? = null
 
     private var mMapView: MapView? = null
+    private lateinit var mGoogleMap: GoogleMap
+
     private lateinit var bottomSheet: BottomSheetBehavior<MaterialCardView>
 
     private val fabHiddenListener = object : Animator.AnimatorListener {
@@ -217,6 +219,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
             if (it) {
                 // Active
                 enableStopTrackingFab()
+                observeService()
             } else {
                 // Inactive
                 enableStartTrackingFab()
@@ -351,6 +354,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
             enableStartTrackingFab()
         }
 
+        return
         viewModel.getBinder().observe(viewLifecycleOwner, Observer { binder ->
             // Either service was bound or unbound
             service = binder?.getService()
@@ -619,16 +623,14 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
 
     // Update UI by observing viewModel data
     private fun observeService() {
-        service?.let {
-            it.getServiceInfo().observe(viewLifecycleOwner, Observer { lastUpdated ->
+        //TODO: Get and save shiftId
+        locationServiceManager.getShiftInfoObservable()
+            .observe(viewLifecycleOwner, Observer { lastUpdated ->
                 shift_info_text_view.text = lastUpdated
             })
-            it.getShiftId().observe(viewLifecycleOwner, Observer { shiftId ->
-                viewModel.currentShiftId = shiftId
-            })
 
-            // Handle shift errors
-            it.hasShiftEndedWithError().observe(viewLifecycleOwner, Observer { error ->
+        locationServiceManager.getShiftErrorsObservable()
+            .observe(viewLifecycleOwner, Observer { error ->
                 error?.let {
                     enableStartTrackingFab()
                     when (error) {
@@ -648,12 +650,55 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
                         }
                         LocationService.ShiftErrors.GET_SHIFT_ID -> {
                             Timber.e("Getting shift id failed")
-                            Toast.makeText(requireContext(), "Failed to start shift", Toast.LENGTH_LONG).show()
+                            Toast.makeText(
+                                requireContext(),
+                                "Failed to start shift",
+                                Toast.LENGTH_LONG
+                            ).show()
                         }
                         else -> Timber.e("Unhandled shift error")
                     }
                 }
             })
+
+        if (enableMap) {
+            locationServiceManager.getLocationListObservable()
+                .observe(viewLifecycleOwner, Observer { locationList ->
+                    if (::mGoogleMap.isInitialized)
+                        if (locationList.isNotEmpty()) {
+                            val locationListToDraw =
+                                locationList.subList(markedListIndexPointer, locationList.size)
+                            markedListIndexPointer = locationList.size
+
+                            locationListToDraw.forEach { location ->
+                                val latLng =
+                                    LatLng(location.latitude, location.longitude)
+                                if (locSet.add(latLng)) {
+                                    // Show starting marker and focus on it
+                                    if (lastLocPoint == null) {
+                                        mGoogleMap.moveCamera(
+                                            CameraUpdateFactory.newLatLngZoom(
+                                                latLng,
+                                                15F
+                                            )
+                                        )
+                                        mGoogleMap.addMarker(
+                                            MarkerOptions().position(latLng)
+                                                .title(getString(R.string.Start))
+                                        )
+                                    } else {
+                                        val polyLine =
+                                            GlobalUtil.getThemedPolyLineOptions(requireContext())
+                                        polyLine.add(lastLocPoint, latLng)
+                                        mGoogleMap.addPolyline(polyLine)
+                                    }
+                                } else {
+                                    Timber.d("Location already exists")
+                                }
+                                lastLocPoint = latLng
+                            }
+                        }
+                })
         }
     }
 
@@ -662,6 +707,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         shift_info_text_view.text = getString(R.string.starting_location_service)
 
         locationServiceManager.startLocationService(true, viewModel.currentCase.value!!)
+
         return
 
         // Pass required extras and start location service
@@ -744,47 +790,8 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
+        mGoogleMap = googleMap
         GlobalUtil.setGoogleMapsTheme(requireActivity(), googleMap)
-        isLocationServiceRunning.observe(viewLifecycleOwner, Observer {
-            if (it) {
-                // Observe locations
-                service?.getAllLocations()?.observe(viewLifecycleOwner, Observer { locationList ->
-                    if (locationList.isNotEmpty()) {
-                        val locationListToDraw =
-                            locationList.subList(markedListIndexPointer, locationList.size)
-                        markedListIndexPointer = locationList.size
-
-                        locationListToDraw.forEach { location ->
-                            val latLng =
-                                LatLng(location.latitude, location.longitude)
-                            if (locSet.add(latLng)) {
-                                // Show starting marker and focus on it
-                                if (lastLocPoint == null) {
-                                    googleMap.moveCamera(
-                                        CameraUpdateFactory.newLatLngZoom(
-                                            latLng,
-                                            15F
-                                        )
-                                    )
-                                    googleMap.addMarker(
-                                        MarkerOptions().position(latLng)
-                                            .title(getString(R.string.Start))
-                                    )
-                                } else {
-                                    val polyLine =
-                                        GlobalUtil.getThemedPolyLineOptions(requireContext())
-                                    polyLine.add(lastLocPoint, latLng)
-                                    googleMap.addPolyline(polyLine)
-                                }
-                            } else {
-                                Timber.d("Location already exists")
-                            }
-                            lastLocPoint = latLng
-                        }
-                    }
-                })
-            }
-        })
     }
 
     override fun onDestroyView() {
