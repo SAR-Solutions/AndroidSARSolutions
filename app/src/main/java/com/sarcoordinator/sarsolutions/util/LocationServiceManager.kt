@@ -1,15 +1,28 @@
 package com.sarcoordinator.sarsolutions.util
 
+import android.Manifest
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.location.Location
+import android.net.Uri
 import android.os.IBinder
+import android.provider.Settings
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.karumi.dexter.Dexter
+import com.karumi.dexter.PermissionToken
+import com.karumi.dexter.listener.PermissionDeniedResponse
+import com.karumi.dexter.listener.PermissionGrantedResponse
+import com.karumi.dexter.listener.PermissionRequest
+import com.karumi.dexter.listener.single.PermissionListener
+import com.sarcoordinator.sarsolutions.BuildConfig
+import com.sarcoordinator.sarsolutions.R
 import com.sarcoordinator.sarsolutions.models.Case
 import timber.log.Timber
 
@@ -53,20 +66,83 @@ object LocationServiceManager {
         return instance!!
     }
 
-    fun startLocationService(isTestMode: Boolean, currentCase: Case) {
-        mIsShiftComplete.postValue(false)
-        serviceIntent.putExtra(
-            LocationService.isTestMode,
-            isTestMode
-        )
+    /**
+     * Returns status of location service permission
+     * -1 -> In progress
+     * 0  -> Permission denied
+     * 1  -> Permission granted
+     */
+    private val mLocationPermissionStatus = MutableLiveData<Int>()
+    fun startLocationService(isTestMode: Boolean, currentCase: Case): LiveData<Int> {
 
-        serviceIntent.putExtra(
-            LocationService.case,
-            currentCase
-        )
+        mLocationPermissionStatus.value = -1
 
-        ContextCompat.startForegroundService(activity.applicationContext, serviceIntent)
-        bindService()
+        // Check for location permission
+        Dexter.withActivity(activity)
+            .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+            .withListener(object : PermissionListener {
+                override fun onPermissionGranted(response: PermissionGrantedResponse) {
+                    mLocationPermissionStatus.postValue(1)
+
+                    mIsShiftComplete.postValue(false)
+                    serviceIntent.putExtra(
+                        LocationService.isTestMode,
+                        isTestMode
+                    )
+
+                    serviceIntent.putExtra(
+                        LocationService.case,
+                        currentCase
+                    )
+
+                    ContextCompat.startForegroundService(
+                        activity.applicationContext,
+                        serviceIntent
+                    )
+                    bindService()
+                }
+
+                override fun onPermissionDenied(response: PermissionDeniedResponse) {
+                    mLocationPermissionStatus.postValue(0)
+
+                    if (response.isPermanentlyDenied)
+                        MaterialAlertDialogBuilder(activity)
+                            .setTitle("Permission Denied")
+                            .setMessage("Location permission is needed to use this feature")
+                            .setNegativeButton(activity.getString(R.string.cancel), null)
+                            .setPositiveButton(activity.getString(R.string.go_to_settings)) { _, _ ->
+                                // Open settings
+                                val settingsIntent = Intent(
+                                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                    Uri.parse("package:" + BuildConfig.APPLICATION_ID)
+                                )
+                                activity.startActivity(settingsIntent)
+                            }
+                            .show()
+                }
+
+                override fun onPermissionRationaleShouldBeShown(
+                    permission: PermissionRequest,
+                    token: PermissionToken
+                ) {
+                    MaterialAlertDialogBuilder(activity)
+                        .setTitle("Location Permission Required")
+                        .setMessage("Location permission is needed to use this feature")
+                        .setPositiveButton(activity.getString(R.string.ok)) { _, _ -> token.continuePermissionRequest() }
+                        .setOnCancelListener { token.cancelPermissionRequest() }
+                        .show()
+                }
+
+            })
+            .withErrorListener {
+                mLocationPermissionStatus.postValue(0)
+                Timber.e("Unexpected error requesting location permission")
+                Toast.makeText(activity, "Unexpected error, try again", Toast.LENGTH_LONG)
+                    .show()
+            }
+            .onSameThread()
+            .check()
+        return mLocationPermissionStatus
     }
 
     fun stopLocationService(): LiveData<Boolean> {

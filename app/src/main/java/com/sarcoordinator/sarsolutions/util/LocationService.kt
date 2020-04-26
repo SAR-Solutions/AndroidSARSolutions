@@ -185,7 +185,7 @@ class LocationService : Service() {
                 Timber.e(getString(R.string.error_starting))
                 withContext(Main) {
                     serviceInfoText.value = getString(R.string.error_starting)
-                    shiftEndedWithError.value = ShiftErrors.START_SHIFT
+                    shiftEndedWithError.postValue(ShiftErrors.START_SHIFT)
                 }
                 onDestroy()
             }
@@ -268,7 +268,7 @@ class LocationService : Service() {
 
             while (shiftId.value == null) {
                 if(networkRetries > 10) {
-                    shiftEndedWithError.value = ShiftErrors.GET_SHIFT_ID
+                    shiftEndedWithError.postValue(ShiftErrors.GET_SHIFT_ID)
                     return@launch
                 }
                 Timber.d(
@@ -299,7 +299,7 @@ class LocationService : Service() {
                     Timber.d("Final location sync pointer: $locationSyncListPointer for list size: ${locationList.value?.size}")
                 } catch (exception: Exception) {
                     Timber.e("Error with network call putting locations\n$exception")
-                    shiftEndedWithError.value = ShiftErrors.PUT_LOCATIONS
+                    shiftEndedWithError.postValue(ShiftErrors.PUT_LOCATIONS)
                 }
             }
 
@@ -320,7 +320,7 @@ class LocationService : Service() {
             } catch (exception: Exception) {
                 Timber.e("Error with network call putting end time\n$exception")
                 mEndTime = endTime
-                shiftEndedWithError.value = ShiftErrors.PUT_END_TIME
+                shiftEndedWithError.postValue(ShiftErrors.PUT_END_TIME)
             }
         }
     }

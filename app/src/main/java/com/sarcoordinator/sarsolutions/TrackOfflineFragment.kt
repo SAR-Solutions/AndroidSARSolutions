@@ -1,5 +1,7 @@
 package com.sarcoordinator.sarsolutions
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -20,7 +22,12 @@ class TrackOfflineFragment : Fragment() {
 
     private lateinit var bottomSheet: BottomSheetBehavior<MaterialCardView>
 
-    private lateinit var locationServiceManager: LocationServiceManager
+    private val locationServiceManager: LocationServiceManager by lazy {
+        LocationServiceManager.getInstance(requireActivity() as MainActivity)
+    }
+    private val sharedPrefs: SharedPreferences by lazy {
+        requireActivity().getPreferences(Context.MODE_PRIVATE)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,6 +48,15 @@ class TrackOfflineFragment : Fragment() {
 
         // Hide image fab
         capture_photo_fab.hide()
+
+        // Init fab click listener
+        location_service_fab.setOnClickListener {
+            if (locationServiceManager.getServiceStatus()) {
+                // Start shift
+            } else {
+                // End shift
+            }
+        }
 
         back_button_view.image_button.setImageDrawable(requireContext().getDrawable(R.drawable.ic_baseline_arrow_back_24))
         back_button_view.image_button.setOnClickListener { requireActivity().onBackPressed() }

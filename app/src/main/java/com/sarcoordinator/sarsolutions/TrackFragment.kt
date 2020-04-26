@@ -1,6 +1,5 @@
 package com.sarcoordinator.sarsolutions
 
-import android.Manifest
 import android.animation.Animator
 import android.app.Activity
 import android.content.Context
@@ -36,12 +35,6 @@ import com.google.android.material.card.MaterialCardView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.transition.MaterialFade
-import com.karumi.dexter.Dexter
-import com.karumi.dexter.PermissionToken
-import com.karumi.dexter.listener.PermissionDeniedResponse
-import com.karumi.dexter.listener.PermissionGrantedResponse
-import com.karumi.dexter.listener.PermissionRequest
-import com.karumi.dexter.listener.single.PermissionListener
 import com.sarcoordinator.sarsolutions.adapters.ImagesAdapter
 import com.sarcoordinator.sarsolutions.custom_views.LargeInfoView
 import com.sarcoordinator.sarsolutions.models.Case
@@ -323,7 +316,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
                 // Start new service, if there isn't a service running already
                 if (!locationServiceManager.getServiceStatus()) {
                     stopLocationTracking = false
-                    requestLocPermission()
+                    startLocationService()
                 } else {
                     stopLocationTracking = true
                     completeShiftAndStopService()
@@ -414,6 +407,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         val progressCircle = CircularProgressDrawable(requireContext()).apply {
             strokeWidth = 10f
         }
+
         location_service_fab.setImageDrawable(progressCircle)
         progressCircle.start()
         shift_info_text_view.text = getString(R.string.waiting_for_server)
@@ -537,52 +531,6 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         setupImagesCardView()
     }
 
-    private fun requestLocPermission() {
-        // Ask for locational permission and handle response
-        Dexter.withActivity(activity)
-            .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-            .withListener(object : PermissionListener {
-                override fun onPermissionGranted(response: PermissionGrantedResponse) {
-                    startLocationService()
-                }
-
-                override fun onPermissionDenied(response: PermissionDeniedResponse) {
-                    if (response.isPermanentlyDenied)
-                        MaterialAlertDialogBuilder(context)
-                            .setTitle("Permission Denied")
-                            .setMessage("Location permission is needed to use this feature")
-                            .setNegativeButton(getString(R.string.cancel), null)
-                            .setPositiveButton(getString(R.string.go_to_settings)) { _, _ ->
-                                // Open settings
-                                val settingsIntent = Intent(
-                                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                                    Uri.parse("package:" + BuildConfig.APPLICATION_ID))
-                                startActivity(settingsIntent)
-                            }
-                            .show()
-                }
-
-                override fun onPermissionRationaleShouldBeShown(
-                    permission: PermissionRequest,
-                    token: PermissionToken
-                ) {
-                    MaterialAlertDialogBuilder(context)
-                        .setTitle("Location Permission Required")
-                        .setMessage("Location permission is needed to use this feature")
-                        .setPositiveButton(getString(R.string.ok)) { _, _ -> token.continuePermissionRequest() }
-                        .setOnCancelListener { token.cancelPermissionRequest() }
-                        .show()
-                }
-
-            })
-            .withErrorListener {
-                Timber.e("Unexpected error requesting location permission")
-                Toast.makeText(context, "Unexpected error, try again", Toast.LENGTH_LONG).show()
-            }
-            .onSameThread()
-            .check()
-    }
-
     // Update UI by observing viewModel data
     private fun observeService() {
         locationServiceManager.getShiftIdObservable().observe(viewLifecycleOwner, Observer {
@@ -671,12 +619,22 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
 
     // Starts service
     private fun startLocationService() {
-        viewModel.isShiftActive = true
-        shift_info_text_view.text = getString(R.string.starting_location_service)
-        locationServiceManager.startLocationService(
+        val obs = locationServiceManager.startLocationService(
             sharedPrefs.getBoolean(SettingsTabFragment.TESTING_MODE_PREFS, false),
             viewModel.currentCase.value!!
         )
+        obs.observe(viewLifecycleOwner, Observer {
+            if (it != -1) {
+                if (it == 1) {
+                    viewModel.isShiftActive = true
+                    shift_info_text_view.text = getString(R.string.starting_location_service)
+                } else if (it == 0) {
+                    Timber.e("Loc permission denied")
+                }
+                // Remove observer after handling result
+                obs.removeObservers(viewLifecycleOwner)
+            }
+        })
     }
 
     // Get image from activity result
