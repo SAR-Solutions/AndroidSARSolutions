@@ -37,6 +37,8 @@ object LocationServiceManager {
     fun getServiceStatusObservable(): LiveData<Boolean> = mIsServiceRunning
     fun getServiceStatus(): Boolean = mIsServiceRunning.value!!
 
+    private val mIsShiftComplete = MutableLiveData<Boolean>()
+
     fun getInstance(activity: AppCompatActivity): LocationServiceManager {
         if (instance == null) {
             this.activity = activity
@@ -52,6 +54,7 @@ object LocationServiceManager {
     }
 
     fun startLocationService(isTestMode: Boolean, currentCase: Case) {
+        mIsShiftComplete.postValue(false)
         serviceIntent.putExtra(
             LocationService.isTestMode,
             isTestMode
@@ -66,11 +69,13 @@ object LocationServiceManager {
         bindService()
     }
 
-    fun stopLocationService() {
+    fun stopLocationService(): LiveData<Boolean> {
         service?.completeShift()?.invokeOnCompletion {
             unbindService()
             activity.stopService(serviceIntent)
+            mIsShiftComplete.postValue(true)
         }
+        return mIsShiftComplete
     }
 
     private fun bindService() {
@@ -98,4 +103,6 @@ object LocationServiceManager {
         service!!.hasShiftEndedWithError()
 
     fun getLocationListObservable(): LiveData<ArrayList<Location>> = service!!.getAllLocations()
+    fun getUnsyncedLocationLists(): List<Location> = service!!.getListOfUnsyncedLocations()
+    fun getEndTime(): String = service!!.getEndTime() ?: "Error getting end time"
 }

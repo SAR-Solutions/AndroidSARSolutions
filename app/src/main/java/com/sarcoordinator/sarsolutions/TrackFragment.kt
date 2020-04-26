@@ -54,7 +54,6 @@ import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.File
 
@@ -78,7 +77,6 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     private var enableMap: Boolean = true
 
     private val nav: Navigation by lazy { Navigation.getInstance() }
-    private var service: LocationService? = null
     private var isRetryNetworkFab = false
     private lateinit var caseId: String
     private var stopLocationTracking = false
@@ -243,18 +241,6 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    private fun setupCircularButtons() {
-        back_button_view.image_button.setImageDrawable(requireContext().getDrawable(R.drawable.ic_baseline_arrow_back_24))
-        back_button_view.image_button.setOnClickListener { requireActivity().onBackPressed() }
-        info_button_view.image_button.setOnClickListener {
-            bottomSheet.state = when (bottomSheet.state) {
-                BottomSheetBehavior.STATE_HIDDEN -> BottomSheetBehavior.STATE_HALF_EXPANDED
-                BottomSheetBehavior.STATE_EXPANDED -> BottomSheetBehavior.STATE_COLLAPSED
-                else -> BottomSheetBehavior.STATE_EXPANDED
-            }
-        }
-    }
-
     private fun setupViewInsets() {
         back_button_view.doOnApplyWindowInsets { view, insets, initialState ->
             view.setMargins(
@@ -299,50 +285,32 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    private fun validateNetworkConnectivity() {
-        // If service is already running, disregard network state
-        if (!locationServiceManager.getServiceStatus()) {
-            if (!GlobalUtil.isNetworkConnectivityAvailable(requireActivity(), case_info_card)) {
-                enableRetryNetworkState()
-                return
+    private fun setupCircularButtons() {
+        back_button_view.image_button.setImageDrawable(requireContext().getDrawable(R.drawable.ic_baseline_arrow_back_24))
+        back_button_view.image_button.setOnClickListener { requireActivity().onBackPressed() }
+        info_button_view.image_button.setOnClickListener {
+            bottomSheet.state = when (bottomSheet.state) {
+                BottomSheetBehavior.STATE_HIDDEN -> BottomSheetBehavior.STATE_HALF_EXPANDED
+                BottomSheetBehavior.STATE_EXPANDED -> BottomSheetBehavior.STATE_COLLAPSED
+                else -> BottomSheetBehavior.STATE_EXPANDED
             }
-        } else {
-            // Service is running
-            enableStopTrackingFab()
-        }
-
-        // If coming from retry network fab, change case info card visibility and desc text
-        case_info_card.visibility = View.VISIBLE
-        shift_info_text_view.text = getString(R.string.start_tracking_desc)
-
-        setupInterface()
-
-        // Stop fab was clicked already but fragment was detached
-        if (stopLocationTracking) {
-            completeShiftAndStopService()
-            return
         }
     }
 
-    private fun setupInterface() {
-        // Only fetch data if detailed case isn't in cache
-        if (!viewModel.currentCase.value?.id.equals(caseId)) {
-            enableLoadingState(true)
-            viewModel.currentCase.value = null
-            viewModel.getCaseDetails(caseId).observe(viewLifecycleOwner, Observer { case ->
-                if (case != null) {
-                    populateViewWithCase(case)
-                    enableLoadingState(false)
-                    enableStartTrackingFab()
-                }
-            })
-        } else {
-            // Fetch from cache
-            populateViewWithCase(viewModel.currentCase.value!!)
-            enableLoadingState(false)
-            enableStartTrackingFab()
-        }
-        return
+    private fun initCaseInfoBottomSheet() {
+        bottomSheet.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+            }
+
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                if (newState == BottomSheetBehavior.STATE_HIDDEN)
+                    Toast.makeText(
+                        requireContext(),
+                        "Click on the info button to see case information",
+                        Toast.LENGTH_LONG
+                    ).show()
+            }
+        })
     }
 
     private fun initFabClickListener() {
@@ -394,21 +362,50 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    // Bottom Sheet stuff
-    private fun initCaseInfoBottomSheet() {
-        bottomSheet.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+    private fun validateNetworkConnectivity() {
+        // If service is already running, disregard network state
+        if (!locationServiceManager.getServiceStatus()) {
+            if (!GlobalUtil.isNetworkConnectivityAvailable(requireActivity(), case_info_card)) {
+                enableRetryNetworkState()
+                return
             }
+        } else {
+            // Service is running
+            enableStopTrackingFab()
+        }
 
-            override fun onStateChanged(bottomSheet: View, newState: Int) {
-                if (newState == BottomSheetBehavior.STATE_HIDDEN)
-                    Toast.makeText(
-                        requireContext(),
-                        "Click on the info button to see case information",
-                        Toast.LENGTH_LONG
-                    ).show()
-            }
-        })
+        // If coming from retry network fab, change case info card visibility and desc text
+        case_info_card.visibility = View.VISIBLE
+        shift_info_text_view.text = getString(R.string.start_tracking_desc)
+
+        setupInterface()
+
+        // Stop fab was clicked already but fragment was detached
+        if (stopLocationTracking) {
+            completeShiftAndStopService()
+            return
+        }
+    }
+
+    private fun setupInterface() {
+        // Only fetch data if detailed case isn't in cache
+        if (!viewModel.currentCase.value?.id.equals(caseId)) {
+            enableLoadingState(true)
+            viewModel.currentCase.value = null
+            viewModel.getCaseDetails(caseId).observe(viewLifecycleOwner, Observer { case ->
+                if (case != null) {
+                    populateViewWithCase(case)
+                    enableLoadingState(false)
+                    enableStartTrackingFab()
+                }
+            })
+        } else {
+            // Fetch from cache
+            populateViewWithCase(viewModel.currentCase.value!!)
+            enableLoadingState(false)
+            enableStartTrackingFab()
+        }
+        return
     }
 
     private fun completeShiftAndStopService() {
@@ -426,16 +423,15 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
             while (viewModel.currentShiftId.isNullOrEmpty())
                 delay(1000)
 
-            locationServiceManager.stopLocationService()
-            withContext(Main) {
-                navigateToShiftReportFragment()
+            lifecycleScope.launch(Main) {
+                locationServiceManager.stopLocationService().observe(viewLifecycleOwner, Observer {
+                    if (it) {
+                        viewModel.numberOfVehicles = 0
+                        nav.pushFragment(ShiftReportFragment(), Navigation.TabIdentifiers.HOME)
+                    }
+                })
             }
         }
-    }
-
-    private fun navigateToShiftReportFragment() {
-        viewModel.numberOfVehicles = 0
-        nav.pushFragment(ShiftReportFragment(), Navigation.TabIdentifiers.HOME)
     }
 
     // Setup everything related to the images card
@@ -589,8 +585,6 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
 
     // Update UI by observing viewModel data
     private fun observeService() {
-        //TODO: Get and save shiftId
-
         locationServiceManager.getShiftIdObservable().observe(viewLifecycleOwner, Observer {
             it?.let {
                 viewModel.currentShiftId = it
@@ -615,11 +609,11 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
                         }
                         LocationService.ShiftErrors.PUT_LOCATIONS -> {
                             Timber.e("All locations could not posted")
-                            viewModel.addLocationsToCache(service!!.getListOfUnsyncedLocations())
+                            viewModel.addLocationsToCache(locationServiceManager.getUnsyncedLocationLists())
                         }
                         LocationService.ShiftErrors.PUT_END_TIME -> {
                             Timber.e("Posting end time failed")
-                            viewModel.addEndTimeToCache(service!!.getEndTime()!!)
+                            viewModel.addEndTimeToCache(locationServiceManager.getEndTime())
                         }
                         LocationService.ShiftErrors.GET_SHIFT_ID -> {
                             Timber.e("Getting shift id failed")
@@ -675,21 +669,17 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-//    private fun removeObserversFromService() {
-//        locationServiceManager.let {
-//            it.getShiftInfoObservable().removeObservers(viewLifecycleOwner)
-//            it.getShiftErrorsObservable().removeObservers(viewLifecycleOwner)
-//            it.getLocationListObservable().removeObservers(viewLifecycleOwner)
-//        }
-//    }
-
     // Starts service
     private fun startLocationService() {
         viewModel.isShiftActive = true
         shift_info_text_view.text = getString(R.string.starting_location_service)
-        locationServiceManager.startLocationService(true, viewModel.currentCase.value!!)
+        locationServiceManager.startLocationService(
+            sharedPrefs.getBoolean(SettingsTabFragment.TESTING_MODE_PREFS, false),
+            viewModel.currentCase.value!!
+        )
     }
 
+    // Get image from activity result
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_IMAGE_CAPTURE) {

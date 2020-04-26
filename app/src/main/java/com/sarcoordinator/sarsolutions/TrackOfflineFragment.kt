@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.card.MaterialCardView
+import com.sarcoordinator.sarsolutions.util.LocationServiceManager
 import com.sarcoordinator.sarsolutions.util.Navigation
 import com.sarcoordinator.sarsolutions.util.setMargins
 import dev.chrisbanes.insetter.doOnApplyWindowInsets
@@ -18,6 +19,8 @@ class TrackOfflineFragment : Fragment() {
     val nav: Navigation by lazy { Navigation.getInstance() }
 
     private lateinit var bottomSheet: BottomSheetBehavior<MaterialCardView>
+
+    private lateinit var locationServiceManager: LocationServiceManager
 
     override fun onCreateView(
         inflater: LayoutInflater,
