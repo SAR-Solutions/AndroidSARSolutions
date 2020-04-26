@@ -70,16 +70,17 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     private val MAPVIEW_BUNDLE_KEY = "MapViewBundleKey"
     private val REQUEST_IMAGE_CAPTURE = 1
 
+    private lateinit var viewModel: SharedViewModel
+    private lateinit var viewManager: LinearLayoutManager
+    private lateinit var viewAdapter: ImagesAdapter
+    private lateinit var sharedPrefs: SharedPreferences
+
     private var enableMap: Boolean = true
 
     private val nav: Navigation by lazy { Navigation.getInstance() }
     private var service: LocationService? = null
-    private lateinit var sharedPrefs: SharedPreferences
-    private lateinit var viewModel: SharedViewModel
     private var isRetryNetworkFab = false
     private lateinit var caseId: String
-    private lateinit var viewManager: LinearLayoutManager
-    private lateinit var viewAdapter: ImagesAdapter
     private var stopLocationTracking = false
 
     private var markedListIndexPointer = 0
@@ -411,8 +412,6 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun completeShiftAndStopService() {
-        //TODO: Complete implementing this
-        locationServiceManager.stopLocationService()
         // Change view state
         location_service_fab.isClickable = false
         val progressCircle = CircularProgressDrawable(requireContext()).apply {
@@ -422,27 +421,15 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         progressCircle.start()
         shift_info_text_view.text = getString(R.string.waiting_for_server)
 
-        return
+        lifecycleScope.launch(IO) {
+            // Wait for server to respond with current shift id
+            while (viewModel.currentShiftId.isNullOrEmpty())
+                delay(1000)
 
-        if (service != null) {
-            service?.completeShift()?.invokeOnCompletion {
-                lifecycleScope.launch(IO) {
-
-                    // Delay till shiftId is fetched
-                    while (viewModel.currentShiftId.isNullOrEmpty())
-                        delay(1000)
-
-                    withContext(Main) {
-                        if(context != null) {
-//                            stopLocationService()
-                            navigateToShiftReportFragment()
-                        }
-                    }
-                }
+            locationServiceManager.stopLocationService()
+            withContext(Main) {
+                navigateToShiftReportFragment()
             }
-        } else {
-            // Service is not running
-            navigateToShiftReportFragment()
         }
     }
 
@@ -603,6 +590,13 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     // Update UI by observing viewModel data
     private fun observeService() {
         //TODO: Get and save shiftId
+
+        locationServiceManager.getShiftIdObservable().observe(viewLifecycleOwner, Observer {
+            it?.let {
+                viewModel.currentShiftId = it
+            }
+        })
+
         locationServiceManager.getShiftInfoObservable()
             .observe(viewLifecycleOwner, Observer { lastUpdated ->
                 shift_info_text_view.text = lastUpdated
@@ -689,12 +683,11 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
 //        }
 //    }
 
-    // Starts service, calls bindService and enableStopTrackingFab
+    // Starts service
     private fun startLocationService() {
         viewModel.isShiftActive = true
         shift_info_text_view.text = getString(R.string.starting_location_service)
         locationServiceManager.startLocationService(true, viewModel.currentCase.value!!)
-        return
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

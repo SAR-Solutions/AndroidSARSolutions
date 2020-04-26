@@ -67,11 +67,13 @@ object LocationServiceManager {
     }
 
     fun stopLocationService() {
-        unbindService()
-        activity.stopService(serviceIntent)
+        service?.completeShift()?.invokeOnCompletion {
+            unbindService()
+            activity.stopService(serviceIntent)
+        }
     }
 
-    fun bindService() {
+    private fun bindService() {
         activity.applicationContext.bindService(
             serviceIntent,
             serviceConnection,
