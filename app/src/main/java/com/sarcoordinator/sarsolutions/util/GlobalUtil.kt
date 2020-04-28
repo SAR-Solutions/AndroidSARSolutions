@@ -270,6 +270,15 @@ object GlobalUtil {
     }
 }
 
+fun getThemeColor(
+    context: Context,
+    attributeColor: Int
+): Int {
+    val value = TypedValue()
+    context.theme.resolveAttribute(attributeColor, value, true)
+    return value.data
+}
+
 // Notify observers of change; adding item to list doesn't notify observers
 fun <T> MutableLiveData<T>.notifyObserver() {
     this.value = this.value

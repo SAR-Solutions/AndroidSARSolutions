@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.res.ColorStateList
 import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
@@ -149,17 +150,17 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
 
         sharedPrefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
 
-        // Set shared element transition
-        sharedElementEnterTransition = TransitionInflater.from(context)
-            .inflateTransition(android.R.transition.move)
-
-        enterTransition = MaterialFade.create(requireContext())
-
         // Get arguments / Restore state
         caseId = arguments?.getString(CASE_ID) ?: savedInstanceState?.getString(CASE_ID)!!
         savedInstanceState?.getBoolean(LOCATION_TRACKING_STATUS)?.let {
             stopLocationTracking = it
         }
+
+        // Set shared element transitions
+        sharedElementEnterTransition = TransitionInflater.from(context)
+            .inflateTransition(android.R.transition.move)
+
+        enterTransition = MaterialFade.create(requireContext())
     }
 
     override fun onCreateView(
@@ -487,7 +488,8 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
             )
         )
 
-        location_service_fab.backgroundTintList = resources.getColorStateList(R.color.newBlue)
+        val primColor = getThemeColor(requireContext(), R.attr.colorPrimary)
+        location_service_fab.backgroundTintList = ColorStateList.valueOf(primColor)
     }
 
     private fun enableStopTrackingFab() {

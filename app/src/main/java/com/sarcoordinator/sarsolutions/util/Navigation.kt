@@ -1,6 +1,7 @@
 package com.sarcoordinator.sarsolutions.util
 
 import android.view.View
+import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -159,12 +160,12 @@ object Navigation {
 
         sharedElements.forEach { element ->
             element?.let {
-                transaction?.addSharedElement(it, it.transitionName)
+                val transitionName = ViewCompat.getTransitionName(it) ?: ""
+                transaction?.addSharedElement(it, transitionName)
             }
         }
 
         transaction
-            ?.setReorderingAllowed(true)
             ?.replace(R.id.fragment_container, fragment)
             ?.commit()
     }

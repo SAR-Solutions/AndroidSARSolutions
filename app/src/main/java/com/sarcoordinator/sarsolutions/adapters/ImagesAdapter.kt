@@ -40,8 +40,6 @@ class ImagesAdapter(private val nav: Navigation, private var imageList: ArrayLis
         RecyclerView.ViewHolder(itemView) {
         fun bindView(imagePath: String) {
 
-            itemView.image_card_parent_layout.cardElevation = 0F
-
             // Shared element transition name
             ViewCompat.setTransitionName(itemView.image_view, imagePath)
 
@@ -62,7 +60,7 @@ class ImagesAdapter(private val nav: Navigation, private var imageList: ArrayLis
 
             Glide.with(itemView)
                 .load(imagePath)
-                .fitCenter()
+                .dontTransform()
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .placeholder(circularProgressDrawable)
                 .into(itemView.image_view)

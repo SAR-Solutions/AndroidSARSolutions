@@ -11,6 +11,7 @@ import androidx.exifinterface.media.ExifInterface
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storageMetadata
@@ -82,7 +83,7 @@ class ImageDetailFragment : Fragment(R.layout.fragment_image_detail), CustomFrag
         Glide.with(this)
             .load(imageFile)
             .dontTransform()
-            .centerCrop()
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
             .into(detailed_image_view)
 
         setFocusChangeListeners()

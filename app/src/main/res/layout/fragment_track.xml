@@ -91,7 +91,6 @@
         android:layout_margin="16dp"
         android:elevation="6dp"
         app:borderWidth="0dp"
-        android:backgroundTint="?colorPrimary"
         android:src="@drawable/ic_baseline_play_arrow_24"
         app:layout_anchor="@id/case_info_card"
         app:layout_anchorGravity="end|top" />
