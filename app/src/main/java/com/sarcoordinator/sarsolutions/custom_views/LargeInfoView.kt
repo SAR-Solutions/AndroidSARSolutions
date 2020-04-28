@@ -49,6 +49,7 @@ class LargeInfoView(context: Context, attrs: AttributeSet) : LinearLayout(contex
     fun setButtonClickListener(clickListener: OnClickListener) {
         enableButton = true
         button.setOnClickListener(clickListener)
+        button.alpha = 1F
     }
 
     fun removeButtonClickListener() {

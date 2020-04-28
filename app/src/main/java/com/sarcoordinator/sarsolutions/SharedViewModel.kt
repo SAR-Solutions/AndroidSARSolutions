@@ -86,6 +86,11 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    // Clear out current cases
+    fun clearCases() {
+        cases.postValue(ArrayList())
+    }
+
     private val userInfo = MutableLiveData<Volunteer>()
     fun getUser(userId: String): LiveData<Volunteer> {
         // Only query endpoint if not in cache

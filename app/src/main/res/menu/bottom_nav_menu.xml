@@ -7,9 +7,9 @@
         android:title="@string/home" />
 
     <item
-        android:id="@+id/failed_shifts_dest"
+        android:id="@+id/failed_syncs_dest"
         android:icon="@drawable/ic_baseline_sync_problem_24"
-        android:title="@string/failed_shifts" />
+        android:title="@string/failed_syncs" />
 
     <item
         android:id="@+id/settings_dest"

@@ -186,6 +186,8 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), CustomFragment {
             viewAdapter = Adapter(nav, this)
             cases_recycler_view.adapter = viewAdapter
             viewModel.refreshCases()
+        } else {
+            viewModel.clearCases()
         }
     }
 

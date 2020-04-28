@@ -62,7 +62,7 @@ object Navigation {
             }
             when (it.itemId) {
                 R.id.home_dest -> loadTab(TabIdentifiers.HOME)
-                R.id.failed_shifts_dest -> loadTab(TabIdentifiers.FAILED_SHIFTS)
+                R.id.failed_syncs_dest -> loadTab(TabIdentifiers.FAILED_SHIFTS)
                 R.id.settings_dest -> loadTab(TabIdentifiers.SETTINGS)
                 else -> return@setOnNavigationItemSelectedListener false
             }
@@ -73,7 +73,7 @@ object Navigation {
     fun selectTab(tabIdentifier: TabIdentifiers) {
         bottomNavBar?.selectedItemId = when(tabIdentifier) {
             TabIdentifiers.HOME -> R.id.home_dest
-            TabIdentifiers.FAILED_SHIFTS -> R.id.failed_shifts_dest
+            TabIdentifiers.FAILED_SHIFTS -> R.id.failed_syncs_dest
             TabIdentifiers.SETTINGS -> R.id.settings_dest
         }
     }
@@ -192,7 +192,7 @@ object Navigation {
                 bottomNavBar?.selectedItemId =
                     when (tabStack.peek()) {
                         TabIdentifiers.HOME -> R.id.home_dest
-                        TabIdentifiers.FAILED_SHIFTS -> R.id.failed_shifts_dest
+                        TabIdentifiers.FAILED_SHIFTS -> R.id.failed_syncs_dest
                         TabIdentifiers.SETTINGS -> R.id.settings_dest
                     }
                 true
