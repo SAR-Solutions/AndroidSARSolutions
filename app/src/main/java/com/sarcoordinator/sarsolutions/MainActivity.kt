@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         if (!BuildConfig.DEBUG) {
             sharedPrefs = getPreferences(Context.MODE_PRIVATE)
             with(sharedPrefs.edit()) {
-                putBoolean(SettingsTabFragment.TESTING_MODE_PREFS, false)
+                putBoolean(TabSettingsFragment.TESTING_MODE_PREFS, false)
                 commit()
             }
         }

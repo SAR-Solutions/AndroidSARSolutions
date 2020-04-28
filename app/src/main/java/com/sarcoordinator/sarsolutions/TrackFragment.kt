@@ -183,7 +183,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        enableMap = !sharedPrefs.getBoolean(SettingsTabFragment.LOW_BANDWIDTH_PREFS, false)
+        enableMap = !sharedPrefs.getBoolean(TabSettingsFragment.LOW_BANDWIDTH_PREFS, false)
 
         if (enableMap) {
             // Required map setup
@@ -620,7 +620,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     // Starts service
     private fun startLocationService() {
         val obs = locationServiceManager.startLocationService(
-            sharedPrefs.getBoolean(SettingsTabFragment.TESTING_MODE_PREFS, false),
+            sharedPrefs.getBoolean(TabSettingsFragment.TESTING_MODE_PREFS, false),
             viewModel.currentCase.value!!
         )
         obs.observe(viewLifecycleOwner, Observer {

@@ -4,10 +4,10 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.sarcoordinator.sarsolutions.CasesTabFragment
-import com.sarcoordinator.sarsolutions.FailedShiftsTabFragment
 import com.sarcoordinator.sarsolutions.R
-import com.sarcoordinator.sarsolutions.SettingsTabFragment
+import com.sarcoordinator.sarsolutions.TabCasesFragment
+import com.sarcoordinator.sarsolutions.TabFailedSyncsFragment
+import com.sarcoordinator.sarsolutions.TabSettingsFragment
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -100,9 +100,17 @@ object Navigation {
                 toolbar = (currentFragment as CustomFragment).getSharedElement()
             }
             when (tabIdentifier) {
-                TabIdentifiers.HOME -> pushFragment(CasesTabFragment(), tabIdentifier, toolbar)
-                TabIdentifiers.FAILED_SHIFTS -> pushFragment(FailedShiftsTabFragment(), tabIdentifier, toolbar)
-                TabIdentifiers.SETTINGS -> pushFragment(SettingsTabFragment(), tabIdentifier, toolbar)
+                TabIdentifiers.HOME -> pushFragment(TabCasesFragment(), tabIdentifier, toolbar)
+                TabIdentifiers.FAILED_SHIFTS -> pushFragment(
+                    TabFailedSyncsFragment(),
+                    tabIdentifier,
+                    toolbar
+                )
+                TabIdentifiers.SETTINGS -> pushFragment(
+                    TabSettingsFragment(),
+                    tabIdentifier,
+                    toolbar
+                )
             }
         } else {
             showTab(tabIdentifier)

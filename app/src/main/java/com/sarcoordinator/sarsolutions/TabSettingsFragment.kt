@@ -19,11 +19,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.sarcoordinator.sarsolutions.util.CustomFragment
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.Navigation
-import kotlinx.android.synthetic.main.fragment_settings.*
+import kotlinx.android.synthetic.main.fragment_tab_settings.*
 import kotlinx.android.synthetic.main.view_account.view.*
 import timber.log.Timber
 
-class SettingsTabFragment : Fragment(R.layout.fragment_settings), CustomFragment {
+class TabSettingsFragment : Fragment(R.layout.fragment_tab_settings), CustomFragment {
 
     private val nav: Navigation by lazy { Navigation.getInstance() }
     private lateinit var viewModel: SharedViewModel

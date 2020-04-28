@@ -19,14 +19,14 @@ import com.sarcoordinator.sarsolutions.util.CustomFragment
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.custom_large_info_view.view.*
-import kotlinx.android.synthetic.main.fragment_cases.*
+import kotlinx.android.synthetic.main.fragment_tab_cases.*
 import kotlinx.android.synthetic.main.list_view_item.view.*
 import timber.log.Timber
 
 /**
  * This fragment displays the list of cases for the user
  */
-class CasesTabFragment : Fragment(R.layout.fragment_cases), CustomFragment {
+class TabCasesFragment : Fragment(R.layout.fragment_tab_cases), CustomFragment {
 
     private val nav: Navigation by lazy { Navigation.getInstance() }
 
@@ -224,14 +224,14 @@ class CasesTabFragment : Fragment(R.layout.fragment_cases), CustomFragment {
     }
 
     /** Recycler view item stuff **/
-    class Adapter(private val nav: Navigation, private val parent: CasesTabFragment) :
+    class Adapter(private val nav: Navigation, private val parent: TabCasesFragment) :
         RecyclerView.Adapter<Adapter.ViewHolder>() {
         private var data = ArrayList<Case>()
 
         class ViewHolder(
             itemView: View,
             private val nav: Navigation,
-            private val parent: CasesTabFragment
+            private val parent: TabCasesFragment
         ) : RecyclerView.ViewHolder(itemView) {
             fun bindView(case: Case) {
                 itemView.missing_person_text.text =

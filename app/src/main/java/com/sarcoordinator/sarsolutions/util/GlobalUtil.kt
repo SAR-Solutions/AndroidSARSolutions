@@ -26,7 +26,7 @@ import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.gms.maps.model.RoundCap
 import com.google.android.material.snackbar.Snackbar
 import com.sarcoordinator.sarsolutions.R
-import com.sarcoordinator.sarsolutions.SettingsTabFragment
+import com.sarcoordinator.sarsolutions.TabSettingsFragment
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -220,15 +220,15 @@ object GlobalUtil {
         // Enable dark map if current theme is dark
         if (isDarkTheme) {
             when (sharedPref.getString(
-                SettingsTabFragment.MAP_DARK_THEME_PREFS,
-                SettingsTabFragment.MapDarkThemes.STANDARD.name
+                TabSettingsFragment.MAP_DARK_THEME_PREFS,
+                TabSettingsFragment.MapDarkThemes.STANDARD.name
             )) {
-                SettingsTabFragment.MapDarkThemes.STANDARD.name -> setMapsTheme(
+                TabSettingsFragment.MapDarkThemes.STANDARD.name -> setMapsTheme(
                     activity,
                     googleMap,
                     R.raw.dark_std_map_theme
                 )
-                SettingsTabFragment.MapDarkThemes.Night.name -> setMapsTheme(
+                TabSettingsFragment.MapDarkThemes.Night.name -> setMapsTheme(
                     activity,
                     googleMap,
                     R.raw.dark_night_map_theme
@@ -236,10 +236,10 @@ object GlobalUtil {
             }
         } else {
             val currentLightTheme = sharedPref.getString(
-                SettingsTabFragment.MAP_LIGHT_THEME_PREFS,
-                SettingsTabFragment.MapLightThemes.STANDARD.name
+                TabSettingsFragment.MAP_LIGHT_THEME_PREFS,
+                TabSettingsFragment.MapLightThemes.STANDARD.name
             )
-            if (currentLightTheme == SettingsTabFragment.MapLightThemes.SNOW.name) {
+            if (currentLightTheme == TabSettingsFragment.MapLightThemes.SNOW.name) {
                 setMapsTheme(activity, googleMap, R.raw.light_snow_map_theme)
             }
         }

@@ -11,9 +11,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.sarcoordinator.sarsolutions.adapters.CachedShiftAdapter
 import com.sarcoordinator.sarsolutions.util.CustomFragment
 import com.sarcoordinator.sarsolutions.util.Navigation
-import kotlinx.android.synthetic.main.fragment_failed_shifts.*
+import kotlinx.android.synthetic.main.fragment_tab_failed_syncs.*
 
-class FailedShiftsTabFragment : Fragment(R.layout.fragment_failed_shifts), CustomFragment {
+class TabFailedSyncsFragment : Fragment(R.layout.fragment_tab_failed_syncs), CustomFragment {
 
     private lateinit var viewModel: SharedViewModel
     private lateinit var viewManager: RecyclerView.LayoutManager
