@@ -33,7 +33,6 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.transition.MaterialFade
 import com.sarcoordinator.sarsolutions.adapters.ImagesAdapter
 import com.sarcoordinator.sarsolutions.custom_views.LargeInfoView
@@ -172,9 +171,6 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
 
         bottomSheet = BottomSheetBehavior.from(view.findViewById(R.id.case_info_card))
 
-        view.findViewById<FloatingActionButton>(R.id.capture_photo_fab).hide()
-        view.findViewById<FloatingActionButton>(R.id.location_service_fab).hide()
-
         mMapView = view.findViewById(R.id.map)
 
         return view
@@ -182,6 +178,9 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        capture_photo_fab.hide()
+//        location_service_fab.hide()
 
         enableMap = !sharedPrefs.getBoolean(TabSettingsFragment.LOW_BANDWIDTH_PREFS, false)
 
@@ -356,13 +355,15 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun validateNetworkConnectivity() {
-        // If service is already running, disregard network state
+
+        // If service is not running, enable retry network state
         if (!locationServiceManager.getServiceStatus()) {
             if (!GlobalUtil.isNetworkConnectivityAvailable(requireActivity(), case_info_card)) {
                 enableRetryNetworkState()
                 return
             }
         } else {
+            // If service is already running, disregard network state
             // Service is running
             enableStopTrackingFab()
         }
@@ -514,6 +515,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         location_service_fab.backgroundTintList = resources.getColorStateList(R.color.newRed)
         location_service_fab.visibility = View.VISIBLE
 
+        case_info_card.shimmer_parent_layout.visibility = View.GONE
         case_info_card.parent_layout.visibility = View.GONE
         shift_info_text_view.text = getString(R.string.no_network_desc)
     }

@@ -168,7 +168,6 @@ object LocationServiceManager {
         } catch (exception: Exception) {
             Timber.e("Error unbinding service: $exception")
         }
-        mIsServiceRunning.postValue(false)
     }
 
     /********************************** Service info observables *********************************************/
