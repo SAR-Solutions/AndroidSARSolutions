@@ -21,9 +21,9 @@ import com.sarcoordinator.sarsolutions.BaseApplication.Companion.CHANNEL_ID
 import com.sarcoordinator.sarsolutions.BuildConfig
 import com.sarcoordinator.sarsolutions.MainActivity
 import com.sarcoordinator.sarsolutions.R
+import com.sarcoordinator.sarsolutions.api.Case
 import com.sarcoordinator.sarsolutions.api.Repository
-import com.sarcoordinator.sarsolutions.models.Case
-import com.sarcoordinator.sarsolutions.models.Shift
+import com.sarcoordinator.sarsolutions.api.Shift
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main

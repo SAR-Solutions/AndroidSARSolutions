@@ -23,7 +23,7 @@ import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
 import com.sarcoordinator.sarsolutions.BuildConfig
 import com.sarcoordinator.sarsolutions.R
-import com.sarcoordinator.sarsolutions.models.Case
+import com.sarcoordinator.sarsolutions.api.Case
 import timber.log.Timber
 
 object LocationServiceManager {

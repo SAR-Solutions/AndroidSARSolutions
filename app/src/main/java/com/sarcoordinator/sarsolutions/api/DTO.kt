@@ -1,4 +1,4 @@
-package com.sarcoordinator.sarsolutions.models
+package com.sarcoordinator.sarsolutions.api
 
 import java.io.Serializable
 

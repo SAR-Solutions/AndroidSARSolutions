@@ -12,9 +12,10 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
-import com.sarcoordinator.sarsolutions.models.Case
+import com.sarcoordinator.sarsolutions.api.Case
+import com.sarcoordinator.sarsolutions.local_db.CacheDatabase
+import com.sarcoordinator.sarsolutions.local_db.OfflineDatabase
 import com.sarcoordinator.sarsolutions.onboarding.OnboardingFragment
-import com.sarcoordinator.sarsolutions.util.CacheDatabase
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.GlobalUtil.THEME_LIGHT
 import com.sarcoordinator.sarsolutions.util.Navigation
@@ -50,8 +51,11 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         super.onCreate(savedInstanceState)
 
         auth.addAuthStateListener {
-            if (it.currentUser == null)
+            if (it.currentUser == null) {
+                // Clear local database references as user has signed out
                 CacheDatabase.removeDatabaseInstance()
+                OfflineDatabase.removeDatabaseInstance()
+            }
         }
 
         // Disable testing mode for release variant

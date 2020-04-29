@@ -17,7 +17,7 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import com.sarcoordinator.sarsolutions.models.LocationsInShiftReport
+import com.sarcoordinator.sarsolutions.local_db.LocationsInShiftReport
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.GlobalUtil.getThemedPolyLineOptions
 import com.sarcoordinator.sarsolutions.util.GlobalUtil.setGoogleMapsTheme

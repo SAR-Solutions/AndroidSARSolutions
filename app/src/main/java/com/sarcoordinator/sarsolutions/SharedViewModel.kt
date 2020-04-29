@@ -6,10 +6,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.sarcoordinator.sarsolutions.api.Repository
-import com.sarcoordinator.sarsolutions.models.*
-import com.sarcoordinator.sarsolutions.util.CacheDatabase
-import com.sarcoordinator.sarsolutions.util.LocalCacheRepository
+import com.sarcoordinator.sarsolutions.api.*
+import com.sarcoordinator.sarsolutions.local_db.*
 import com.sarcoordinator.sarsolutions.util.notifyObserver
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.Default
@@ -28,7 +26,9 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     var isShiftActive = false
     lateinit var currentImagePath: String
     private val cacheRepo: LocalCacheRepository =
-        LocalCacheRepository(CacheDatabase.getDatabase(getApplication()).casesDao())
+        LocalCacheRepository(
+            CacheDatabase.getDatabase(getApplication()).casesDao()
+        )
 
     // Number of failed shift syncs in progress
     var syncInProgress = false
@@ -329,7 +329,12 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     private fun cacheLocListToAPILocList(list: List<CacheLocation>): List<LocationPoint> {
         val apiList = ArrayList<LocationPoint>()
         list.forEach {
-            apiList.add(LocationPoint(it.latitude, it.longitude))
+            apiList.add(
+                LocationPoint(
+                    it.latitude,
+                    it.longitude
+                )
+            )
         }
         return apiList
     }

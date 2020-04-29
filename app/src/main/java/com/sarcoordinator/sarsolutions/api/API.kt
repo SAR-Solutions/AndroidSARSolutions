@@ -1,6 +1,5 @@
 package com.sarcoordinator.sarsolutions.api
 
-import com.sarcoordinator.sarsolutions.models.*
 import retrofit2.Response
 import retrofit2.http.*
 

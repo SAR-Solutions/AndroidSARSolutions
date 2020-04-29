@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.sarcoordinator.sarsolutions.R
 import com.sarcoordinator.sarsolutions.ShiftDetailFragment
-import com.sarcoordinator.sarsolutions.models.LocationsInShiftReport
+import com.sarcoordinator.sarsolutions.local_db.LocationsInShiftReport
 import com.sarcoordinator.sarsolutions.util.Navigation
 import kotlinx.android.synthetic.main.loc_cache_list_item.view.*
 

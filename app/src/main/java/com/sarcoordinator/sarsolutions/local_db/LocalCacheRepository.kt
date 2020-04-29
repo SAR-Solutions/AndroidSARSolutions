@@ -1,7 +1,6 @@
-package com.sarcoordinator.sarsolutions.util
+package com.sarcoordinator.sarsolutions.local_db
 
 import androidx.lifecycle.LiveData
-import com.sarcoordinator.sarsolutions.models.*
 
 class LocalCacheRepository(private val caseDao: CaseDao) {
 
@@ -11,7 +10,11 @@ class LocalCacheRepository(private val caseDao: CaseDao) {
         // Only make new case if one doesn't exist
         val case = caseDao.getShiftReportById(shiftId)
         if (case == null)
-            caseDao.insertShiftReport(CacheShiftReport(shiftId))
+            caseDao.insertShiftReport(
+                CacheShiftReport(
+                    shiftId
+                )
+            )
         caseDao.insertLocationList(locationList)
     }
 
@@ -27,7 +30,11 @@ class LocalCacheRepository(private val caseDao: CaseDao) {
     suspend fun insertVehicleList(vehicles: List<CacheVehicle>, shiftId: String) {
         val case = caseDao.getShiftReportById(shiftId)
         if (case == null)
-            caseDao.insertShiftReport(CacheShiftReport(shiftId))
+            caseDao.insertShiftReport(
+                CacheShiftReport(
+                    shiftId
+                )
+            )
         caseDao.insertVehicles(vehicles)
     }
 

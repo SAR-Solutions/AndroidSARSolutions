@@ -36,8 +36,8 @@ import com.google.android.material.card.MaterialCardView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.transition.MaterialFade
 import com.sarcoordinator.sarsolutions.adapters.ImagesAdapter
+import com.sarcoordinator.sarsolutions.api.Case
 import com.sarcoordinator.sarsolutions.custom_views.LargeInfoView
-import com.sarcoordinator.sarsolutions.models.Case
 import com.sarcoordinator.sarsolutions.util.*
 import dev.chrisbanes.insetter.doOnApplyWindowInsets
 import kotlinx.android.synthetic.main.card_case_details.view.*

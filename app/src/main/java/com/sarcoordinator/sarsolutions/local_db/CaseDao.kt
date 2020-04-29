@@ -1,4 +1,4 @@
-package com.sarcoordinator.sarsolutions.models
+package com.sarcoordinator.sarsolutions.local_db
 
 import androidx.lifecycle.LiveData
 import androidx.room.*

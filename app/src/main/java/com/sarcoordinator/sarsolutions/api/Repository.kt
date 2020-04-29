@@ -3,7 +3,6 @@ package com.sarcoordinator.sarsolutions.api
 import android.location.Location
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.FirebaseAuth
-import com.sarcoordinator.sarsolutions.models.*
 import okhttp3.ConnectionSpec
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -53,16 +52,27 @@ object Repository {
     ) {
         val parsedLocList = ArrayList<LocationPoint>()
         paths.forEach {
-            parsedLocList.add(LocationPoint(it.latitude, it.longitude))
+            parsedLocList.add(
+                LocationPoint(
+                    it.latitude,
+                    it.longitude
+                )
+            )
         }
-        service.putLocations(getToken(), shiftId, isTest, LocationBody(parsedLocList))
+        service.putLocations(
+            getToken(), shiftId, isTest,
+            LocationBody(parsedLocList)
+        )
     }
 
     suspend fun putLocationPoints(
         shiftId: String,
         isTest: Boolean,
         paths: List<LocationPoint>
-    ) = service.putLocations(getToken(), shiftId, isTest, LocationBody(paths))
+    ) = service.putLocations(
+        getToken(), shiftId, isTest,
+        LocationBody(paths)
+    )
 
 
     suspend fun putEndTime(
@@ -70,7 +80,10 @@ object Repository {
         isTest: Boolean,
         endTime: String
     ) =
-        service.putEndTime(getToken(), shiftId, isTest, EndTimeBody(endTime))
+        service.putEndTime(
+            getToken(), shiftId, isTest,
+            EndTimeBody(endTime)
+        )
 
     suspend fun postShiftReport(
         shiftId: String,
