@@ -67,13 +67,14 @@ object LocationServiceManager {
     }
 
     /**
+     * Id currentCase is null, an offline shift is started
      * Returns status of location service permission
      * -1 -> In progress
      * 0  -> Permission denied
      * 1  -> Permission granted
      */
     private val mLocationPermissionStatus = MutableLiveData<Int>()
-    fun startLocationService(isTestMode: Boolean, currentCase: Case): LiveData<Int> {
+    fun startLocationService(isTestMode: Boolean, currentCase: Case?): LiveData<Int> {
 
         mLocationPermissionStatus.value = -1
 

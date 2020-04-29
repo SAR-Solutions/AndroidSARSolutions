@@ -246,7 +246,7 @@ class TabCasesFragment : Fragment(R.layout.fragment_tab_cases), CustomFragment {
                         putString(TrackFragment.CASE_ID, case.id)
                     }
 
-                    parent.exitTransition = MaterialFadeThrough.create(parent.requireContext())
+                    parent.exitTransition = MaterialFadeThrough.create()
 
                     nav.pushFragment(
                         trackFragment,

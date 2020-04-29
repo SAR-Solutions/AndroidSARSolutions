@@ -125,7 +125,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         // Exit if location is not enabled
         if (!GlobalUtil.isLocationEnabled(requireActivity().getSystemService(Context.LOCATION_SERVICE) as LocationManager)) {
 
-            MaterialAlertDialogBuilder(context)
+            MaterialAlertDialogBuilder(requireContext())
                 .setIcon(R.drawable.ic_baseline_gps_off_24)
                 .setTitle(getString(R.string.gps_disabled))
                 .setMessage(getString(R.string.enable_gps_prompt))
@@ -160,7 +160,7 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
         sharedElementEnterTransition = TransitionInflater.from(context)
             .inflateTransition(android.R.transition.move)
 
-        enterTransition = MaterialFade.create(requireContext())
+        enterTransition = MaterialFade.create()
     }
 
     override fun onCreateView(

@@ -37,7 +37,6 @@ class LocationService : Service() {
     companion object {
         const val isTestMode = "TEST_MODE"
         const val case = "CASE"
-        const val isOfflineMode = "OFFLINE_MODE"
     }
 
     enum class ShiftErrors {
@@ -46,6 +45,7 @@ class LocationService : Service() {
 
     private var mTestMode: Boolean = false
     private lateinit var mCase: Case
+    private var offlineMode: Boolean = false
     private val shiftId = MutableLiveData<String>()
     fun getShiftId(): LiveData<String> = shiftId
 
@@ -158,7 +158,13 @@ class LocationService : Service() {
             throw Exception("Service needs to be called with specified intent fields")
 
         mTestMode = intent.extras!!.getBoolean(isTestMode, false)
-        mCase = intent.extras!!.getSerializable(case) as Case
+
+        val intentCase: Case? = intent.extras!!.getSerializable(case) as Case?
+        if (intentCase != null) {
+            mCase = intentCase
+        } else {
+            offlineMode = true
+        }
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         locationList.postValue(ArrayList())

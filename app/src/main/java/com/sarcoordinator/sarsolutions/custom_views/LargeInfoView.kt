@@ -31,6 +31,8 @@ class LargeInfoView(context: Context, attrs: AttributeSet) : LinearLayout(contex
                 heading.text = getString(R.styleable.LargeInfoView_Heading)
                 message.text = getString(R.styleable.LargeInfoView_Message)
 
+                button.visibility = View.GONE
+
             } finally {
                 recycle()
             }
@@ -50,12 +52,14 @@ class LargeInfoView(context: Context, attrs: AttributeSet) : LinearLayout(contex
         enableButton = true
         button.setOnClickListener(clickListener)
         button.alpha = 1F
+        button.visibility = View.VISIBLE
     }
 
     fun removeButtonClickListener() {
         enableButton = false
         button.setOnClickListener(null)
         button.alpha = 0F
+        button.visibility = View.GONE
     }
 
     private fun startAnim() {
