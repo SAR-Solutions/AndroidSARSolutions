@@ -46,6 +46,7 @@ class LocationService : Service() {
     private var mTestMode: Boolean = false
     private lateinit var mCase: Case
     private var offlineMode: Boolean = false
+
     private val shiftId = MutableLiveData<String>()
     fun getShiftId(): LiveData<String> = shiftId
 
@@ -86,7 +87,7 @@ class LocationService : Service() {
             super.onLocationResult(locationResult)
 
             locationResult ?: return
-            if (shiftId.value == null)
+            if (shiftId.value == null && !offlineMode)
                 return
 
             for (location in locationResult.locations) {
@@ -106,8 +107,8 @@ class LocationService : Service() {
                             "Pointer: $locationSyncListPointer"
                 )
 
-                // Start addPathsjob if 10 or more locations exist and job isn't running
-                if (!addPathsJobIsSyncing && getListOfUnsyncedLocations().size >= 10) {
+                // Start addPathsjob if 10 or more locations exist, job isn't running and shift isn't in offline mode
+                if (!offlineMode && !addPathsJobIsSyncing && getListOfUnsyncedLocations().size >= 10) {
                     val newPointerValue = locationList.value!!.size - 1
                     addPathsJobIsSyncing = true
                     val locationsToSync = getListOfUnsyncedLocations()
@@ -169,31 +170,39 @@ class LocationService : Service() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         locationList.postValue(ArrayList())
 
-        // Get and set mShiftId
-        CoroutineScope(IO).launch {
-            val shift = Shift(
-                Calendar.getInstance().time.toString(),
-                BuildConfig.VERSION_NAME
-            )
+        if (!offlineMode) {
+            // Get and set mShiftId
+            CoroutineScope(IO).launch {
+                val shift = Shift(
+                    Calendar.getInstance().time.toString(),
+                    BuildConfig.VERSION_NAME
+                )
 
-            try {
-                if (mTestMode) {
-                    // Emulate network call
-                    Timber.d("Emulating getting shift id")
-                    delay(1000)
-                    shiftId.postValue("Test Shift Id ${Calendar.getInstance().timeInMillis}")
-                } else {
-                    shiftId.postValue(Repository.postStartShift(shift, mCase.id, mTestMode).shiftId)
+                try {
+                    if (mTestMode) {
+                        // Emulate network call
+                        Timber.d("Emulating getting shift id")
+                        delay(1000)
+                        shiftId.postValue("Test Shift Id ${Calendar.getInstance().timeInMillis}")
+                    } else {
+                        shiftId.postValue(
+                            Repository.postStartShift(
+                                shift,
+                                mCase.id,
+                                mTestMode
+                            ).shiftId
+                        )
+                    }
+                    Timber.d("Location service started")
+                    serviceInfoText.postValue(getString(R.string.started_shift))
+                } catch (e: Exception) {
+                    Timber.e(getString(R.string.error_starting))
+                    withContext(Main) {
+                        serviceInfoText.value = getString(R.string.error_starting)
+                        shiftEndedWithError.postValue(ShiftErrors.START_SHIFT)
+                    }
+                    onDestroy()
                 }
-                Timber.d("Location service started")
-                serviceInfoText.postValue(getString(R.string.started_shift))
-            } catch (e: Exception) {
-                Timber.e(getString(R.string.error_starting))
-                withContext(Main) {
-                    serviceInfoText.value = getString(R.string.error_starting)
-                    shiftEndedWithError.postValue(ShiftErrors.START_SHIFT)
-                }
-                onDestroy()
             }
         }
 
@@ -220,24 +229,37 @@ class LocationService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        // Notification is needed for >= API 26 for foreground services
-        return NotificationCompat.Builder(this, CHANNEL_ID).apply {
-            setContentTitle(title)
-            setContentText(
-                "Case ID: ${mCase.id}\n" +
-                        "Case Date: ${GlobalUtil.convertEpochToDate(mCase.date)}"
-            )
-            setSmallIcon(R.drawable.ic_location)
-            setContentIntent(resultPendingIntent)
-            setStyle(
-                NotificationCompat.BigTextStyle()
-                    .setBigContentTitle(title)
-                    .bigText(
-                        "Case ID: ${mCase.id}\n" +
-                                "Case Date: ${GlobalUtil.convertEpochToDate(mCase.date)}"
-                    )
-            )
-        }.build()
+        if (!offlineMode) {
+            return NotificationCompat.Builder(this, CHANNEL_ID).apply {
+                setContentTitle(title)
+                setContentText(
+                    "Case ID: ${mCase.id}\n" +
+                            "Case Date: ${GlobalUtil.convertEpochToDate(mCase.date)}"
+                )
+                setSmallIcon(R.drawable.ic_location)
+                setContentIntent(resultPendingIntent)
+                setStyle(
+                    NotificationCompat.BigTextStyle()
+                        .setBigContentTitle(title)
+                        .bigText(
+                            "Case ID: ${mCase.id}\n" +
+                                    "Case Date: ${GlobalUtil.convertEpochToDate(mCase.date)}"
+                        )
+                )
+            }.build()
+        } else {
+            return NotificationCompat.Builder(this, CHANNEL_ID).apply {
+                setContentTitle(title)
+                setContentText("This is an Offline Case")
+                setSmallIcon(R.drawable.ic_location)
+                setContentIntent(resultPendingIntent)
+                setStyle(
+                    NotificationCompat.BigTextStyle()
+                        .setBigContentTitle(title)
+                        .bigText("This is an Offline Case")
+                )
+            }.build()
+        }
     }
 
     override fun onDestroy() {
@@ -248,9 +270,19 @@ class LocationService : Service() {
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
-        completeShift().invokeOnCompletion {
+        if (!offlineMode)
+            completeShift().invokeOnCompletion {
+                onDestroy()
+            }
+        else
             onDestroy()
-        }
+    }
+
+    fun completeOfflineShift(): OfflineEndShiftWrapper {
+        return OfflineEndShiftWrapper(
+            Calendar.getInstance().time.toString(),
+            locationList.value!!
+        )
     }
 
     /*
@@ -258,12 +290,26 @@ class LocationService : Service() {
      * End shift, set endTime and sync remaining points
      */
     fun completeShift(): Job {
+
+        if (offlineMode)
+            throw Exception("Shift was started offline, completeOfflineShift() needs to be called to end shift")
+
         if (::fusedLocationClient.isInitialized)
             fusedLocationClient.removeLocationUpdates(locationCallback)
 
-        serviceInfoText.postValue("Syncing shift data with server")
+        serviceInfoText.postValue(
+            if (offlineMode)
+                "Ending shift"
+            else
+                "Syncing shift data with server"
+        )
 
         return CoroutineScope(IO).launch {
+
+            if (offlineMode) {
+                return@launch
+            }
+
             // Nothing to do, if shift didn't start
             if (shiftEndedWithError.value == ShiftErrors.START_SHIFT)
                 return@launch
@@ -355,4 +401,11 @@ class LocationService : Service() {
             Looper.myLooper()
         )
     }
+
+
+    // Wrapper to return shift information
+    data class OfflineEndShiftWrapper(
+        val endTime: String,
+        val locationList: List<Location>
+    )
 }

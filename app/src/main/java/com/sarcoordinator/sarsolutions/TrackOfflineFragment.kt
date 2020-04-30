@@ -15,6 +15,7 @@ import com.sarcoordinator.sarsolutions.util.setMargins
 import dev.chrisbanes.insetter.doOnApplyWindowInsets
 import kotlinx.android.synthetic.main.fragment_track_offline.*
 import kotlinx.android.synthetic.main.view_circular_button.view.*
+import timber.log.Timber
 
 class TrackOfflineFragment : Fragment() {
 
@@ -51,10 +52,14 @@ class TrackOfflineFragment : Fragment() {
 
         // Init fab click listener
         location_service_fab.setOnClickListener {
-            if (locationServiceManager.getServiceStatus()) {
+            if (!locationServiceManager.getServiceStatus()) {
                 // Start shift
+                locationServiceManager.startLocationService(
+                    sharedPrefs.getBoolean(TabSettingsFragment.TESTING_MODE_PREFS, false)
+                )
             } else {
                 // End shift
+                Timber.d("Offline Shift Result = ${locationServiceManager.stopOfflineLocationService()}")
             }
         }
 

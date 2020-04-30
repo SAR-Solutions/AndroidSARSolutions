@@ -74,7 +74,7 @@ object LocationServiceManager {
      * 1  -> Permission granted
      */
     private val mLocationPermissionStatus = MutableLiveData<Int>()
-    fun startLocationService(isTestMode: Boolean, currentCase: Case?): LiveData<Int> {
+    fun startLocationService(isTestMode: Boolean, currentCase: Case? = null): LiveData<Int> {
 
         mLocationPermissionStatus.value = -1
 
@@ -153,6 +153,14 @@ object LocationServiceManager {
             mIsShiftComplete.postValue(true)
         }
         return mIsShiftComplete
+    }
+
+    fun stopOfflineLocationService(): LocationService.OfflineEndShiftWrapper {
+        val shiftInfo = service!!.completeOfflineShift()
+        unbindService()
+        activity.stopService(serviceIntent)
+        mIsShiftComplete.value = true
+        return shiftInfo
     }
 
     private fun bindService() {
