@@ -6,11 +6,11 @@ class OfflineRepository(private val offlineCaseDao: OfflineCaseDao) {
 
     suspend fun insertOfflineShift(shift: OfflineShift) = offlineCaseDao.insertShift(shift)
 
-    suspend fun deleteShift(shift: OfflineShift) {
-        offlineCaseDao.deleteVehicles(shift.id)
-        offlineCaseDao.deleteLocationList(shift.id)
-        offlineCaseDao.deleteShiftReport(shift.id)
-        offlineCaseDao.deleteShift(shift)
+    suspend fun deleteShift(shiftId: Long) {
+        offlineCaseDao.deleteVehicles(shiftId)
+        offlineCaseDao.deleteLocationList(shiftId)
+        offlineCaseDao.deleteShiftReport(shiftId)
+        offlineCaseDao.deleteShift(shiftId)
     }
 
     suspend fun insertLocationList(locationList: List<OfflineLocation>) =
@@ -22,11 +22,11 @@ class OfflineRepository(private val offlineCaseDao: OfflineCaseDao) {
     suspend fun insertVehicles(vehicles: List<OfflineVehicle>) =
         offlineCaseDao.insertVehicles(vehicles)
 
-    suspend fun getAllLocationsInShift(shiftId: Int) =
+    suspend fun getAllLocationsInShift(shiftId: Long) =
         offlineCaseDao.getAllLocationsForShift(shiftId)
 
-    suspend fun getShiftReport(shiftId: Int) = offlineCaseDao.getShiftReportForShift(shiftId)
+    suspend fun getShiftReport(shiftId: Long) = offlineCaseDao.getShiftReportForShift(shiftId)
 
-    suspend fun getVehiclesInShift(shiftId: Int) = offlineCaseDao.getVehiclesForShift(shiftId)
+    suspend fun getVehiclesInShift(shiftId: Long) = offlineCaseDao.getVehiclesForShift(shiftId)
 
 }
