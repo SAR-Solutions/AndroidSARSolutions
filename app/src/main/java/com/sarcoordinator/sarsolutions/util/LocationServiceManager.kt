@@ -151,6 +151,7 @@ object LocationServiceManager {
             unbindService()
             activity.stopService(serviceIntent)
             mIsShiftComplete.postValue(true)
+            mIsServiceRunning.value = false
         }
         return mIsShiftComplete
     }
@@ -160,6 +161,7 @@ object LocationServiceManager {
         unbindService()
         activity.stopService(serviceIntent)
         mIsShiftComplete.value = true
+        mIsServiceRunning.value = false
         return shiftInfo
     }
 

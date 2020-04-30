@@ -2,6 +2,7 @@ package com.sarcoordinator.sarsolutions
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,6 +12,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.card.MaterialCardView
 import com.sarcoordinator.sarsolutions.util.LocationServiceManager
 import com.sarcoordinator.sarsolutions.util.Navigation
+import com.sarcoordinator.sarsolutions.util.getThemeColor
 import com.sarcoordinator.sarsolutions.util.setMargins
 import dev.chrisbanes.insetter.doOnApplyWindowInsets
 import kotlinx.android.synthetic.main.fragment_track_offline.*
@@ -44,24 +46,12 @@ class TrackOfflineFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         applyViewInsets()
 
+        enableDefaultFabState()
         // Hide image fab
         capture_photo_fab.hide()
-
-        // Init fab click listener
-        location_service_fab.setOnClickListener {
-            if (!locationServiceManager.getServiceStatus()) {
-                // Start shift
-                locationServiceManager.startLocationService(
-                    sharedPrefs.getBoolean(TabSettingsFragment.TESTING_MODE_PREFS, false)
-                )
-            } else {
-                // End shift
-                Timber.d("Offline Shift Result = ${locationServiceManager.stopOfflineLocationService()}")
-            }
-        }
+        initFabClickListeners()
 
         back_button_view.image_button.setImageDrawable(requireContext().getDrawable(R.drawable.ic_baseline_arrow_back_24))
         back_button_view.image_button.setOnClickListener { requireActivity().onBackPressed() }
@@ -98,5 +88,53 @@ class TrackOfflineFragment : Fragment() {
                 initialState.margins.bottom
             )
         }
+    }
+
+    private fun initFabClickListeners() {
+        // Location fab click listener
+        location_service_fab.setOnClickListener {
+            if (!locationServiceManager.getServiceStatus()) {
+                // Start shift
+                locationServiceManager.startLocationService(
+                    sharedPrefs.getBoolean(TabSettingsFragment.TESTING_MODE_PREFS, false)
+                )
+
+                capture_photo_fab.show()
+
+                // Change main fab color and image
+                location_service_fab.setImageDrawable(
+                    resources.getDrawable(
+                        R.drawable.ic_baseline_stop_24,
+                        requireContext().theme
+                    )
+                )
+                location_service_fab.backgroundTintList =
+                    resources.getColorStateList(R.color.orange)
+
+            } else {
+                enableDefaultFabState()
+                capture_photo_fab.hide()
+                // End shift
+                Timber.d("Offline Shift Result = ${locationServiceManager.stopOfflineLocationService()}")
+            }
+        }
+
+        // Photo fab click listener
+        capture_photo_fab.setOnClickListener {
+
+        }
+    }
+
+    private fun enableDefaultFabState() {
+
+        location_service_fab.setImageDrawable(
+            resources.getDrawable(
+                R.drawable.ic_baseline_play_arrow_24,
+                requireContext().theme
+            )
+        )
+
+        val primColor = getThemeColor(requireContext(), R.attr.colorPrimary)
+        location_service_fab.backgroundTintList = ColorStateList.valueOf(primColor)
     }
 }
