@@ -279,6 +279,7 @@ fun View.setMargins(l: Int, t: Int, r: Int, b: Int) {
     if (layoutParams is ViewGroup.MarginLayoutParams) {
         val p = layoutParams as ViewGroup.MarginLayoutParams
         p.setMargins(l, t, r, b)
+        invalidate()
         requestLayout()
     }
 }

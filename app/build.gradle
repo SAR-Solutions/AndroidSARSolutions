@@ -20,8 +20,8 @@ android {
         applicationId "com.sarcoordinator.sarsolutions"
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 35
-        versionName "2.2.3"
+        versionCode 36
+        versionName "2.2.4"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         resValue 'string', "gmaps_api_key", GOOGLE_MAPS_API_KEY

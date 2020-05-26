@@ -1,5 +1,6 @@
 package com.sarcoordinator.sarsolutions
 
+import android.os.Build
 import android.os.Bundle
 import android.transition.TransitionManager
 import android.view.LayoutInflater
@@ -140,19 +141,19 @@ class ShiftDetailFragment : Fragment(), OnMapReadyCallback {
 
         back_button.doOnApplyWindowInsets { view, insets, initialState ->
             view.setMargins(
-                initialState.margins.left + insets.systemGestureInsets.left,
-                initialState.margins.top + insets.systemGestureInsets.top,
-                initialState.margins.right + insets.systemGestureInsets.right,
-                initialState.margins.bottom + insets.systemGestureInsets.bottom
+                initialState.margins.left + insets.mandatorySystemGestureInsets.left,
+                initialState.margins.top + insets.mandatorySystemGestureInsets.top,
+                initialState.margins.right + insets.mandatorySystemGestureInsets.right,
+                initialState.margins.bottom + insets.mandatorySystemGestureInsets.bottom
             )
         }
 
         info_button.doOnApplyWindowInsets { view, insets, initialState ->
             view.setMargins(
-                initialState.margins.left + insets.systemGestureInsets.left,
-                initialState.margins.top + insets.systemGestureInsets.top,
-                initialState.margins.right + insets.systemGestureInsets.right,
-                initialState.margins.bottom + insets.systemGestureInsets.bottom
+                initialState.margins.left + insets.mandatorySystemGestureInsets.left,
+                initialState.margins.top + insets.mandatorySystemGestureInsets.top,
+                initialState.margins.right + insets.mandatorySystemGestureInsets.right,
+                initialState.margins.bottom + insets.mandatorySystemGestureInsets.bottom
             )
         }
 
@@ -219,8 +220,11 @@ class ShiftDetailFragment : Fragment(), OnMapReadyCallback {
         googleMap.uiSettings.isZoomControlsEnabled = true
 
         try {
-            val insets = requireActivity().window.decorView.rootWindowInsets.systemGestureInsets
-            googleMap.setPadding(insets.left, insets.top, insets.right, insets.bottom)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val insets =
+                    requireActivity().window.decorView.rootWindowInsets.mandatorySystemGestureInsets
+                googleMap.setPadding(insets.left, insets.top, insets.right, insets.bottom)
+            }
         } catch (e: Exception) {
             Timber.e("Error applying insets to map")
         }

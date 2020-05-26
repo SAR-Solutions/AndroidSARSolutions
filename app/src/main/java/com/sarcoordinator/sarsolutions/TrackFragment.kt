@@ -245,46 +245,35 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun setupViewInsets() {
-        back_button_view.doOnApplyWindowInsets { view, insets, initialState ->
-            view.setMargins(
-                initialState.margins.left + insets.systemGestureInsets.left,
-                initialState.margins.top,
-                initialState.margins.right + insets.systemGestureInsets.right,
-                initialState.margins.bottom
-            )
+
+        test_parent.doOnApplyWindowInsets { view, insets, initialState ->
+            if (insets.systemWindowInsetTop != 0)
+                view.setMargins(
+                    initialState.margins.left + insets.systemWindowInsetLeft,
+                    initialState.margins.top + insets.systemWindowInsetTop,
+                    initialState.margins.right + insets.systemWindowInsetRight,
+                    initialState.margins.bottom + insets.systemWindowInsetBottom
+                )
         }
-        info_button_view.doOnApplyWindowInsets { view, insets, initialState ->
-            view.setMargins(
-                initialState.margins.left + insets.systemGestureInsets.left,
-                initialState.margins.top,
-                initialState.margins.right + insets.systemGestureInsets.right,
-                initialState.margins.bottom
-            )
-        }
-        info_view_layout.doOnApplyWindowInsets { view, insets, initialState ->
-            view.setMargins(
-                initialState.margins.left + insets.systemGestureInsets.left,
-                initialState.margins.top + insets.systemGestureInsets.top,
-                initialState.margins.right + insets.systemGestureInsets.right,
-                initialState.margins.bottom + insets.systemGestureInsets.bottom
-            )
-        }
+
         case_info_card.parent_layout.doOnApplyWindowInsets { view, insets, initialState ->
             bottomSheet.peekHeight = insets.systemGestureInsets.bottom + 200
-            view.setMargins(
-                initialState.margins.left + insets.systemGestureInsets.left,
-                initialState.margins.top,
-                initialState.margins.right + insets.systemGestureInsets.right,
-                initialState.margins.bottom + insets.systemGestureInsets.bottom
-            )
+            if (insets.systemWindowInsetTop != 0)
+                view.setMargins(
+                    initialState.margins.left + insets.systemGestureInsets.left,
+                    initialState.margins.top,
+                    initialState.margins.right + insets.systemGestureInsets.right,
+                    initialState.margins.bottom + insets.systemGestureInsets.bottom
+                )
         }
         location_service_fab.doOnApplyWindowInsets { view, insets, initialState ->
-            view.setMargins(
-                initialState.margins.left + insets.systemGestureInsets.left,
-                initialState.margins.top + insets.systemGestureInsets.top,
-                initialState.margins.right + insets.systemGestureInsets.right,
-                initialState.margins.bottom + insets.systemGestureInsets.bottom
-            )
+            if (insets.systemWindowInsetTop != 0)
+                view.setMargins(
+                    initialState.margins.left + insets.systemGestureInsets.left,
+                    initialState.margins.top + insets.systemGestureInsets.top,
+                    initialState.margins.right + insets.systemGestureInsets.right,
+                    initialState.margins.bottom + insets.systemGestureInsets.bottom
+                )
         }
     }
 

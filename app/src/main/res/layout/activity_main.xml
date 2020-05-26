@@ -8,7 +8,7 @@
     app:layoutDescription="@xml/activity_main_scene"
     tools:context=".MainActivity">
 
-    <com.sarcoordinator.sarsolutions.custom_views.WindowInsetsFrameLayout
+    <FrameLayout
         android:id="@+id/fragment_container"
         android:layout_width="0dp"
         android:layout_height="0dp"
