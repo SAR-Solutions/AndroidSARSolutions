@@ -13,8 +13,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.sarcoordinator.sarsolutions.LoginFragment
 import com.sarcoordinator.sarsolutions.MainActivity
 import com.sarcoordinator.sarsolutions.R
-import com.sarcoordinator.sarsolutions.util.setMargins
-import dev.chrisbanes.insetter.doOnApplyWindowInsets
+import com.sarcoordinator.sarsolutions.util.applyAllInsets
 import kotlinx.android.synthetic.main.fragment_onboarding.*
 
 class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
@@ -71,23 +70,8 @@ class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
     }
 
     private fun setupInsets() {
-        button.doOnApplyWindowInsets { view, insets, initialState ->
-            view.setMargins(
-                initialState.margins.left + insets.systemGestureInsets.left,
-                initialState.margins.top + insets.systemGestureInsets.top,
-                initialState.margins.right + insets.systemGestureInsets.right,
-                initialState.margins.bottom + insets.systemGestureInsets.bottom
-            )
-        }
-
-        onboarding_indicators_parent.doOnApplyWindowInsets { view, insets, initialState ->
-            view.setMargins(
-                initialState.margins.left + insets.systemGestureInsets.left,
-                initialState.margins.top + insets.systemGestureInsets.top,
-                initialState.margins.right + insets.systemGestureInsets.right,
-                initialState.margins.bottom + insets.systemGestureInsets.bottom
-            )
-        }
+        button.applyAllInsets()
+        onboarding_indicators_parent.applyAllInsets()
     }
 
     private fun setupOnboardingIndicators() {

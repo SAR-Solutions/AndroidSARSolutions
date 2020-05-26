@@ -22,7 +22,7 @@
         app:Message="@string/low_bandwidth_desc" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/test_parent"
+        android:id="@+id/top_bar_parent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 

@@ -3,7 +3,6 @@ package com.sarcoordinator.sarsolutions
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -17,8 +16,7 @@ import com.sarcoordinator.sarsolutions.adapters.ImagesAdapter
 import com.sarcoordinator.sarsolutions.adapters.VehiclesAdapter
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.Navigation
-import com.sarcoordinator.sarsolutions.util.setMargins
-import dev.chrisbanes.insetter.doOnApplyWindowInsets
+import com.sarcoordinator.sarsolutions.util.applyAllInsets
 import kotlinx.android.synthetic.main.card_images.*
 import kotlinx.android.synthetic.main.card_images.view.*
 import kotlinx.android.synthetic.main.fragment_shift_report_modern.*
@@ -82,18 +80,19 @@ class ShiftReportFragment : Fragment(R.layout.fragment_shift_report_modern) {
         bottomSheet = BottomSheetBehavior.from(view.findViewById(R.id.bottom_sheet))
 
         // Set insets
-        shift_report_parent_layout.children.forEach { child ->
-            child.doOnApplyWindowInsets { childView, insets, initialState ->
-                if (childView.id != R.id.bottom_sheet) {
-                    childView.setMargins(
-                        initialState.margins.left + insets.systemGestureInsets.left,
-                        initialState.margins.top + insets.systemGestureInsets.top,
-                        initialState.margins.right + insets.systemGestureInsets.right,
-                        initialState.margins.bottom + insets.systemGestureInsets.bottom
-                    )
-                }
-            }
-        }
+        shift_report_parent_layout.applyAllInsets()
+//        shift_report_parent_layout.children.forEach { child ->
+//            child.doOnApplyWindowInsets { childView, insets, initialState ->
+//                if (childView.id != R.id.bottom_sheet) {
+//                    childView.setMargins(
+//                        initialState.margins.left + insets.systemGestureInsets.left,
+//                        initialState.margins.top + insets.systemGestureInsets.top,
+//                        initialState.margins.right + insets.systemGestureInsets.right,
+//                        initialState.margins.bottom + insets.systemGestureInsets.bottom
+//                    )
+//                }
+//            }
+//        }
 
         observeNetworkExceptions()
         setupVehicleRecyclerView()

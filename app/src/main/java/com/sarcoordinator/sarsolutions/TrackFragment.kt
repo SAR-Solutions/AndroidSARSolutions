@@ -47,11 +47,7 @@ import com.karumi.dexter.listener.single.PermissionListener
 import com.sarcoordinator.sarsolutions.adapters.ImagesAdapter
 import com.sarcoordinator.sarsolutions.custom_views.LargeInfoView
 import com.sarcoordinator.sarsolutions.models.Case
-import com.sarcoordinator.sarsolutions.util.GlobalUtil
-import com.sarcoordinator.sarsolutions.util.LocationService
-import com.sarcoordinator.sarsolutions.util.Navigation
-import com.sarcoordinator.sarsolutions.util.setMargins
-import dev.chrisbanes.insetter.doOnApplyWindowInsets
+import com.sarcoordinator.sarsolutions.util.*
 import kotlinx.android.synthetic.main.card_case_details.view.*
 import kotlinx.android.synthetic.main.fragment_track.*
 import kotlinx.android.synthetic.main.view_circular_button.view.*
@@ -246,35 +242,11 @@ class TrackFragment : Fragment(), OnMapReadyCallback {
 
     private fun setupViewInsets() {
 
-        test_parent.doOnApplyWindowInsets { view, insets, initialState ->
-            if (insets.systemWindowInsetTop != 0)
-                view.setMargins(
-                    initialState.margins.left + insets.systemWindowInsetLeft,
-                    initialState.margins.top + insets.systemWindowInsetTop,
-                    initialState.margins.right + insets.systemWindowInsetRight,
-                    initialState.margins.bottom + insets.systemWindowInsetBottom
-                )
-        }
+        top_bar_parent.applyAllInsets()
 
-        case_info_card.parent_layout.doOnApplyWindowInsets { view, insets, initialState ->
-            bottomSheet.peekHeight = insets.systemGestureInsets.bottom + 200
-            if (insets.systemWindowInsetTop != 0)
-                view.setMargins(
-                    initialState.margins.left + insets.systemGestureInsets.left,
-                    initialState.margins.top,
-                    initialState.margins.right + insets.systemGestureInsets.right,
-                    initialState.margins.bottom + insets.systemGestureInsets.bottom
-                )
-        }
-        location_service_fab.doOnApplyWindowInsets { view, insets, initialState ->
-            if (insets.systemWindowInsetTop != 0)
-                view.setMargins(
-                    initialState.margins.left + insets.systemGestureInsets.left,
-                    initialState.margins.top + insets.systemGestureInsets.top,
-                    initialState.margins.right + insets.systemGestureInsets.right,
-                    initialState.margins.bottom + insets.systemGestureInsets.bottom
-                )
-        }
+        case_info_card.applyAllInsetsExceptTop()
+
+        location_service_fab.applyAllInsets()
     }
 
     private fun validateNetworkConnectivity() {

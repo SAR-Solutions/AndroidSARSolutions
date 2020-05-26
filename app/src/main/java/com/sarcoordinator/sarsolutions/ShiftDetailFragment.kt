@@ -23,8 +23,6 @@ import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.GlobalUtil.getThemedPolyLineOptions
 import com.sarcoordinator.sarsolutions.util.GlobalUtil.setGoogleMapsTheme
 import com.sarcoordinator.sarsolutions.util.Navigation
-import com.sarcoordinator.sarsolutions.util.setMargins
-import dev.chrisbanes.insetter.doOnApplyWindowInsets
 import kotlinx.android.synthetic.main.card_shift_details.*
 import kotlinx.android.synthetic.main.card_shift_details.view.*
 import kotlinx.android.synthetic.main.fragment_shift_detail.*
@@ -139,23 +137,9 @@ class ShiftDetailFragment : Fragment(), OnMapReadyCallback {
 
         back_button.image_button.setImageDrawable(resources.getDrawable(R.drawable.ic_baseline_arrow_back_24))
 
-        back_button.doOnApplyWindowInsets { view, insets, initialState ->
-            view.setMargins(
-                initialState.margins.left + insets.mandatorySystemGestureInsets.left,
-                initialState.margins.top + insets.mandatorySystemGestureInsets.top,
-                initialState.margins.right + insets.mandatorySystemGestureInsets.right,
-                initialState.margins.bottom + insets.mandatorySystemGestureInsets.bottom
-            )
-        }
-
-        info_button.doOnApplyWindowInsets { view, insets, initialState ->
-            view.setMargins(
-                initialState.margins.left + insets.mandatorySystemGestureInsets.left,
-                initialState.margins.top + insets.mandatorySystemGestureInsets.top,
-                initialState.margins.right + insets.mandatorySystemGestureInsets.right,
-                initialState.margins.bottom + insets.mandatorySystemGestureInsets.bottom
-            )
-        }
+//        back_button.applyAllInsets()
+//
+//        info_button.applyAllInsets()
 
         back_button.image_button.setOnClickListener {
             requireActivity().onBackPressed()
@@ -181,18 +165,18 @@ class ShiftDetailFragment : Fragment(), OnMapReadyCallback {
         if (insets != null) {
             constraintSet.knownIds.forEach {
                 if (it != R.id.map && it != R.id.shift_detail_parent) {
-                    constraintSet.setMargin(it, ConstraintSet.TOP, insets.systemGestureInsets.top)
+                    constraintSet.setMargin(it, ConstraintSet.TOP, insets.systemWindowInsetTop)
                     constraintSet.setMargin(
                         it,
                         ConstraintSet.BOTTOM,
-                        insets.systemGestureInsets.bottom
+                        insets.systemWindowInsetBottom
                     )
                     constraintSet.setMargin(
                         it,
                         ConstraintSet.START,
-                        insets.systemGestureInsets.left
+                        insets.systemWindowInsetLeft
                     )
-                    constraintSet.setMargin(it, ConstraintSet.END, insets.systemGestureInsets.right)
+                    constraintSet.setMargin(it, ConstraintSet.END, insets.systemWindowInsetRight)
                 }
             }
         }
@@ -222,8 +206,13 @@ class ShiftDetailFragment : Fragment(), OnMapReadyCallback {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 val insets =
-                    requireActivity().window.decorView.rootWindowInsets.mandatorySystemGestureInsets
-                googleMap.setPadding(insets.left, insets.top, insets.right, insets.bottom)
+                    requireActivity().window.decorView.rootWindowInsets
+                googleMap.setPadding(
+                    insets.systemWindowInsetLeft,
+                    insets.systemWindowInsetTop,
+                    insets.systemWindowInsetRight,
+                    insets.systemWindowInsetBottom
+                )
             }
         } catch (e: Exception) {
             Timber.e("Error applying insets to map")

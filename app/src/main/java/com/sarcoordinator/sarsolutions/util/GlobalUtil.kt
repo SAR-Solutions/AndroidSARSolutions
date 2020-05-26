@@ -27,6 +27,7 @@ import com.google.android.gms.maps.model.RoundCap
 import com.google.android.material.snackbar.Snackbar
 import com.sarcoordinator.sarsolutions.R
 import com.sarcoordinator.sarsolutions.SettingsTabFragment
+import dev.chrisbanes.insetter.doOnApplyWindowInsets
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -279,8 +280,31 @@ fun View.setMargins(l: Int, t: Int, r: Int, b: Int) {
     if (layoutParams is ViewGroup.MarginLayoutParams) {
         val p = layoutParams as ViewGroup.MarginLayoutParams
         p.setMargins(l, t, r, b)
-        invalidate()
         requestLayout()
+    }
+}
+
+fun View.applyAllInsets() {
+    this.doOnApplyWindowInsets { view, insets, initialState ->
+        if (insets.systemWindowInsetTop != 0)
+            view.setMargins(
+                initialState.margins.left + insets.systemWindowInsetLeft,
+                initialState.margins.top + insets.systemWindowInsetTop,
+                initialState.margins.right + insets.systemWindowInsetRight,
+                initialState.margins.bottom + insets.systemWindowInsetBottom
+            )
+    }
+}
+
+fun View.applyAllInsetsExceptTop() {
+    this.doOnApplyWindowInsets { view, insets, initialState ->
+        if (insets.systemWindowInsetTop != 0)
+            view.setMargins(
+                initialState.margins.left + insets.systemWindowInsetLeft,
+                initialState.margins.top,
+                initialState.margins.right + insets.systemWindowInsetRight,
+                initialState.margins.bottom + insets.systemWindowInsetBottom
+            )
     }
 }
 
