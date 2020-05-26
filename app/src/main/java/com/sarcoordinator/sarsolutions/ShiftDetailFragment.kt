@@ -2,13 +2,10 @@ package com.sarcoordinator.sarsolutions
 
 import android.os.Build
 import android.os.Bundle
-import android.transition.TransitionManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -18,11 +15,15 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.card.MaterialCardView
 import com.sarcoordinator.sarsolutions.models.LocationsInShiftReport
 import com.sarcoordinator.sarsolutions.util.GlobalUtil
 import com.sarcoordinator.sarsolutions.util.GlobalUtil.getThemedPolyLineOptions
 import com.sarcoordinator.sarsolutions.util.GlobalUtil.setGoogleMapsTheme
 import com.sarcoordinator.sarsolutions.util.Navigation
+import com.sarcoordinator.sarsolutions.util.applyAllInsets
+import com.sarcoordinator.sarsolutions.util.applyAllInsetsExceptTop
 import kotlinx.android.synthetic.main.card_shift_details.*
 import kotlinx.android.synthetic.main.card_shift_details.view.*
 import kotlinx.android.synthetic.main.fragment_shift_detail.*
@@ -36,16 +37,16 @@ class ShiftDetailFragment : Fragment(), OnMapReadyCallback {
 
     companion object ARGS {
         val CACHED_SHIFT = "CACHED_SHIFT"
-        private val INFO_CARD = "InfoCard"
     }
 
     private var mMapView: MapView? = null
     private val MAPVIEW_BUNDLE_KEY = "MapViewBundleKey"
 
     private lateinit var viewModel: SharedViewModel
-    private var isInfoCardVisible = false
     private val nav: Navigation by lazy { Navigation.getInstance() }
     private lateinit var cachedShiftReport: LocationsInShiftReport
+
+    private lateinit var bottomSheet: BottomSheetBehavior<MaterialCardView>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,6 +61,8 @@ class ShiftDetailFragment : Fragment(), OnMapReadyCallback {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_shift_detail, container, false)
+
+        bottomSheet = BottomSheetBehavior.from(view.findViewById(R.id.info_card))
 
         var mapViewBundle: Bundle? = null
         if (savedInstanceState != null) {
@@ -82,10 +85,6 @@ class ShiftDetailFragment : Fragment(), OnMapReadyCallback {
             )) as LocationsInShiftReport
 
         populateShiftInfoCard()
-
-        savedInstanceState?.getBoolean(INFO_CARD)?.let {
-            isInfoCardVisible = it
-        }
 
         setupViewState()
 
@@ -125,69 +124,32 @@ class ShiftDetailFragment : Fragment(), OnMapReadyCallback {
 
     private fun setupViewState() {
 
-        val parentLayout = requireView().findViewById<ConstraintLayout>(R.id.shift_detail_parent)
-
-        var constraintSet1 = ConstraintSet()
-        constraintSet1.clone(requireContext(), R.layout.fragment_shift_detail)
-        var constraintSet2 = ConstraintSet()
-        constraintSet2.clone(requireContext(), R.layout.fragment_shift_detail_alt)
-
         nav.hideBottomNavBar?.let { it(true) }
         (requireActivity() as MainActivity).enableTransparentSystemBars(true)
 
         back_button.image_button.setImageDrawable(resources.getDrawable(R.drawable.ic_baseline_arrow_back_24))
 
-//        back_button.applyAllInsets()
-//
-//        info_button.applyAllInsets()
+        top_buttons_parent.applyAllInsets()
+        info_card.applyAllInsetsExceptTop()
+        sync_button.applyAllInsets()
 
         back_button.image_button.setOnClickListener {
             requireActivity().onBackPressed()
         }
 
         info_button.image_button.setOnClickListener {
-            var constraintSet = constraintSet2
-            if (isInfoCardVisible) {
-                constraintSet = constraintSet1
-                isInfoCardVisible = false
-            } else {
-                isInfoCardVisible = true
-            }
-            constraintSet = setConstraintSetInsets(constraintSet)
-
-            TransitionManager.beginDelayedTransition(parentLayout)
-            constraintSet.applyTo(parentLayout)
-        }
-    }
-
-    private fun setConstraintSetInsets(constraintSet: ConstraintSet): ConstraintSet {
-        val insets = requireActivity().window.decorView.rootWindowInsets
-        if (insets != null) {
-            constraintSet.knownIds.forEach {
-                if (it != R.id.map && it != R.id.shift_detail_parent) {
-                    constraintSet.setMargin(it, ConstraintSet.TOP, insets.systemWindowInsetTop)
-                    constraintSet.setMargin(
-                        it,
-                        ConstraintSet.BOTTOM,
-                        insets.systemWindowInsetBottom
-                    )
-                    constraintSet.setMargin(
-                        it,
-                        ConstraintSet.START,
-                        insets.systemWindowInsetLeft
-                    )
-                    constraintSet.setMargin(it, ConstraintSet.END, insets.systemWindowInsetRight)
-                }
+            bottomSheet.state = when (bottomSheet.state) {
+                BottomSheetBehavior.STATE_HIDDEN -> BottomSheetBehavior.STATE_HALF_EXPANDED
+                BottomSheetBehavior.STATE_EXPANDED -> BottomSheetBehavior.STATE_COLLAPSED
+                else -> BottomSheetBehavior.STATE_EXPANDED
             }
         }
-        return constraintSet
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
         outState.putSerializable(CACHED_SHIFT, cachedShiftReport)
-        outState.putBoolean(INFO_CARD, isInfoCardVisible)
 
         var mapViewBundle =
             outState.getBundle(MAPVIEW_BUNDLE_KEY)
